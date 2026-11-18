@@ -1,7 +1,7 @@
 // Renderer entry. createRenderer(canvas, { reduceMotion, quality }) as in CONTRACT section 9.
 // It never throws: every call is guarded, and a bad frame is skipped.
 import { createScene } from './scene.js';
-import { computeLayout, tileCx, tileCy, RISE_BEATS, HUD_TOP, HUD_BOTTOM } from './layout.js';
+import { computeLayout, tileCx, tileCy, RISE_BEATS, HUD_TOP, HUD_BOTTOM, MAX_COL } from './layout.js';
 import { createCamera } from './camera.js';
 import { createWell, PX_PER_M } from './well.js';
 import { createRope } from './rope.js';
@@ -15,6 +15,7 @@ import { createEffects } from './effects.js';
 import { drawFx, drawFlash } from './drawFx.js';
 import { clearSprites } from './partIcon.js';
 import { num, clamp, clamp01, warn } from './safe.js';
+import { TOKENS } from './palette.js';
 import * as partIcon from './partIcon.js';
 
 export { partIcon };
@@ -25,7 +26,7 @@ export function createRenderer(canvas, opts = {}) {
   try { ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null; } catch (e) { warn('no 2d context'); }
   const sc = createScene(), camera = createCamera(), well = createWell(), rope = createRope(), bucket = createBucket();
   const items = createItems(), particles = createParticles(), floaters = createFloaters(), vignette = createVignette();
-  let dead = false, W = 360, H = 640, dpr = 1, reduce = !!o.reduceMotion, frameMs = 16;
+  let dead = false, hidden = false, sized = false, W = 360, H = 640, CW = 360, colX = 0, dpr = 1, reduce = !!o.reduceMotion, frameMs = 16;
   const quality = createQuality(o.quality === 'low' ? 'low' : 'high', applyQuality);
   const fx = createEffects({ sc, particles, floaters, camera, rope, bucket, well, vignette });
   const tmp = { x: 0, y: 0 };
@@ -41,11 +42,12 @@ export function createRenderer(canvas, opts = {}) {
     applyQuality();
   }
   function relayout() {
-    computeLayout(sc.L, W, H, dpr, sc.rig.cols, sc.rig.rows);
-    items.rebuild(sc.L.itemSize, dpr); bucket.rebuild(sc.L); well.resize(W, H, dpr, quality.level === 'low'); vignette.build(W, H, dpr);
+    CW = Math.min(W, MAX_COL); colX = Math.floor((W - CW) / 2);
+    computeLayout(sc.L, CW, H, dpr, sc.rig.cols, sc.rig.rows);
+    items.rebuild(sc.L.itemSize, dpr); bucket.rebuild(sc.L); well.resize(CW, H, dpr, quality.level === 'low'); vignette.build(CW, H, dpr);
   }
   applyMotion();
-  computeLayout(sc.L, W, H, dpr, 4, 3);
+  computeLayout(sc.L, CW, H, dpr, 4, 3);
 
   function updateItems(dt) {
     const L = sc.L, list = sc.items.items, hauling = sc.haulT >= 0;
@@ -80,7 +82,7 @@ export function createRenderer(canvas, opts = {}) {
   function step(rawDt, alpha) {
     const dt = clamp(num(rawDt, 16), 0, 250);
     frameMs = frameMs * 0.9 + dt * 0.1;
-    quality.sample(dt);
+    quality.sample(num(rawDt, 16)); // raw time: a hidden tab must not count as slow
     if (sc.slowT > 0) { sc.slowT -= dt; if (sc.slowT <= 0) sc.timeScale = 1; else sc.timeScale = 0.3 + 0.7 * (1 - sc.slowT / 600); }
     const sdt = dt * sc.timeScale; sc.time += dt;
     const a = clamp01(num(alpha, 0)), cand = sc.beatCount + a;
@@ -105,8 +107,11 @@ export function createRenderer(canvas, opts = {}) {
     const L = sc.L, t = sc.time;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = TOKENS.ink900; ctx.fillRect(0, 0, W, H); // outside the column, and behind camera shake
     ctx.save();
-    camera.apply(ctx, W, H);
+    if (colX > 0) { ctx.translate(colX, 0); ctx.beginPath(); ctx.rect(0, 0, CW, H); ctx.clip(); } // wide window: centred column
+    ctx.save();
+    camera.apply(ctx, CW, H);
     well.draw(ctx, sc.depthVis * PX_PER_M, sc.depthVis, t, sc.strain01);
     drawItems(ctx, false, t);
     const oy = bucket.offY;
@@ -115,14 +120,17 @@ export function createRenderer(canvas, opts = {}) {
     drawItems(ctx, true, t);
     particles.draw(ctx); drawFx(ctx, sc, oy); floaters.draw(ctx);
     ctx.restore();
-    vignette.draw(ctx, W, H); drawFlash(ctx, sc);
+    vignette.draw(ctx, CW, H); drawFlash(ctx, sc);
+    ctx.restore();
   }
 
   const api = {
     resize(w, h, d) {
       if (dead) return;
       try {
-        W = Math.max(1, num(w, W)); H = Math.max(1, num(h, H)); dpr = clamp(num(d, 1) || 1, 1, 2);
+        const nw = Math.max(1, num(w, W)), nh = Math.max(1, num(h, H)), nd = clamp(num(d, 1) || 1, 1, 2); // dpr is capped at 2
+        if (nw === W && nh === H && nd === dpr && canvas && canvas.width === Math.round(nw * nd) && sized) return; // nothing changed: keep sprites
+        W = nw; H = nh; dpr = nd; sized = true;
         if (canvas) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); if (canvas.style) { canvas.style.width = W + 'px'; canvas.style.height = H + 'px'; } }
         clearSprites(); relayout();
       } catch (e) { warn('resize', e && e.message); }
@@ -149,13 +157,19 @@ export function createRenderer(canvas, opts = {}) {
       for (let i = 0; i < events.length; i++) { try { fx.handle(events[i]); } catch (e) { warn('event', e && e.message); } }
     },
     frame(dtMs, alpha) {
-      if (dead || !ctx) return;
+      if (dead || !ctx || hidden) return;
       try { step(dtMs, alpha); paint(); }
       catch (e) { warn('frame', e && e.message); try { ctx.restore(); ctx.restore(); } catch (e2) { /* ignore */ } }
     },
     setQuality(q) { if (!dead) quality.set(q === 'low' ? 'low' : 'high', true); },
     setReduceMotion(v) { reduce = !!v; applyMotion(); },
-    safeRect() { return { top: HUD_TOP, bottom: Math.max(HUD_TOP, H - HUD_BOTTOM) }; },
+    // The band where the bucket and items live. top/bottom are the HUD limits; the rest is where things really are.
+    safeRect() {
+      const L = sc.L, bottom = Math.max(HUD_TOP, H - HUD_BOTTOM);
+      return { top: HUD_TOP, bottom, left: colX, right: colX + CW, width: CW, height: Math.max(0, bottom - HUD_TOP), bucketTop: L.top, bucketBottom: L.top + L.bucketH, tile: L.tile };
+    },
+    // Tab hidden / shown. While hidden, frames are skipped; on return the slow-frame count starts fresh.
+    setHidden(v) { const h = !!v; if (h === hidden) return; hidden = h; if (!h) { frameMs = 16; quality.sample(0); } },
     // Dev info for the lab.
     debugStats() { return { frameMs, particles: particles.count, floaters: floaters.count, items: sc.items.live, quality: quality.level, beatPos: sc.beatPos }; },
     destroy() {

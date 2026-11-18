@@ -6,7 +6,7 @@ import { easeOut, clamp01 } from './safe.js';
 const FLASH_MS = 140;
 
 export function createBucket() {
-  let body = null, glow = null, key = '';
+  let body = null, glow = null, kw = -1, kh = -1, kd = -1;
   const flash = new Float32Array(20);
   const b = { offY: 0, tilt: 0, lift: 0, fall: 0, fallV: 0, mode: 0 /* 0 idle, 1 lifting, 2 falling */, t: 0 };
 
@@ -46,8 +46,8 @@ export function createBucket() {
   }
 
   return Object.assign(b, {
-    rebuild(L) { key = ''; build(L); key = L.bucketW + 'x' + L.bucketH + 'x' + L.dpr; },
-    ensure(L) { const k = L.bucketW + 'x' + L.bucketH + 'x' + L.dpr; if (k !== key) { build(L); key = k; } },
+    rebuild(L) { build(L); kw = L.bucketW; kh = L.bucketH; kd = L.dpr; },
+    ensure(L) { if (L.bucketW !== kw || L.bucketH !== kh || L.dpr !== kd) { build(L); kw = L.bucketW; kh = L.bucketH; kd = L.dpr; } }, // numbers only: no string per frame
     flash(r, c, cols) { const i = r * cols + c; if (i >= 0 && i < 20) flash[i] = FLASH_MS; },
     flashLevel(r, c, cols) { const i = r * cols + c; return i >= 0 && i < 20 ? flash[i] : 0; },
     reset() { b.mode = 0; b.offY = 0; b.tilt = 0; b.lift = 0; b.fall = 0; b.fallV = 0; flash.fill(0); },

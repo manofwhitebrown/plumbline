@@ -12,7 +12,7 @@ export const PX_PER_M = 44;
 
 export function createWell() {
   let W = 360, H = 640, dpr = 1, low = false, reduce = false;
-  const tiles = {}, grads = {}, cones = {}, fogs = {};
+  const tiles = {}, grads = {}, cones = {}, fogs = {}, idsBuf = ['clay', 'clay'];
   let sweep = null, edge = null, edgeW = 0;
   const st = { from: 'clay', to: 'clay', fade: 1, sweepT: 1 };
   const mx = new Float32Array(36), my = new Float32Array(36), ms = new Float32Array(36);
@@ -60,10 +60,11 @@ export function createWell() {
     },
     update(dtMs) { if (st.fade < 1) st.fade = Math.min(1, st.fade + dtMs / FADE_MS); if (st.sweepT < 1) st.sweepT = Math.min(1, st.sweepT + dtMs / FADE_MS); },
     draw(ctx, scrollPx, depth, t, strain01) {
-      const fade = reduce ? (st.fade < 1 ? 1 : 1) : st.fade, ids = st.fade < 1 ? [st.from, st.to] : [st.to];
+      const fade = reduce ? 1 : st.fade, ids = idsBuf, two = st.fade < 1; // no new array per frame
+      idsBuf[0] = two ? st.from : st.to; idsBuf[1] = st.to;
       const sideW = Math.round(Math.max(18, W * 0.07));
-      for (let n = 0; n < ids.length; n++) {
-        const id = ids[n], a = ids.length === 1 ? 1 : n === 0 ? 1 : clamp01(fade);
+      for (let n = 0; n < (two ? 2 : 1); n++) {
+        const id = ids[n], a = !two ? 1 : n === 0 ? 1 : clamp01(fade);
         if (!grads[id]) { const g = ctx.createLinearGradient(0, 0, 0, H), p = biomePalette(id); g.addColorStop(0, p.top); g.addColorStop(1, p.bottom); grads[id] = g; }
         ctx.globalAlpha = a; ctx.fillStyle = grads[id]; ctx.fillRect(0, -50, W, H + 100); ctx.globalAlpha = 1;
         layer(ctx, id, a * 0.55, 0.5, scrollPx, 0.5, 0, W);              // far wall, dark
