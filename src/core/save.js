@@ -288,6 +288,15 @@ function installLifecycle() {
   } catch (err) { log.warn('could not watch page leave', err); }
 }
 
+// ---- memory-only mode (debug fixtures) ----
+
+// Keep the save in memory for this page only. The real saved game is never read or written.
+// Call it before initSave() and before any module registers its slice.
+export function useMemoryOnly() {
+  _configure({ storage: makeMemoryStorage() });
+}
+export function storageKind() { return store().kind || 'unknown'; }
+
 // ---- for tests only ----
 
 // Start fresh with a chosen storage. Clears every slice and timer.

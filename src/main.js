@@ -10,6 +10,7 @@ import { installGlobalErrorHandlers, showFatal } from './core/errors.js';
 import { wireSenses } from './core/wiring.js';
 import { applyViewportVars, watchViewport } from './platform/viewport.js';
 import { buzz, setHapticsEnabled } from './platform/haptics.js';
+import { wireAudio, initOnFirstGesture } from './audio/wire.js';
 
 // Style files from the UI folder (tokens, base, components). Whatever is there gets loaded.
 import.meta.glob('./ui/styles/*.css', { eager: true });
@@ -18,6 +19,8 @@ const optional = import.meta.glob(['./meta/index.js', './cheats/index.js']);
 const screenFiles = import.meta.glob('./ui/screens/*.js');
 
 const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '');
+const DEBUG = params.get('debug') === '1'; // debug entry points exist only with ?debug=1
+const DEBUG_SCREENS = ['home', 'rig', 'drop', 'results', 'crew', 'workshop', 'codex', 'rewards', 'settings', 'guide'];
 const ctx = { ui: null, audio: null, tutorial: null, run: null, meta: null, settings: null };
 
 function hideSplash() {
@@ -55,10 +58,26 @@ const steps = [
     startMetaClock();
   } },
 
+  // Debug only: ?fixture=empty|busy|extreme. The save is in memory, so the real game is never touched.
+  { name: 'fixture', run: async () => {
+    const name = DEBUG ? params.get('fixture') : null;
+    if (!name) return;
+    const { loadFixture } = await import('./cheats/fixtures.js');
+    const r = loadFixture(name);
+    if (!r.ok) log.warn('fixture not loaded: ' + r.error);
+  } },
+
+  // A drop that was cut off by closing the page is paid once, as a snap, before Home opens.
+  { name: 'recover', run: async () => {
+    const s = ctx.run && ctx.run.session;
+    if (s && typeof s.recover === 'function') s.recover();
+  } },
+
   { name: 'audio', run: async () => {
     const mod = await soft(() => import('./audio/index.js'), 'audio');
     ctx.audio = mod ? mod.audio : null;
-    armAudioOnFirstTap();
+    wireAudio();            // game events -> sound (audio/wire.js)
+    initOnFirstGesture();   // browsers only allow sound after a tap or key press
     applySettingsToSenses();
     wireSenses({ bus, audio: ctx.audio, buzz });
   } },
@@ -75,24 +94,13 @@ const steps = [
     if (ctx.settings) ctx.settings.applySettings(document.documentElement);
     if (!ctx.ui.shell.go('home')) throw new Error('home screen did not open');
     hideSplash();
-    maybeStartTutorial();
+    const target = DEBUG ? params.get('screen') : null;
+    if (target && target !== 'home') openDebugScreen(target);
+    else if (!(DEBUG && (target || params.get('fixture')))) maybeStartTutorial();
   } }
 ];
 
 // ---- helpers ----
-
-// Audio can only start after a real tap or key press (browser rule).
-function armAudioOnFirstTap() {
-  const start = () => {
-    window.removeEventListener('pointerdown', start, true);
-    window.removeEventListener('keydown', start, true);
-    window.removeEventListener('touchstart', start, true);
-    try { if (ctx.audio) ctx.audio.init(); } catch (err) { log.warn('audio start failed', err); }
-  };
-  window.addEventListener('pointerdown', start, true);
-  window.addEventListener('keydown', start, true);
-  window.addEventListener('touchstart', start, true);
-}
 
 function applySettingsToSenses() {
   if (!ctx.settings) return;
@@ -140,6 +148,19 @@ function pauseDropWhenHidden() {
   });
 }
 
+// Debug only: ?debug=1&screen=<id> opens any screen. Drop and Results get a safe fake drop.
+function openDebugScreen(id) {
+  try {
+    if (!DEBUG_SCREENS.includes(id)) { log.warn('debug: unknown screen ' + id); return; }
+    const big = params.get('fixture') === 'extreme';
+    const session = ctx.run && ctx.run.session;
+    let args;
+    if (id === 'drop' && session) args = { debug: true, view: session.debugView({ extreme: big }) };
+    else if (id === 'results' && session) args = { ...session.debugResults(params.get('outcome') === 'snapped' ? 'snapped' : 'hauled', { extreme: big }), debug: true };
+    ctx.ui.shell.go(id, args);
+  } catch (err) { log.warn('debug screen failed', err); }
+}
+
 // ---- go ----
 
 async function main() {
@@ -148,8 +169,9 @@ async function main() {
   applyViewportVars();
   watchViewport(() => {});
   pauseDropWhenHidden();
-  if (params.get('debug') === '1') window.game = { bus, save, log };
+  if (DEBUG) window.game = { bus, save, log, ctx };
 
+  if (DEBUG && params.get('fixture')) save.useMemoryOnly(); // before any slice is registered
   const result = await runSteps(steps);
   if (!result.ok) log.warn(`started with problems in: ${result.failed.join(', ')}`);
   if (result.fatal) showFatal('The game could not start. Your save is safe.');

@@ -10,6 +10,7 @@ import { addEvents } from './tally.js';
 import { buildView, idleView } from './view.js';
 import { finishRun, keepFraction } from './finish.js';
 import { ensureRecovered, recover } from './recover.js';
+import { computePayout } from './payout.js';
 
 const CHECKPOINT_EVERY = 10;  // beats between crash checkpoints
 const SPEED_EFFECT = 0.5;     // a rig that is 2x faster plays 1.5x quicker, so it stays readable
@@ -79,6 +80,16 @@ function afterEvents(events) {
   const ms = beatMsFor(st.speed);
   if (ms !== S.lastBeatMs && S.loop) { S.lastBeatMs = ms; call(S.loop, 'setBeatMs', ms); }
   if (S.beats % CHECKPOINT_EVERY === 0) writeCheckpoint();
+  autoHaulCheck(st);
+}
+
+// Auto-Haul Assist (Workshop upgrade): haul by itself when the strain reaches the chosen level.
+function autoHaulCheck(st) {
+  if (S.tutorial || S.hauling || S.ended || S.status !== 'running') return;
+  const pct = Number(call(deps.meta && deps.meta.upgrades, 'autoHaul'));
+  if (!Number.isFinite(pct) || pct <= 0) return;
+  const max = Number(st.maxStrain) || 0;
+  if (max > 0 && Number(st.strain) / max >= pct / 100) haul();
 }
 
 function onBeat() {
@@ -112,8 +123,12 @@ export function start(opts = {}) {
     S.mods = mods;
     S.rig = rig;
     S.counter++;
-    S.seed = ((Number(deps.now()) % 2147483647) ^ Math.imul(S.counter, 2654435761)) >>> 0;
-    S.run = deps.engine.createRun({ rig, mods, seed: S.seed });
+    const given = Number(opts && opts.seed);
+    S.seed = Number.isFinite(given) && given >= 0 ? Math.floor(given) >>> 0
+      : ((Number(deps.now()) % 2147483647) ^ Math.imul(S.counter, 2654435761)) >>> 0;
+    const safe = Number(opts && opts.safeUntilDepth);
+    S.tutorial = !!(opts && opts.tutorial);
+    S.run = deps.engine.createRun({ rig, mods, seed: S.seed, safeUntilDepth: Number.isFinite(safe) && safe > 0 ? safe : 0 });
     if (!S.run || !S.run.state) throw new Error('engine gave no run');
     S.bestBefore = records.bestDepth();
     S.goals = goalsApi.generate({ bestDepth: S.bestBefore, rng: deps.makeRng(S.seed ^ 0x9e3779b9) });
@@ -122,7 +137,7 @@ export function start(opts = {}) {
     S.status = 'running';
     S.view = viewNow('running');
     writeCheckpoint();
-    deps.bus.emit('run:started', { view: S.view, seed: S.seed });
+    deps.bus.emit('run:started', { view: S.view, seed: S.seed, rig: S.rig });
     S.loop.start();
     return { ok: true, seed: S.seed };
   } catch (e) {
@@ -188,6 +203,39 @@ export function getView() {
 }
 
 export function getResult() { return S.result; }
+
+// Debug only (?debug=1&screen=drop). A safe fake drop for the screen. Sends no events and pays nothing.
+export function debugView(opts = {}) {
+  if (S.status === 'running' || S.status === 'paused') return S.view;
+  const big = !!(opts && opts.extreme);
+  const fake = { state: big
+    ? { status: 'running', depth: 99999, gold: 9.994e35, strain: 98, maxStrain: 100, combo: 99, speed: 3, beat: 99999, biomeId: 'abyss' }
+    : { status: 'running', depth: 137, gold: 1234, strain: 62, maxStrain: 100, combo: 7, speed: 1, beat: 90, biomeId: 'quartz' } };
+  const goals = [
+    { id: 'depth', text: 'Reach 150 m', done: false, reward: 5 },
+    { id: 'gems', text: 'Collect 20 gems', done: true, reward: 5 },
+    { id: 'strain', text: 'Haul with strain under 40', done: false, reward: 5 },
+  ];
+  S.view = buildView(fake, { goals, bestDepth: big ? 99998 : 120, status: 'running', riskInfo: () => ({ beatsToSnap: big ? 1 : 14, goldAtRisk: big ? 6.9e35 : 864, keepIfSnap: big ? 3e35 : 370 }) });
+  return S.view;
+}
+
+// Debug only. A fake finished drop for the Results screen. Sends no events and pays nothing.
+export function debugResults(outcome = 'hauled', opts = {}) {
+  const big = !!(opts && opts.extreme);
+  const goals = [
+    { id: 'depth', text: 'Reach 150 m', done: true, reward: 5 },
+    { id: 'gems', text: 'Collect 20 gems', done: true, reward: 5 },
+    { id: 'strain', text: 'Haul with strain under 40', done: false, reward: 5 },
+  ];
+  const tally = { biggest: { tier: 4, value: 81 }, bestCombo: 12, fires: { hook: 40, magnet: 22 }, gems: 31 };
+  const p = computePayout({
+    outcome: outcome === 'snapped' ? 'snapped' : 'hauled', gold: big ? 9.994e35 : 1234, goldKept: big ? 3e35 : 370, depth: big ? 99999 : 162, bestBefore: big ? 99998 : 120,
+    goals, tally, partsInRig: ['hook', 'magnet', 'polisher'], cheated: false, fmt: deps.fmt,
+  });
+  S.result = { ...p, seed: 0, debug: true };
+  return S.result;
+}
 export function isRunning() { return S.status === 'running' || S.status === 'paused'; }
 
 // The renderer and HUD can hook the animation frame here. Returns a function that removes the hook.
@@ -197,5 +245,5 @@ export function onFrameTick(fn) {
   return () => { const i = S.frameCbs.indexOf(fn); if (i >= 0) S.frameCbs.splice(i, 1); };
 }
 
-export const session = { start, haul, pause, resume, abort, getView, getResult, isRunning, recover, onFrame: onFrameTick };
+export const session = { start, haul, pause, resume, abort, getView, getResult, isRunning, recover, onFrame: onFrameTick, debugView, debugResults };
 export default session;

@@ -72,6 +72,21 @@ export const tutorial = {
     }
   },
 
+  // Safe to call twice. The slice is registered when this file loads, so there is little to do.
+  init() {
+    try { store.get(); } catch (e) { log.warn('tutorial init failed', e); }
+    return true;
+  },
+
+  // True until the tutorial is finished or skipped, and only for a player who has not played yet.
+  shouldStart() {
+    try {
+      const s = store.get();
+      if (s.done || s.skipped) return false;
+      return !!s.stepId || !hasPlayedBefore();
+    } catch (e) { return false; }
+  },
+
   isActive() {
     return !!(flow && flow.isActive());
   },

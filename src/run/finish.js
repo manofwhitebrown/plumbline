@@ -51,7 +51,7 @@ export function finishRun(outcome) {
     deps.log.error('run: payout failed', e && e.message);
   }
 
-  const result = { ...payout, seed: S.seed };
+  const result = { ...payout, seed: S.seed, rig: S.rig };
   S.result = result;
   S.view = buildView(S.run, { goals: S.goals, bestDepth: S.bestBefore, status: final });
   call(deps.meta && deps.meta.stats, 'record', result);
