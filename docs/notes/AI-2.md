@@ -7,7 +7,7 @@
 - Speed: a 300-beat run with events about 2 ms. Headless about 11,000 runs per second.
 
 ## In progress
-- Wiring the real parts module (waiting for AI-3's import path, see `docs/requests/AI-2-to-AI-3-part-hooks.md`).
+- Nothing. The real parts module is wired in `src/engine/registry.js`. When AI-3's real part behaviour lands, re-run `npm test` (my tests use their own fake parts, so they stay green).
 
 ## Blocked
 - Nothing.
@@ -17,6 +17,8 @@
 - Gold is always a whole number. `gold = max(1, round(value x comboMult x goldMult x depthBonus x factor))`.
 - Spawn uses its own seeded stream per beat. Part randomness uses `run.rng`. They never mix.
 - A bare run (no parts) snaps at about 80 m.
+- `ctx.emit({t:'FIRE'})` is accepted (counts as a fire, no duplicate). `emit(COLLECT)` with an item is paid by the engine. CHAIN is made by the engine.
+- Bat `drifts` (AI-4) is not used yet. Ask me if you want it.
 - Base beat is 450 ms (`beatMs()`). At 1 m per beat a 60-120 m first drop lasts 27-54 s. Faster or slower beats are a Manager decision.
 
 ## Firing order (never change)
@@ -34,4 +36,5 @@
 | Snap | strain >= maxStrain; kept = floor(gold x keepOnSnap) |
 | beatsToSnap | (max - strain) / average strain change of last 8 beats; 999 if not rising |
 
-STATUS: IN PROGRESS
+STATUS: DONE
+Last code commit: 3ac64b3
