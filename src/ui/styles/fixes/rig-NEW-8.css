@@ -16,3 +16,7 @@
 @media (max-height: 720px) {
   .rig-grid { grid-template-columns: repeat(var(--cols), minmax(44px, 58px)); gap: var(--space-2); }
 }
+
+/* Loadout chips said "Loadou…" at 320px wide (three chips share one row).
+   Smaller side padding, and let a long label (Large text) wrap onto a second line instead of ending in "…". */
+.loadouts .chip { padding: 0 var(--space-2); white-space: normal; line-height: 1.15; text-overflow: clip; overflow: visible; }

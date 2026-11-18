@@ -1,0 +1,6 @@
+/* Layout fixes for the Home screen (NEW-8). */
+
+/* The hint under the rope ("Buy Crew to earn Gold while you rest") was drawn across the rope line
+   and the dark well (390x844). Give it a soft dark backing so it stays readable. */
+.home-bottom .income { align-self: center; max-width: 100%; padding: 4px var(--space-3); border-radius: var(--radius-pill);
+  background: rgba(7, 10, 18, .72); }

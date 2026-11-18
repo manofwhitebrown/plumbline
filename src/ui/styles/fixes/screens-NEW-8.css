@@ -1,0 +1,7 @@
+/* Layout fixes that apply to every scrolling screen (NEW-8). */
+
+/* BROKEN at every size: inside a screen (a flex column that scrolls) a row with overflow-x: auto may shrink
+   to a few pixels. The Workshop part-family chips were 4px tall at 360x640, 390x844 and 1440x900.
+   Children of a scrolling screen must keep their height. The screen scrolls instead.
+   (.no-pad screens are full-bleed scenes such as Home and Drop; they lay out their own children.) */
+.screen:not(.no-pad) > * { flex-shrink: 0; }
