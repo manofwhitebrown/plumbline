@@ -117,3 +117,18 @@ test('meta.tick adds income for real time, capped at 1 s a call', () => {
   meta.tick(-1000); meta.tick(NaN);
   assert.equal(meta.gold(), g + 30);
 });
+
+test('init works out away income so the first tick cannot lose it', () => {
+  const clock = withCrew();
+  clock.advance(2 * HOUR);
+  meta.init();
+  meta.tick(1000);
+  meta.tick(1000);
+  const p = meta.offline.peek();
+  assert.ok(p, 'away income is still waiting');
+  assert.equal(p.ms, 2 * HOUR);
+  assert.equal(p.gold, 2 * 3600 * 20 * 0.6);
+  const before = meta.gold();
+  assert.equal(meta.offline.claim().gold, p.gold);
+  assert.equal(meta.gold(), before + p.gold);
+});

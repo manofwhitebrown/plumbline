@@ -40,6 +40,9 @@ function tick(dtMs) {
 function init() {
   try {
     runhooks.start();
+    // Work out away income now and keep it until the player claims it. This way the first
+    // tick of the game clock can never wipe it out.
+    offline.peek();
     quests.ensureToday();
     achievements.check();
   } catch (e) { log.error('meta.init failed', e && e.message); }
