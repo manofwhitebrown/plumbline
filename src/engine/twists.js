@@ -1,7 +1,8 @@
 // Daily twists. getTwist(id), todaysTwist(dateKey), applyTwist(mods, id).
 import { TWIST_DATA, TWIST_ORDER } from '../data/twists.js';
 
-const DEFAULTS = { hazardRate: 1, gemRate: 1, oreRate: 1, hazardGold: 0, speedBonus: 0, relicBonus: 0 };
+// Safe starting numbers when a field is missing or broken.
+const DEFAULTS = { hazardRate: 1, gemRate: 1, oreRate: 1, hazardGold: 0, speedBonus: 0, relicBonus: 0, maxStrain: 100, goldMult: 1, strainMult: 1, luck: 0, startDepth: 0 };
 
 // Apply one overlay entry to a number.
 function applyOp(base, op) {
@@ -18,7 +19,7 @@ export function applyOverlay(mods, overlay) {
   if (!mods || typeof mods !== 'object' || !overlay) return mods;
   const out = Object.assign({}, mods);
   for (const key of Object.keys(overlay)) {
-    const base = typeof out[key] === 'number' ? out[key] : (key in DEFAULTS ? DEFAULTS[key] : 0);
+    const base = Number.isFinite(out[key]) ? out[key] : (key in DEFAULTS ? DEFAULTS[key] : 0);
     out[key] = applyOp(base, overlay[key]);
   }
   return out;
