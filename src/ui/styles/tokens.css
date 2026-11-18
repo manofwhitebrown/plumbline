@@ -1,0 +1,13 @@
+/* Design tokens (CONTRACT section 13). Use these variables only. */
+:root {
+  --ink-900: #070a12; --ink-800: #0d1220; --ink-700: #141b2e; --ink-600: #1d2740;
+  --line: #2a3555; --text: #eef2ff; --muted: #8d97b8;
+  --gold: #f6c453; --gold-soft: #ffe3a1; --ember: #ff7a45;
+  --ok: #46e3a3; --danger: #ff4d5e; --shard: #7fd6ff; --core: #b583ff;
+  --tier-1: #9fb4ff; --tier-2: #46e3a3; --tier-3: #ffb454; --tier-4: #ff5470; --tier-5: #b583ff;
+  --radius-card: 16px; --radius-btn: 12px; --radius-pill: 999px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px;
+  --fs-1: 12px; --fs-2: 14px; --fs-3: 16px; --fs-4: 20px; --fs-5: 28px; --fs-6: 40px;
+  --dur-fast: 160ms; --dur-slow: 260ms; --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --tap-min: 44px;
+}
