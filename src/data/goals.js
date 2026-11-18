@@ -37,8 +37,8 @@ export const TEMPLATES = [
     make(best, level) {
       const tier = tierFor(best);
       const target = [5, 10, 18][level] + Math.floor(best / 100) * 2;
-      const label = tier > 1 ? ` of tier ${tier} or better` : '';
-      return { target, tier, text: `Collect ${target} gems${label}`, reward: 1 + level };
+      const label = tier > 1 ? `Collect ${target} tier ${tier}+ gems` : `Collect ${target} gems`;
+      return { target, tier, text: label, reward: 1 + level };
     },
   },
   {
@@ -53,7 +53,7 @@ export const TEMPLATES = [
     make(best, level) {
       const strainBelow = [70, 55, 40][level];
       const minDepth = roundTo(best * [0.4, 0.5, 0.6][level], 10);
-      return { target: minDepth, strainBelow, text: `Haul with Strain under ${strainBelow} after ${minDepth} m`, reward: 2 + level };
+      return { target: minDepth, strainBelow, text: `Strain under ${strainBelow} at ${minDepth} m`, reward: 2 + level };
     },
   },
   {
@@ -61,7 +61,7 @@ export const TEMPLATES = [
     make(best, level) {
       const maxHits = [4, 3, 2][level];
       const target = roundTo(best * [0.4, 0.5, 0.6][level], 10);
-      return { target, maxHits, text: `Reach ${target} m with at most ${maxHits} hazard hits`, reward: 2 + level };
+      return { target, maxHits, text: `Reach ${target} m, max ${maxHits} hits`, reward: 2 + level };
     },
   },
 ];

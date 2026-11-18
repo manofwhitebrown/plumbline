@@ -153,7 +153,7 @@ export const PART_DATA = {
 export const COMBO_DATA = {
   gem_press: {
     name: 'Gem Press', tags: ['ore', 'tier', 'column'],
-    desc: 'Smelter, then Polisher, then Multiplier in one column (bottom to top). Ore leaves as rich gems.',
+    desc: 'Smelter, Polisher, Multiplier in one column (bottom to top). Ore leaves as rich gems.',
   },
   wide_net: {
     name: 'Wide Net', tags: ['wide', 'copy'],
