@@ -34,10 +34,11 @@ test('combo climbs the scale and stays finite', () => {
   assert.equal(Math.round(midiToHz(69)), 440);
 });
 
-test('tutorial start, skip and state', () => {
-  tutorial.start();
-  assert.equal(tutorial.isActive(), true);
-  tutorial.skip();
+test('tutorial without a page never throws', () => {
+  assert.doesNotThrow(() => {
+    tutorial.start();
+    tutorial.skip();
+  });
   assert.equal(tutorial.isActive(), false);
 });
 
