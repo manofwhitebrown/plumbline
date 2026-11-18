@@ -17,7 +17,16 @@
     html, body { margin: 0; height: 100%; background: #070a12; color: #eef2ff;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
-    #app { position: fixed; inset: 0; }
+    html { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    /* The game is a column: full screen on phones, max 480 px wide and centered on laptops. */
+    #app { position: fixed; top: 0; bottom: 0; left: 0; right: 0; width: min(100%, 480px); margin: 0 auto; overflow: hidden;
+      background: #070a12; }
+    @media (min-width: 900px) {
+      body { background:
+        radial-gradient(ellipse at 50% 0%, #1d2740 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 100%, #2b1a14 0%, transparent 55%), #05070d; }
+      #app { box-shadow: 0 0 0 1px #2a3555, 0 0 80px rgba(246, 196, 83, .08); }
+    }
     #splash { position: fixed; inset: 0; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 20px;
       background: radial-gradient(ellipse at 50% 30%, #1d2740 0%, #0d1220 55%, #070a12 100%);

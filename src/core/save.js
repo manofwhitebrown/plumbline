@@ -14,6 +14,7 @@ let KEY = 'plumbline.save';
 let AUTOSAVE_MS = 10000;
 let storage = null;          // chosen lazily
 let loaded = false;
+let fresh = false;           // true when nothing was in storage at the first load
 let raw = {};                // slices read from storage: name -> { v, data }
 const slices = new Map();    // name -> { def, data }
 const lastGood = new Map();  // name -> last JSON text that worked
@@ -53,7 +54,7 @@ function ensureLoaded() {
   loaded = true;
   let text = null;
   try { text = store().getItem(KEY); } catch (err) { log.warn('could not read the save', err); }
-  if (text == null || text === '') return;
+  if (text == null || text === '') { fresh = true; return; }
   try {
     const env = readEnvelope(JSON.parse(text));
     if (!env) throw new Error('save has the wrong shape');
@@ -112,6 +113,19 @@ export function registerSlice(name, def) {
     log.error('registerSlice failed', err);
     return null;
   }
+}
+
+// Load the save and start watching for page leave. Safe to call many times.
+export function initSave() {
+  ensureLoaded();
+  installLifecycle();
+  return { fresh };
+}
+
+// True when this device had no save before this session (a brand new player).
+export function wasFresh() {
+  ensureLoaded();
+  return fresh;
 }
 
 export function getSlice(name) {
@@ -279,12 +293,12 @@ function installLifecycle() {
 // Start fresh with a chosen storage. Clears every slice and timer.
 export function _configure({ storage: st, key, autosaveMs } = {}) {
   if (timer !== null) { clearTimeout(timer); timer = null; }
-  slices.clear(); lastGood.clear(); raw = {}; loaded = false; dirty = false;
+  slices.clear(); lastGood.clear(); raw = {}; loaded = false; dirty = false; fresh = false;
   storage = st || makeMemoryStorage();
   if (key) KEY = key;
   if (autosaveMs) AUTOSAVE_MS = autosaveMs;
 }
 export const _isDirty = () => dirty;
 
-export const save = { registerSlice, getSlice, markDirty, saveNow, resetAll, exportSave, importSave };
+export const save = { registerSlice, getSlice, markDirty, saveNow, resetAll, exportSave, importSave, initSave, wasFresh };
 export default save;

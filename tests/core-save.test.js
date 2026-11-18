@@ -167,3 +167,12 @@ test('bad calls never throw', () => {
   assert.doesNotThrow(() => markDirty('unknown'));
   assert.doesNotThrow(() => saveNow());
 });
+
+test('wasFresh: true only when storage was empty at first load', async () => {
+  const { initSave, wasFresh } = await import('../src/core/save.js');
+  assert.deepEqual(initSave(), { fresh: true });
+  registerSlice('meta', { version: 1, defaults: { gold: 0 } });
+  saveNow();
+  _configure({ storage: st, key: KEY });
+  assert.equal(wasFresh(), false);
+});
