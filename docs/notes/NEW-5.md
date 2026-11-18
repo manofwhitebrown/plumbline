@@ -37,6 +37,10 @@ Also done in the engine: `safeUntilDepth`, the daily twist (`applyTwist` in `cre
 - AI-8-to-AI-5-tutorial-meta-event: already done (`workshop.js` emits `meta:changed {what:'parts'}`).
 - AI-8-to-AI-7-tutorial-hooks: partly done. See "Still needed from the screens".
 
+- NEW-6-to-Manager-engine-parts-wiring: done (Big fix). One difference: `createRun` still applies each part's `passive` once per kind (AI-2's rule), not once per cell like `applyPassives`.
+- NEW-8-to-NEW-1-format-limits: done. `fmt` uses one decimal for a 3-digit exponent; `fmtDepth` prints `100K m` from 100000. The two todo tests are now real tests.
+- NEW-6-to-ALL-plain-words: not mine (data text owned by others). Left in docs/requests/ for the data owners.
+
 ## Still needed from the screens (these screens are 14-line stubs on main)
 Drop, Results, Workshop, Crew, Codex, Rewards, Settings and Guide are stubs. The flow does not break (the stubs show an empty page), but a
 player cannot finish a drop yet. Owners of the real screens please:

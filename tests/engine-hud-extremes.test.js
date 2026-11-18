@@ -33,10 +33,10 @@ test('every power of ten and its neighbours fit, up and down', () => {
 // Known gaps, outside the extremes the game can reach (gold is never negative, depth is 99999 in the extreme fixture).
 // They are listed as todo so npm run check stays green. They become real tests when core/format.js is fixed.
 // See docs/requests/NEW-8-to-NEW-1-format-limits.md.
-test('todo: a negative number of 1e100 or more fits 8 characters', { todo: 'fmt gives -9.99e100 (9 characters)' }, () => {
+test('a negative number of 1e100 or more fits 8 characters', () => {
   assert.ok(fmt(-9.994e100).length <= MAX, show(-9.994e100));
 });
-test('todo: depth of 100000 m or more fits 8 characters', { todo: 'fmtDepth gives "100,000 m" (9 characters)' }, () => {
+test('depth of 100000 m or more fits 8 characters', () => {
   assert.ok(fmtDepth(100000).length <= MAX, fmtDepth(100000));
   assert.ok(fmtDepth(5e6).length <= MAX, fmtDepth(5e6));
 });

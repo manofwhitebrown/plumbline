@@ -13,7 +13,8 @@ function trim(x) {
 
 // Past Dc: 1.5e40 style.
 function expStyle(v) {
-  const [m, e] = v.toExponential(2).split('e');
+  const wide = v >= 1e100;                 // a 3-digit exponent: one decimal, so even a minus sign fits 8 characters
+  const [m, e] = v.toExponential(wide ? 1 : 2).split('e');
   return `${Number(m)}e${Number(e)}`;
 }
 
@@ -62,7 +63,7 @@ export function fmtTime(ms) {
 export function fmtDepth(m) {
   let v = toNum(m);
   if (Number.isNaN(v) || v < 0) v = 0;
-  if (v >= 1e6) return `${fmt(v)} m`;
+  if (v >= 1e5) return `${fmt(v)} m`;     // 100,000 m would be 9 characters; 100K m is 6
   const r = Math.floor(v);
   return `${String(r).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} m`;
 }
