@@ -7,6 +7,7 @@ export const DEFAULTS = {
   haptics: true,
   reduceMotion: false, largeText: false, colorblind: false,
   quality: 'high',
+  loadoutNames: ['Loadout 1', 'Loadout 2', 'Loadout 3'],
 };
 
 let data = { ...DEFAULTS };
@@ -23,6 +24,12 @@ function clean(src, base) {
     if (Number.isFinite(src[k])) out[k] = Math.min(1, Math.max(0, src[k]));
   }
   if (src.quality === 'high' || src.quality === 'low') out.quality = src.quality;
+  if (Array.isArray(src.loadoutNames)) {
+    out.loadoutNames = DEFAULTS.loadoutNames.map((d, i) => {
+      const n = src.loadoutNames[i];
+      return typeof n === 'string' && n.trim() ? n.trim().slice(0, 14) : d;
+    });
+  }
   return out;
 }
 
@@ -48,7 +55,7 @@ export function getSettings() {
 export function setSetting(key, value) {
   if (!(key in DEFAULTS) || key === 'version') return false;
   const next = clean({ ...data, [key]: value }, data); // bad values keep the old one
-  if (next[key] === data[key]) return false;
+  if (JSON.stringify(next[key]) === JSON.stringify(data[key])) return false;
   data = next;
   if (slice) {
     try { Object.assign(slice.get(), data); slice.dirty(); } catch (e) { log.warn('settings: save failed'); }

@@ -2,6 +2,7 @@
 // module, or a small safe stand-in so a screen still draws before that module is built.
 import { dep, log } from './soft.js';
 
+const iconCache = new Map();
 const STARTER = { id: 'hook', name: 'Hook', family: 'collector', tags: ['collector'], desc: 'Collects the item in its lane.', cost: 0, unlock: { type: 'start', value: 0 } };
 
 function emptyRig(cols, rows) {
@@ -55,11 +56,26 @@ export const api = {
   get tutorial() { return dep('tutorial'); },
   get createRenderer() { return dep('createRenderer'); },
   get save() { return dep('save'); },
+  // Icon as a picture address for <img>. Cached. If the renderer cannot make one
+  // (OffscreenCanvas has no toDataURL), we draw it ourselves on a normal canvas.
   partIcon(id, size) {
+    const px = Math.max(16, Math.min(256, Math.round(Number(size)) || 96));
+    const key = id + ':' + px;
+    const hit = iconCache.get(key);
+    if (hit) return hit;
+    let url = '';
     try {
       const p = dep('partIcon');
-      return p && typeof p.toDataURL === 'function' ? p.toDataURL(id, size) || '' : '';
-    } catch (e) { log.warn('partIcon failed', id); return ''; }
+      if (p && typeof p.toDataURL === 'function') url = p.toDataURL(id, px) || '';
+      if (!url && p && typeof p.draw === 'function' && typeof document !== 'undefined') {
+        const c = document.createElement('canvas');
+        c.width = px; c.height = px;
+        const g = c.getContext('2d');
+        if (g) { p.draw(g, id, 0, 0, px, 'idle'); url = c.toDataURL('image/png'); }
+      }
+    } catch (e) { log.warn('partIcon failed', id); }
+    if (url) iconCache.set(key, url);
+    return url;
   },
   allParts() {
     try {
