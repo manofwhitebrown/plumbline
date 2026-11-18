@@ -1,0 +1,60 @@
+// Finishing a drop: pay out, record, clear the crash checkpoint, tell everyone. Runs once per drop.
+import { deps, call } from './deps.js';
+import { S } from './state.js';
+import records from './records.js';
+import goalsApi from './goals.js';
+import { computePayout } from './payout.js';
+import { buildView } from './view.js';
+
+export const SNAP_KEEP_MAX = 0.6;
+
+export function keepFraction(mods) {
+  const k = Number(mods && mods.keepOnSnap);
+  return Number.isFinite(k) ? Math.min(SNAP_KEEP_MAX, Math.max(0, k)) : 0.3;
+}
+
+// Money is added, the checkpoint is cleared, then everything is saved in one write.
+// If the page dies before that write, the old checkpoint stays and pays once on the next start.
+export function applyPayout(payout, seed, biomeId, cheated) {
+  call(deps.meta, 'addGold', payout.kept);
+  call(deps.meta, 'addShards', payout.shardsEarned);
+  records.recordDrop({ outcome: payout.outcome, depth: payout.depth, kept: payout.kept, biomeId, cheated });
+  records.markPaid(seed);
+  records.clearCheckpoint();
+  call(deps.save, 'saveNow');
+}
+
+export function finishRun(outcome) {
+  if (S.ended || !S.run) return null;
+  S.ended = true;
+  S.status = 'ended';
+  try { if (S.loop) S.loop.stop(); } catch (e) { deps.log.warn('run: loop stop failed'); }
+  S.loop = null;
+
+  const st = S.run.state || {};
+  const final = outcome === 'hauled' ? 'hauled' : 'snapped';
+  const gold = Math.max(0, Number(st.gold) || 0);
+  const cheated = !!(S.mods && S.mods.cheat);
+  const keptIfSnap = S.snap && Number.isFinite(Number(S.snap.goldKept))
+    ? Number(S.snap.goldKept) : Math.floor(gold * keepFraction(S.mods));
+
+  goalsApi.finalize(S.goals, { outcome: final, depth: st.depth, strain: st.strain });
+  const payout = computePayout({
+    outcome: final, gold, goldKept: keptIfSnap, depth: st.depth, bestBefore: S.bestBefore,
+    goals: S.goals, tally: S.tally, partsInRig: S.rig ? S.rig.cells.flat().filter(Boolean) : [],
+    cheated, fmt: deps.fmt,
+  });
+
+  try {
+    applyPayout(payout, S.seed, st.biomeId, cheated);
+  } catch (e) {
+    deps.log.error('run: payout failed', e && e.message);
+  }
+
+  const result = { ...payout, seed: S.seed };
+  S.result = result;
+  S.view = buildView(S.run, { goals: S.goals, bestDepth: S.bestBefore, status: final });
+  call(deps.meta && deps.meta.stats, 'record', result);
+  deps.bus.emit('run:ended', result);
+  return result;
+}
