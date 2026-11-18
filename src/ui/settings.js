@@ -6,7 +6,7 @@ export const DEFAULTS = {
   sound: true, sfx: 0.8, music: 0.6,
   haptics: true,
   reduceMotion: false, largeText: false, colorblind: false,
-  quality: 'high',
+  quality: 'auto',
   loadoutNames: ['Loadout 1', 'Loadout 2', 'Loadout 3'],
 };
 
@@ -23,7 +23,7 @@ function clean(src, base) {
   for (const k of ['sfx', 'music']) {
     if (Number.isFinite(src[k])) out[k] = Math.min(1, Math.max(0, src[k]));
   }
-  if (src.quality === 'high' || src.quality === 'low') out.quality = src.quality;
+  if (src.quality === 'auto' || src.quality === 'high' || src.quality === 'low') out.quality = src.quality;
   if (Array.isArray(src.loadoutNames)) {
     out.loadoutNames = DEFAULTS.loadoutNames.map((d, i) => {
       const n = src.loadoutNames[i];
@@ -77,6 +77,7 @@ export function applySettings(root) {
   root.dataset.reduce = data.reduceMotion ? '1' : '0';
   root.dataset.large = data.largeText ? '1' : '0';
   root.dataset.cb = data.colorblind ? '1' : '0';
+  root.dataset.reduceMotion = data.reduceMotion ? 'true' : 'false'; // the tutorial glow reads this
 }
 
 export function _resetSettingsForTests() {

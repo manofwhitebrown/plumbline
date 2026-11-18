@@ -1,0 +1,51 @@
+/* Settings screen. Colors come from tokens.css only. */
+.screen-settings { gap: var(--space-4); padding-bottom: var(--space-6); }
+.set-head { display: flex; align-items: center; gap: var(--space-2); }
+.set-head .title { flex: 1 1 auto; min-width: 0; font-size: var(--fs-5); }
+.set-card { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.set-card > .stack { padding-top: var(--space-2); border-top: 1px solid var(--line); }
+.set-card > h2 + .stack { border-top: 0; padding-top: 0; }
+
+/* One row = one control. The whole row is the tap target. */
+.set-row { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--tap-min); padding: var(--space-2) 0;
+  background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; min-width: 0; }
+.set-text { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.set-label { font-weight: 700; font-size: var(--fs-3); overflow-wrap: anywhere; }
+.slider-row, .choice-row { flex-direction: column; align-items: stretch; gap: var(--space-2); cursor: default; }
+.set-line { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.set-val { color: var(--gold-soft); min-width: 4ch; text-align: right; }
+
+/* Switch */
+.sw-word { flex: 0 0 auto; font-size: var(--fs-2); font-weight: 700; color: var(--muted); min-width: 3ch; text-align: right; }
+.sw { flex: 0 0 auto; position: relative; width: 48px; height: 28px; border-radius: var(--radius-pill); background: var(--ink-900); border: 1px solid var(--line);
+  transition: background var(--dur-fast) var(--ease); }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted);
+  transition: transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+.switch-row[aria-checked="true"] .sw { background: var(--gold); border-color: transparent; }
+.switch-row[aria-checked="true"] .sw::after { transform: translateX(20px); background: var(--ink-900); }
+.switch-row[aria-checked="true"] .sw-word { color: var(--gold-soft); }
+
+/* Slider */
+.range { width: 100%; min-height: var(--tap-min); margin: 0; accent-color: var(--gold); background: transparent; cursor: pointer; touch-action: pan-y; }
+
+/* Choice buttons (Quality) */
+.seg { display: flex; gap: var(--space-2); }
+.seg-btn { flex: 1 1 0; min-width: 0; min-height: var(--tap-min); padding: 0 var(--space-2); border-radius: var(--radius-btn); background: var(--ink-900);
+  border: 1px solid var(--line); color: var(--muted); font-weight: 700; font-size: var(--fs-3); cursor: pointer; }
+.seg-btn[aria-checked="true"] { background: var(--gold); color: var(--ink-900); border-color: transparent; }
+
+/* Save tools */
+.set-btns .btn { flex: 1 1 120px; }
+.code-box { min-height: 72px; padding: var(--space-2) var(--space-3); resize: none; font-size: var(--fs-2); overflow-wrap: anywhere; word-break: break-all; user-select: text; -webkit-user-select: text; }
+textarea.input { height: auto; }
+.reason[role="alert"] { text-align: left; }
+
+/* About */
+.build-label { width: 100%; min-height: var(--tap-min); padding: var(--space-2) 0; background: none; border: 0; color: var(--muted); font: inherit; font-size: var(--fs-2);
+  font-weight: 600; text-align: center; overflow-wrap: anywhere; cursor: default; -webkit-touch-callout: none; }
+.credits { text-align: center; gap: var(--space-2); }
+
+/* The banner that tells the truth after a cheat was used */
+.cheat-banner { padding: var(--space-3) var(--space-4); border-radius: var(--radius-btn); border: 1px solid var(--line); background: var(--ink-700);
+  color: var(--muted); font-size: var(--fs-2); font-weight: 700; text-align: center; overflow-wrap: anywhere; }
+.cheat-banner.used { border-color: var(--ember); color: var(--ember); }
