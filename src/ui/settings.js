@@ -75,6 +75,8 @@ export function onSettings(fn) {
 export function applySettings(root) {
   if (!root || !root.dataset) return;
   root.dataset.reduce = data.reduceMotion ? '1' : '0';
+  root.dataset.reduceMotion = data.reduceMotion ? 'true' : 'false'; // the tutorial glow reads this
+  if (root.classList) root.classList.toggle('reduce-motion', !!data.reduceMotion);
   root.dataset.large = data.largeText ? '1' : '0';
   root.dataset.cb = data.colorblind ? '1' : '0';
   root.dataset.reduceMotion = data.reduceMotion ? 'true' : 'false'; // the tutorial glow reads this

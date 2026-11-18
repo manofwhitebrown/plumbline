@@ -28,6 +28,7 @@ registerScreen('home', {
     const dropBtn = button({ label: 'Drop', sub: 'Best ' + fmtDepth(best), kind: 'primary', big: true, onPress: () => startDrop(), aria: 'Drop. Best ' + fmtDepth(best) }, scope);
     dropBtn.setAttribute('data-tut', 'home-drop');
     dropBtn.classList.add('drop-btn');
+    dropBtn.setAttribute('data-tut', 'home-drop');
     const banner = h('div', { class: 'banner-slot' });
     const income = h('div', { class: 'income sub' });
     const gift = h('button', { class: 'btn ghost iconbtn gift', type: 'button', 'aria-label': 'Daily reward' }, svg(iconHtml('gift')), h('span', { class: 'dot', hidden: true }));

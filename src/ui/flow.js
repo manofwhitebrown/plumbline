@@ -8,13 +8,30 @@ let runEndHook = null; // [MOTION-1] optional (payload, goFn) => true when it wi
 
 export function setRunEndHook(fn) { runEndHook = typeof fn === 'function' ? fn : null; }
 
-// Go to the Drop screen. The screen itself starts the run. A double tap does nothing.
+// Start a drop and open the Drop screen. The Drop screen only shows the run; it must not call session.start.
+// The first drop of the tutorial gets its special options here. A double tap does nothing.
 export function startDrop() {
   if (starting) return false;
   starting = true;
   setTimeout(() => { starting = false; }, 400);
   buzz('tap');
   ui('open');
+  try {
+    const session = api.session;
+    const going = typeof session.isRunning === 'function' && session.isRunning();
+    if (!going) {
+      const tut = api.tutorial;
+      const opts = tut && typeof tut.runOptions === 'function' ? tut.runOptions() : null;
+      const r = session.start(opts ? { ...opts } : {});
+      if (!r || !r.ok) {
+        shell.toast((r && r.error) || 'Could not start the drop. Try again.', 'warn');
+        return false;
+      }
+    }
+  } catch (e) {
+    shell.toast('Could not start the drop. Try again.', 'warn');
+    return false;
+  }
   return shell.go('drop');
 }
 
