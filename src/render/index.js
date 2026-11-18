@@ -16,6 +16,7 @@ import { drawFx, drawFlash } from './drawFx.js';
 import { clearSprites } from './partIcon.js';
 import { num, clamp, clamp01, warn } from './safe.js';
 import { TOKENS } from './palette.js';
+import { createPolish } from './polish/index.js'; // [AI-2] polish hook
 import * as partIcon from './partIcon.js';
 
 export { partIcon };
@@ -30,21 +31,31 @@ export function createRenderer(canvas, opts = {}) {
   const quality = createQuality(o.quality === 'low' ? 'low' : 'high', applyQuality);
   const fx = createEffects({ sc, particles, floaters, camera, rope, bucket, well, vignette });
   const tmp = { x: 0, y: 0 };
+  // [AI-2] polish hook: extra light, ambience and wall detail. Keep these calls when editing (see docs/manager/POLISH_SPLIT.md).
+  const polish = createPolish({ reduceMotion: reduce, quality: o.quality === 'low' ? 'low' : 'high' });
+  const pst = { depth: 0, biomeId: 'clay', strain01: 0, danger: 0, speed: 1, bucket: { x: 0, y: 0 }, lanes: null, laneCount: 4, arriveY: 0, w: 360, h: 640, time: 0 };
+  function fillPolish() {
+    const L = sc.L;
+    pst.depth = sc.depthVis; pst.biomeId = sc.biomeId || 'clay'; pst.strain01 = sc.strain01; pst.danger = sc.strain01; pst.speed = sc.speed;
+    pst.bucket.x = L.cx; pst.bucket.y = L.top + L.bucketH * 0.5 + bucket.offY; pst.lanes = L.laneX; pst.laneCount = L.cols; pst.arriveY = L.arriveY; pst.w = CW; pst.h = H; pst.time = sc.time;
+  }
 
   function applyQuality() {
     const q = quality.settings;
     particles.setCap(reduce ? Math.round(q.maxParticles * 0.4) : q.maxParticles);
+    polish.setQuality(q.name);
     well.setLow(q.name === 'low');
   }
   function applyMotion() {
     sc.reduceMotion = reduce; camera.reduceMotion = reduce; rope.reduceMotion = reduce; well.setReduceMotion(reduce); vignette.setReduceMotion(reduce);
     if (reduce) { sc.timeScale = 1; sc.slowT = 0; }
+    polish.setReduceMotion(reduce);
     applyQuality();
   }
   function relayout() {
     CW = Math.min(W, MAX_COL); colX = Math.floor((W - CW) / 2);
     computeLayout(sc.L, CW, H, dpr, sc.rig.cols, sc.rig.rows);
-    items.rebuild(sc.L.itemSize, dpr); bucket.rebuild(sc.L); well.resize(CW, H, dpr, quality.level === 'low'); vignette.build(CW, H, dpr);
+    items.rebuild(sc.L.itemSize, dpr); bucket.rebuild(sc.L); well.resize(CW, H, dpr, quality.level === 'low'); vignette.build(CW, H, dpr); polish.resize(CW, H, dpr);
   }
   applyMotion();
   computeLayout(sc.L, CW, H, dpr, 4, 3);
@@ -94,6 +105,7 @@ export function createRenderer(canvas, opts = {}) {
     if (sc.flashA > 0) sc.flashA = Math.max(0, sc.flashA - dt / 260);
     camera.update(sdt); well.update(sdt); rope.update(sdt); bucket.update(sdt, H); vignette.update(sdt);
     updateItems(sdt); fx.runDue();
+    fillPolish(); polish.update(dt, pst);
     particles.update(sdt); floaters.update(sdt);
     const th = sc.threads.items, rg = sc.rings.items, st = sc.streaks.items;
     for (let i = 0; i < th.length; i++) if (th[i].alive && (th[i].life -= dt) <= 0) sc.threads.release(th[i]);
@@ -113,11 +125,13 @@ export function createRenderer(canvas, opts = {}) {
     ctx.save();
     camera.apply(ctx, CW, H);
     well.draw(ctx, sc.depthVis * PX_PER_M, sc.depthVis, t, sc.strain01);
+    polish.drawBack(ctx, pst);
     drawItems(ctx, false, t);
     const oy = bucket.offY;
     rope.draw(ctx, L.cx, -20, L.cx, Math.max(0, L.attachY + oy * 0.0 + (sc.hauled ? Math.min(0, oy) : 0)), sc.strain01, t, sc.depthVis * PX_PER_M);
     bucket.draw(ctx, L, sc.rig, t);
     drawItems(ctx, true, t);
+    polish.drawFront(ctx, pst);
     particles.draw(ctx); drawFx(ctx, sc, oy); floaters.draw(ctx);
     ctx.restore();
     vignette.draw(ctx, CW, H); drawFlash(ctx, sc);
@@ -177,6 +191,7 @@ export function createRenderer(canvas, opts = {}) {
     destroy() {
       if (dead) return; dead = true;
       try { particles.clear(); floaters.clear(); sc.reset(); clearSprites(); ctx && ctx.clearRect(0, 0, canvas.width, canvas.height); } catch (e) { /* ignore */ }
+      try { polish.destroy(); } catch (e) { /* ignore */ }
       ctx = null;
     },
   };
