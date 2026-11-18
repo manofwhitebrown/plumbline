@@ -6,10 +6,23 @@
 - Every function of CONTRACT section 8 exists and fails soft on bad input.
 
 ## In progress
-- Cheats (`src/cheats/`), `docs/CHEATS.md`, the full test list from the mission.
+- Nothing. AI-5 ran out of usage; the Manager finished the last fixes.
+
+## Fixed by the Manager
+- The daily twist now really changes a drop: `getMods()` applies it with `applyTwist` (limits re-checked, cheat field kept). Test: `tests/meta-twist.test.js`.
+- `meta.buyPart` already sends `meta:changed {what:'parts'}` (the tutorial request is done).
+- Rigs re-fit to owned parts on every `getRig()`, so Collapse needs no extra listener.
+
+## Not built (decided, not needed for launch)
+- The `multiplierLevel` Workshop upgrade (Multiplier x3). Multiplier pays x2.
+- Test-state fixtures (`src/cheats/fixtures.js`) belong to NEW-5.
+- Cheat panel UI is NEW-4's (`src/ui/screens/cheatPanel.js`).
+- Crew and upgrade cost balance is NEW-6's job (bot report).
 
 ## Blocked
 - Nothing.
+
+STATUS: DONE
 
 ## What other AIs must know
 - `import { meta } from '../meta/index.js'`. It starts listening to `run:started`, `run:events` and `run:ended` by itself.

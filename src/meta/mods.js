@@ -7,6 +7,7 @@ import { clamp, num } from './safe.js';
 // Round to 4 places so 0.68 is 0.68, not 0.6799999.
 const r4 = (x) => Math.round(x * 10000) / 10000;
 import { dailyTwistId } from './daily.js';
+import { applyTwist } from '../engine/twists.js';
 
 export function coreDustMult() {
   return 1 + LIMITS.coreDustGoldEach * s().coreDustTotal;
@@ -40,5 +41,14 @@ export function getMods() {
     };
   }
   if (st.cheated && st.cheatStartDepth > 0) mods.startDepth = Math.max(mods.startDepth, st.cheatStartDepth);
-  return mods;
+  // Daily twist: change the numbers for today. Unknown fields are kept; a bad twist id changes nothing.
+  let out = mods;
+  if (mods.twist) {
+    try { out = applyTwist(mods, mods.twist) || mods; } catch (e) { out = mods; }
+    out.maxStrain = clamp(num(out.maxStrain, mods.maxStrain), 20, 1000);
+    out.keepOnSnap = clamp(num(out.keepOnSnap, mods.keepOnSnap), 0, LIMITS.maxKeepOnSnap);
+    out.cheat = mods.cheat;
+    out.twist = mods.twist;
+  }
+  return out;
 }
