@@ -24,6 +24,8 @@ const KEY = [[360, 640], [390, 844], [1440, 900]];
 const sizes = args.sizes === 'key' ? KEY : args.sizes === 'one' ? [[390, 844]] : SIZES;
 const TABS = { home: 0, rig: 1, crew: 2, workshop: 3, codex: 4, more: 5 };
 const screens = (args.screens || 'home,rig,crew,workshop').split(',');
+// --twistsizes 320x568,844x390 replaces the three key sizes for the twist runs
+const TWISTSIZES = args.twistsizes ? args.twistsizes.split(',').map((x) => x.split('x').map(Number)) : null;
 const twists = (args.twist || '').split(',').filter(Boolean);
 
 // This runs inside the page. It returns a list of problem strings.
@@ -244,7 +246,8 @@ async function gotoScreen(page, name) {
 const twistSets = [[]];
 for (const t of twists) if (t !== 'rotate') twistSets.push([t]);
 for (const tw of twistSets) {
-  const useSizes = tw.length ? KEY : sizes;
+  // Browser zoom only changes the CSS size on laptops. Phones cannot go below 320 CSS px, so zoom is tested on laptop sizes.
+  const useSizes = tw[0] && tw[0].startsWith('zoom') ? [[1440, 900], [1024, 768]] : tw.length ? (TWISTSIZES || KEY) : sizes;
   for (const [w, h] of useSizes) {
     const page = await openPage(w, h, tw);
     for (const s of screens) {
@@ -257,7 +260,7 @@ for (const tw of twistSets) {
   }
 }
 if (twists.includes('rotate')) {
-  for (const [w, h] of KEY.filter(([a]) => a < 900)) {
+  for (const [w, h] of (TWISTSIZES || KEY).filter(([a, b]) => a < 900 && a < b)) {
     const page = await openPage(w, h, []);
     for (const s of screens) {
       await gotoScreen(page, s);

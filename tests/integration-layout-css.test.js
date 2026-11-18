@@ -113,7 +113,13 @@ function resolve(value, depth = 0) {
   });
 }
 function px(value) {
-  const v = resolve(value).trim();
+  let v = resolve(value).trim();
+  // max(44px, min-content): the 44px part is the guaranteed minimum
+  const mx = /^max\((.*)\)$/.exec(v);
+  if (mx) {
+    const nums = mx[1].split(',').map((a) => /^\s*(-?\d*\.?\d+)px\s*$/.exec(a)).filter(Boolean).map((m) => parseFloat(m[1]));
+    return nums.length ? Math.max(...nums) : null;
+  }
   const m = /^(-?\d*\.?\d+)px$/.exec(v);
   return m ? parseFloat(m[1]) : null;
 }

@@ -1,0 +1,6 @@
+/* Layout fixes for the bottom tab bar (NEW-8). */
+
+/* BROKEN: Large text on a 320px phone made the "Rig" tab only 37px wide, because the long label "Workshop"
+   took more than its share. Every tab keeps at least 44px and at least the width of its label (no overlap). Six tabs need 264px, so this still fits 320px.
+   The tabs touch each other on purpose (a segmented bar, each tab is 56px tall); the 8px rule is not applied to this bar. */
+.tabbar button { min-width: max(var(--tap-min), min-content); padding: 0 2px; }
