@@ -105,3 +105,27 @@ export function changed(what) {
   dirty();
   try { bus.emit('meta:changed', { what }); } catch (e) { log.warn('emit failed', e && e.message); }
 }
+
+// ---- cheat flag (used by src/cheats only) ----
+
+// Any cheat marks the save. From then on: no records, no achievements, no codex finds.
+export function markCheated() {
+  const st = s();
+  if (!st.cheated) { st.cheated = true; changed('cheated'); }
+}
+
+// patch: { noSnap, freezeStrain, speedMult, forceBiome, goldMult }
+export function setCheatMods(patch) {
+  const st = s();
+  markCheated();
+  const cur = st.cheatMods && typeof st.cheatMods === 'object' ? st.cheatMods : {};
+  st.cheatMods = { ...cur, ...(patch || {}) };
+  changed('cheatmods');
+  return st.cheatMods;
+}
+
+export function setCheatStartDepth(n) {
+  markCheated();
+  s().cheatStartDepth = clamp(n, 0, 5000);
+  changed('cheatmods');
+}
