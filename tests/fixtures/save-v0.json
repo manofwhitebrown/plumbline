@@ -1,0 +1,7 @@
+{
+  "gold": 1234, "shards": 56, "coreDust": 3, "best": 410, "lifetimeGold": 98000,
+  "parts": ["hook", "magnet", "magnet"],
+  "crew": { "winch": 12, "smithy": 3 },
+  "upgrades": { "rope": 2 },
+  "stats": { "drops": 20, "hauls": 11, "snaps": 9 }
+}
