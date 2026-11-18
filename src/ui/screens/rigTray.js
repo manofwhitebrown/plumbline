@@ -47,13 +47,16 @@ export function buildTray(scope, handlers) {
     row.textContent = '';
     const ids = Object.keys(owned);
     let shown = 0;
+    let marked = false;
     for (const id of ids) {
       const part = api.getPart(id);
       if (!part) continue; // unknown part id is ignored
       if (family !== 'all' && part.family !== family) continue;
       const n = owned[id];
       const inUse = (used[id] || 0) >= n;
-      row.append(partCard(part, { owned: n, inUse, selected: selectedId === id, icon: api.partIcon(id, 96), onPress: () => handlers.onPart(id, n, used[id] || 0) }, scope));
+      const card = partCard(part, { owned: n, inUse, selected: selectedId === id, icon: api.partIcon(id, 96), onPress: () => handlers.onPart(id, n, used[id] || 0) }, scope);
+      if (!marked && !inUse) { card.setAttribute('data-tut', 'rig-new-part'); marked = true; }
+      row.append(card);
       shown++;
     }
     if (!shown) row.append(h('p', { class: 'sub tray-empty', text: 'No parts here yet. Visit the Workshop.' }));

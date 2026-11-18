@@ -21,7 +21,7 @@ export function tabbar(onPick, scope) {
   const el = h('nav', { class: 'tabbar', 'aria-label': 'Main' });
   const buttons = {};
   for (const t of TABS) {
-    const b = h('button', { type: 'button', 'aria-label': t.label }, svg(iconHtml(t.icon)), h('span', { text: t.label }));
+    const b = h('button', { type: 'button', 'aria-label': t.label, 'data-tut': 'tab-' + t.id }, svg(iconHtml(t.icon)), h('span', { text: t.label }));
     const press = () => { buzz('tap'); ui('tap'); if (typeof onPick === 'function') onPick(t.id); };
     if (scope) scope.on(b, 'click', press); else b.addEventListener('click', press);
     buttons[t.id] = b;

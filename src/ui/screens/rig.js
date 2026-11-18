@@ -48,6 +48,7 @@ registerScreen('rig', {
       if (key === gridKey) return;
       gridKey = key;
       grid = buildGrid(r, scope, {
+        onRemove: (rr, cc) => { if ((rig0().cells[rr] || [])[cc]) { api.rigs.remove(rr, cc); ui('remove'); repaint(); } },
         onCell: (rr, cc) => run(rs.tapCell(st, rr, cc, (rig0().cells[rr] || [])[cc] || null)),
         onCellDown: (e, rr, cc) => { const id = (rig0().cells[rr] || [])[cc]; if (id) begin(e, { kind: 'cell', r: rr, c: cc, partId: id }); },
       });
@@ -164,6 +165,7 @@ registerScreen('rig', {
       startDrop();
     } }, scope);
     dropBtn.classList.add('grow');
+    dropBtn.setAttribute('data-tut', 'rig-drop');
 
     scope.sub(bus, 'meta:changed', () => repaint());
     scope.sub(bus, 'rig:changed', () => repaint());
