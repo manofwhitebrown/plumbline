@@ -1,7 +1,7 @@
 // createRun: turns a rig + mods + seed into a Run, and checks every input on the way.
 import { makeRng } from '../core/rng.js';
 import { ENGINE, DEFAULT_MODS } from '../data/engine.js';
-import { getProviders } from './registry.js';
+import { getProviders, hasCustomParts } from './registry.js';
 import { seedToInt, newItem, biomeFor } from './spawn.js';
 import { Ctx } from './ctx.js';
 import { clampNum, fin, warnOnce } from './safe.js';
@@ -97,6 +97,8 @@ export function createRun({ rig, mods, seed, deps } = {}) {
     lastCollectValue: 0, chainR: -1, chainC: -1, triggerDepth: 0, out: null,
     slope: new Float64Array(ENGINE.slopeWindow), slopeIdx: 0, slopeCount: 0,
     lastMilestone: 0, ctx: null,
+    // The real parts run through parts/runtime.js. Test fakes (deps.getPart) keep the old walk.
+    runtime: !(deps && typeof deps.getPart === 'function') && !hasCustomParts(),
   };
   run.ctx = new Ctx(run);
   run.lastMilestone = Math.floor(run.state.depth / ENGINE.milestoneEvery);

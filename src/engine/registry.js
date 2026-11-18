@@ -15,7 +15,12 @@ const providers = {
 export function setProviders(p) {
   if (!p || typeof p !== 'object') return;
   for (const k of Object.keys(providers)) if (typeof p[k] === 'function') providers[k] = p[k];
+  if (typeof p.getPart === 'function') customParts = true;
 }
+
+let customParts = false;
+// True when a test swapped in its own parts. Then the engine uses the old walk (no parts runtime).
+export function hasCustomParts() { return customParts; }
 
 export function getProviders() {
   return providers;

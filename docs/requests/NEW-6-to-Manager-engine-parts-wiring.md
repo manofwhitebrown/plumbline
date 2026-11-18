@@ -16,3 +16,9 @@ and `fx.bonusValue`, and call `applyPassives` in `createRun`.
 
 I cannot balance numbers until this lands. I will build `suggest.bestRig`, the bot and the report against the public
 engine API now, so they work once it is wired. Please tell me who owns the fix.
+
+## UPDATE: fixed by NEW-6
+Wired in `src/engine/beat.js` (`settleRuntime`), `run.js` (flag `run.runtime`) and `registry.js` (`hasCustomParts`).
+Real parts now go through `parts/runtime.js` (parts tick first, then lanes, then `finishBeat`; the engine pays `fx.collected`,
+emits MISS and HAZARD, adds `fx.strainDelta` and `fx.bonusValue`). Tests that pass fake parts (`deps.getPart` or `setProviders({getPart})`)
+keep the old walk, so the old engine tests still run. Firing order change: parts' onBeat now runs at the START of the beat (as AI-3 asked).
