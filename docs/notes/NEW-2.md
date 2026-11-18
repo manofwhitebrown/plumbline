@@ -1,6 +1,6 @@
 # Notes — NEW-2 (Crew screen and Workshop screen)
 
-STATUS: IN PROGRESS (code and tests done; real-browser size checks not done yet)
+STATUS: DONE for code, tests and static CSS review. NOT verified: pixel layout in a real browser (no browser in my sandbox). See Next.
 
 ## Done
 - Crew screen: Gold per second header (animated counter), 6 cards, x1 / x10 / Max toggle (remembered), progress to the next doubling, Buy with a reason when disabled, manager hire, locked rule shown.
@@ -14,6 +14,9 @@ STATUS: IN PROGRESS (code and tests done; real-browser size checks not done yet)
 - Result: 0 console errors or warnings, no NaN / undefined text, no overlong labels. Crew 7 cards, Workshop 42 (26 parts + 16 upgrades).
 - This does NOT check pixels. Layout at the four sizes is still untested.
 - `src/cheats/fixtures.js` does not exist yet, so I built the saves with the meta API.
+
+## Late fix
+- `.btn`, `.pill`, `.icon`, `.row` set `display`, which beats the `hidden` attribute. Added `[hidden] { display: none !important }` inside both screens so the hired-manager button, lock icon and maxed cost row really hide. Test: tests/ui-workshop-css.test.js.
 
 ## In progress
 - Nothing is half done.

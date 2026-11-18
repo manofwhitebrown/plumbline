@@ -33,3 +33,4 @@
 .card.shake { animation: shake 260ms var(--ease); }
 .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #app[data-reduce="1"] .card.shake, #app[data-reduce="1"] .card.pop { animation: none; }
+.screen-workshop [hidden], .sheet .ws-sheet [hidden] { display: none !important; }
