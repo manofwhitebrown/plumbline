@@ -38,11 +38,34 @@ export function biomeFor(run, depth) {
   return def || { id: 'clay', goldFactor: 1, strainFactor: 1, hazardStrain: ENGINE.fallbackHazardStrain, mix: null };
 }
 
+// Spawn odds changed by mods (daily twists and parts): gemRate, oreRate, hazardRate, rareMult.
+// The changed table is built once per biome per run and kept on the run.
+function tuned(run, def, table) {
+  const m = run.mods;
+  const g = Number(m.gemRate) || 1, o = Number(m.oreRate) || 1, h = Number(m.hazardRate) || 1, rare = Number(m.rareMult) || 1;
+  if (g === 1 && o === 1 && h === 1 && rare === 1) return table;
+  const cache = run.tunedTables || (run.tunedTables = new Map());
+  const key = def.id + ':' + m.luck;
+  let t = cache.get(key);
+  if (t) return t;
+  t = table.map(([item, w]) => {
+    let f = 1;
+    if (item.kind === 'gem') f = g * (item.tier >= 4 ? rare : 1);
+    else if (item.kind === 'ore') f = o;
+    else if (item.kind === 'hazard') f = h;
+    else if (item.kind === 'relic') f = rare;
+    const nw = w * f;
+    return [item, Number.isFinite(nw) && nw > 0 ? nw : 0];
+  }).filter((p) => p[1] > 0);
+  cache.set(key, t);
+  return t;
+}
+
 // Fill `row` (array of pooled items, one per lane) for the given beat.
 export function spawnRow(run, beat, depth, def, row) {
   const rng = makeRng(mixSeed(run.seed, beat));
   let table = null;
-  try { table = run.deps.lootTable(def, run.mods.luck); } catch (e) { table = null; }
+  try { table = run.deps.lootTable(def, run.mods.luck); if (Array.isArray(table) && table.length) table = tuned(run, def, table); } catch (e) { table = null; }
   const ok = Array.isArray(table) && table.length > 0;
   const relicBonus = run.mods.relicBonus || 0;
   for (let lane = 0; lane < run.cols; lane++) {

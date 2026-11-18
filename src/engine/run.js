@@ -5,6 +5,7 @@ import { getProviders, hasCustomParts } from './registry.js';
 import { seedToInt, newItem, biomeFor } from './spawn.js';
 import { Ctx } from './ctx.js';
 import { clampNum, fin, warnOnce } from './safe.js';
+import { applyTwist } from './twists.js';
 
 const L = ENGINE.limits;
 
@@ -59,9 +60,12 @@ function newStats() {
     chains: 0, maxCombo: 0, peakStrain: 0, fires: {} };
 }
 
-export function createRun({ rig, mods, seed, deps } = {}) {
+export function createRun({ rig, mods, seed, deps, safeUntilDepth } = {}) {
   const d = { ...getProviders(), ...(deps || {}) };
-  const m0 = sanitizeMods(mods);
+  let m0 = sanitizeMods(mods);
+  if (typeof m0.twist === 'string' && m0.twist) {          // the daily twist (Mods overlay)
+    try { m0 = sanitizeMods(applyTwist(m0, m0.twist)); } catch (e) { warnOnce('twist:' + m0.twist, 'twist failed: ' + m0.twist); }
+  }
   const rg = sanitizeRig(rig, m0);
   const n = rg.cols * rg.rows;
   const parts = new Array(n).fill(null), partIds = new Array(n).fill(''), mem = new Array(n);
@@ -96,6 +100,7 @@ export function createRun({ rig, mods, seed, deps } = {}) {
     firedThisBeat: 0, collectsThisBeat: 0, strainAdjust: 0, hazardStrain: 0, speedPending: 0,
     lastCollectValue: 0, chainR: -1, chainC: -1, triggerDepth: 0, out: null,
     slope: new Float64Array(ENGINE.slopeWindow), slopeIdx: 0, slopeCount: 0,
+    safeUntil: clampNum(safeUntilDepth, 0, 1000, 0, 'safeUntilDepth'), // first tutorial drop: no Snap before this depth
     lastMilestone: 0, ctx: null,
     // The real parts run through parts/runtime.js. Test fakes (deps.getPart) keep the old walk.
     runtime: !(deps && typeof deps.getPart === 'function') && !hasCustomParts(),

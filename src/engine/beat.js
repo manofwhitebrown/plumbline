@@ -102,6 +102,7 @@ export function runBeat(run, out) {
   }
   const noSnap = cheat && cheat.noSnap;
   if (noSnap && st.strain > st.maxStrain) st.strain = st.maxStrain;
+  if (run.safeUntil > 0 && st.depth < run.safeUntil && st.strain >= st.maxStrain) st.strain = Math.max(0, st.maxStrain - 0.5);
   const delta = st.strain - before;
   run.slope[run.slopeIdx] = delta;
   run.slopeIdx = (run.slopeIdx + 1) % run.slope.length;
