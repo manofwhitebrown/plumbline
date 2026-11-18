@@ -1,0 +1,93 @@
+/* Polish (AI-2). LOOKS ONLY: shadows, gradients, glows, transitions, press states.
+   Never sizes, margins, paddings or positions. Loaded last. Reduce motion is handled at the end. */
+
+/* ---- Screens: fade and 8 px rise, 220 ms ---- */
+@keyframes polishIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.screen { animation: polishIn 220ms var(--ease) both; }
+
+/* ---- Cards: soft layered shadow and an inner highlight ---- */
+.card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, 0) 42%), var(--ink-700);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 0 0 1px rgba(255, 255, 255, .015),
+    0 1px 2px rgba(0, 0, 0, .35), 0 10px 24px -10px rgba(0, 0, 0, .65);
+}
+.card.owned, .ws-up.maxed { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 0 18px -6px rgba(70, 227, 163, .45), 0 10px 24px -10px rgba(0, 0, 0, .65); }
+
+/* ---- Buttons ---- */
+.btn { transition: transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), opacity var(--dur-fast), background var(--dur-fast); }
+.btn:where(:not(.ghost, .primary, .danger, .on, .disabled)) {
+  background: linear-gradient(180deg, #26324f, var(--ink-600));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 2px 6px rgba(0, 0, 0, .3);
+}
+.btn.primary {
+  background: linear-gradient(180deg, var(--gold-soft) 0%, var(--gold) 70%, #e0a93a 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 -2px 0 rgba(150, 100, 20, .25), 0 0 0 1px rgba(255, 227, 161, .25), 0 6px 22px -4px rgba(246, 196, 83, .5);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
+}
+.btn.danger { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 6px 18px -6px rgba(255, 77, 94, .55); }
+/* the satisfying press-in */
+.btn:active, .btn.pressed { transform: translateY(1px) scale(.97); filter: brightness(.96); }
+.btn.primary:active, .btn.primary.pressed { box-shadow: inset 0 2px 6px rgba(120, 80, 10, .4), 0 0 0 1px rgba(255, 227, 161, .25), 0 2px 10px -2px rgba(246, 196, 83, .4); }
+.btn:where(:not(.ghost, .primary, .danger, .on, .disabled)):active { box-shadow: inset 0 2px 6px rgba(0, 0, 0, .45); }
+@media (hover: hover) {
+  .btn:hover { filter: brightness(1.08); }
+  .btn.primary:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 0 0 1px rgba(255, 227, 161, .35), 0 8px 30px -4px rgba(246, 196, 83, .7); }
+  .btn:active { filter: brightness(.96); }
+}
+.btn.disabled, .btn[disabled], .btn.primary.disabled { box-shadow: none; text-shadow: none; filter: saturate(.55); }
+/* focus ring */
+.btn:focus-visible, .partcard:focus-visible, .ws-main:focus-visible, .tabbar button:focus-visible {
+  outline: 2px solid var(--gold-soft); outline-offset: 2px; box-shadow: 0 0 0 4px rgba(246, 196, 83, .22);
+}
+.btn:focus:not(:focus-visible) { outline: none; }
+
+/* ---- Pills ---- */
+.pill { background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0)), var(--ink-700); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07); }
+.pill.gold { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 0 12px -4px rgba(246, 196, 83, .45); }
+.pill.shard { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 0 12px -4px rgba(127, 214, 255, .45); }
+.pill.core { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 0 12px -4px rgba(181, 131, 255, .45); }
+
+/* ---- Progress bars: smooth fill, soft glow, a little shine ---- */
+.bar { box-shadow: inset 0 1px 3px rgba(0, 0, 0, .6); }
+.bar > i { transition: transform 420ms var(--ease); box-shadow: 0 0 10px rgba(246, 196, 83, .5); background-image: linear-gradient(90deg, var(--ember), var(--gold)), linear-gradient(180deg, rgba(255, 255, 255, .25), rgba(255, 255, 255, 0)); background-blend-mode: normal; }
+.bar.ok > i { box-shadow: 0 0 10px rgba(70, 227, 163, .5); }
+
+/* ---- Important numbers glow ---- */
+.big-num, .crew-rate { text-shadow: 0 0 18px rgba(246, 196, 83, .35); }
+
+/* ---- Tab bar, sheets, modals, toasts ---- */
+.tabbar { background: linear-gradient(180deg, var(--ink-800), var(--ink-900)); box-shadow: 0 -10px 24px -8px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .05); }
+.tabbar button { transition: color var(--dur-fast) var(--ease), text-shadow var(--dur-fast) var(--ease); }
+.tabbar button[aria-current="page"] { text-shadow: 0 0 14px rgba(246, 196, 83, .55); }
+.sheet, .modal { background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, 0) 30%), var(--ink-700); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 -12px 40px rgba(0, 0, 0, .55); }
+.modal { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 20px 60px rgba(0, 0, 0, .6); }
+.scrim { backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.toast { background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0)), var(--ink-600); }
+.partcard { background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, 0)), var(--ink-700); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 4px 10px -4px rgba(0, 0, 0, .5); transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), border-color var(--dur-fast); }
+.partcard:active { transform: scale(.97); }
+
+/* ---- Nicer scrollbars (colours only) ---- */
+* { scrollbar-color: var(--line) transparent; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: var(--radius-pill); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- Wide screens: a slow, subtle moving glow behind the column ---- */
+@keyframes polishBackdrop { from { background-position: 0% 0%, 100% 100%, 0 0; } to { background-position: 100% 100%, 0% 0%, 0 0; } }
+@media (min-width: 900px) {
+  .backdrop {
+    background: radial-gradient(ellipse at 20% 30%, rgba(246, 196, 83, .07), rgba(246, 196, 83, 0) 45%),
+      radial-gradient(ellipse at 80% 70%, rgba(181, 131, 255, .07), rgba(181, 131, 255, 0) 45%),
+      radial-gradient(ellipse at 50% 20%, var(--ink-600) 0%, var(--ink-800) 50%, var(--ink-900) 100%);
+    background-size: 160% 160%, 160% 160%, 100% 100%;
+    animation: polishBackdrop 40s ease-in-out infinite alternate;
+  }
+}
+
+/* ---- Reduce motion: still looks good, nothing moves ---- */
+#app[data-reduce="1"] .screen, #app[data-reduce="1"] .backdrop { animation: none; }
+#app[data-reduce="1"] .btn, #app[data-reduce="1"] .bar > i, #app[data-reduce="1"] .partcard, #app[data-reduce="1"] .tabbar button { transition: none; }
+#app[data-reduce="1"] .btn:active, #app[data-reduce="1"] .btn.pressed, #app[data-reduce="1"] .partcard:active { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .screen, .backdrop { animation: none; }
+  .btn, .bar > i, .partcard, .tabbar button { transition: none; }
+}

@@ -19,6 +19,7 @@ import './screens/codex.js';
 import './screens/rewards.js';
 import './screens/settings.js';
 import './screens/guide.js';
+import './styles/polish.css'; // [AI-2] looks only, loaded last
 
 let mounted = null;
 
