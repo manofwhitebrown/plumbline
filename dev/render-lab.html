@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumbline render lab</title>
+<style>
+  :root { --ink-900:#070a12; --ink-800:#0d1220; --ink-700:#141b2e; --ink-600:#1d2740; --line:#2a3555; --text:#eef2ff; --muted:#8d97b8; --gold:#f6c453; --ok:#46e3a3; --danger:#ff4d5e; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ink-900); color:var(--text); font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:baseline; flex-wrap:wrap; }
+  header h1 { font-size:16px; margin:0; }
+  header span { color:var(--muted); font-size:12px; }
+  main { display:flex; gap:16px; padding:16px; align-items:flex-start; flex-wrap:wrap; }
+  #stage { flex:0 0 auto; max-width:100%; overflow:auto; }
+  #frame { position:relative; background:#000; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  #frame canvas { display:block; }
+  .zone { position:absolute; left:0; right:0; pointer-events:none; background:rgba(255,77,94,.16); border:0 dashed rgba(255,77,94,.8); font-size:11px; color:#ffb0b8; padding:2px 6px; display:none; }
+  .zone.top { top:0; border-bottom-width:1px; }
+  .zone.bottom { bottom:0; border-top-width:1px; display:none; }
+  .show-zones .zone { display:block; }
+  #panel { flex:1 1 380px; min-width:300px; max-width:760px; display:grid; grid-template-columns:minmax(0,1fr); gap:12px; }
+  #panel > section { min-width:0; }
+  section { background:var(--ink-800); border:1px solid var(--line); border-radius:12px; padding:12px; }
+  section h2 { margin:0 0 8px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  button, select { background:var(--ink-600); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font:inherit; cursor:pointer; min-height:32px; }
+  button:hover { border-color:var(--gold); }
+  button.on { background:#3a2f12; border-color:var(--gold); color:var(--gold); }
+  label.slider { display:grid; grid-template-columns:70px 1fr 64px; gap:8px; align-items:center; margin:4px 0; }
+  label.slider b { text-align:right; font-variant-numeric:tabular-nums; }
+  input[type=range] { width:100%; accent-color:var(--gold); }
+  label.check { display:inline-flex; gap:6px; align-items:center; margin-right:10px; }
+  #stats { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:6px 12px; font-variant-numeric:tabular-nums; }
+  #stats div { display:flex; justify-content:space-between; gap:8px; border-bottom:1px solid var(--ink-600); padding:2px 0; }
+  #stats span { color:var(--muted); }
+  #stats b.bad { color:var(--danger); } #stats b.good { color:var(--ok); }
+  #palette { display:grid; grid-template-columns:repeat(auto-fill,minmax(76px,1fr)); gap:6px; }
+  #palette button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px; font-size:11px; }
+  #palette img, .cell img { width:40px; height:40px; image-rendering:auto; }
+  #grid { display:grid; gap:4px; margin:8px 0; width:max-content; background:#2a1a0c; padding:8px; border-radius:10px; }
+  .cell { width:52px; height:52px; padding:0; display:grid; place-items:center; background:#0a0a10; }
+  .cell.empty { opacity:.6; }
+  #gallery { max-width:100%; overflow:auto; background:var(--ink-700); border-radius:8px; }
+  #log { max-height:120px; overflow:auto; font:12px/1.4 ui-monospace,Menlo,Consolas,monospace; color:var(--muted); white-space:pre-wrap; }
+  small { color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Plumbline render lab</h1>
+  <span>Sandbox for the canvas. Space = step one beat. Nothing here is saved.</span>
+</header>
+<main>
+  <div id="stage">
+    <div id="frame">
+      <canvas id="cv"></canvas>
+      <div class="zone top">top 88 px: HUD</div>
+      <div class="zone bottom">bottom 120 px: HUD</div>
+    </div>
+  </div>
+  <div id="panel">
+    <section>
+      <h2>Live numbers</h2>
+      <div id="stats"></div>
+      <small id="statsNote"></small>
+    </section>
+    <section>
+      <h2>Sliders</h2>
+      <label class="slider">Strain <input id="sStrain" type="range" min="0" max="100" value="20"><b id="vStrain">20</b></label>
+      <label class="slider">Depth <input id="sDepth" type="range" min="0" max="1500" value="0"><b id="vDepth">0 m</b></label>
+      <label class="slider">Biome <input id="sBiome" type="range" min="0" max="5" value="0"><b id="vBiome">clay</b></label>
+      <label class="check"><input id="cAutoBiome" type="checkbox"> biome follows depth</label>
+      <label class="check"><input id="cAutoRun" type="checkbox" checked> auto-run (a new row each beat)</label>
+      <label class="check"><input id="cPause" type="checkbox"> pause</label>
+    </section>
+    <section>
+      <h2>Send an event (fake data)</h2>
+      <div class="row" id="events"></div>
+      <small>Item events wait for the next beat, then the item rises 2 beats before it lands. That is how the game works.</small>
+    </section>
+    <section>
+      <h2>Settings</h2>
+      <div class="row">
+        <label class="check"><input id="cReduce" type="checkbox"> Reduce motion</label>
+        <label>Quality <select id="qSel"><option value="auto">auto</option><option value="high">high</option><option value="low">low</option></select></label>
+        <label>Size <select id="sizeSel"></select></label>
+        <label>Pixel density <select id="dprSel"><option>1</option><option>1.5</option><option selected>2</option><option>3</option></select></label>
+        <button id="bRotate">Rotate</button>
+        <button id="bJitter">Resize mid-drop</button>
+        <label class="check"><input id="cZones" type="checkbox"> show HUD zones</label>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button id="bStress">Stress: 300 particles</button>
+        <button id="bDestroy">Destroy twice, then restart</button>
+        <button id="bHide">Simulate hidden tab (3 s)</button>
+      </div>
+    </section>
+    <section>
+      <h2>Rig editor (26 parts)</h2>
+      <div class="row">
+        <label>Columns <select id="rCols"><option>4</option><option>5</option></select></label>
+        <label>Rows <select id="rRows"><option>3</option><option>4</option></select></label>
+        <button id="bFillA">Fill parts 1–20</button><button id="bFillB">Fill parts 7–26</button><button id="bClear">Clear</button>
+      </div>
+      <div id="grid"></div>
+      <div id="palette"></div>
+    </section>
+    <section>
+      <h2>Part icons at 24 px and 96 px</h2>
+      <div id="gallery"><canvas id="gal"></canvas></div>
+    </section>
+    <section>
+      <h2>Log</h2>
+      <div id="log"></div>
+    </section>
+  </div>
+</main>
+<script type="module" src="./render-lab.js"></script>
+</body>
+</html>

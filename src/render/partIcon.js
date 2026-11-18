@@ -90,16 +90,26 @@ export function getSprite(partId, size, dpr = 1, state = 'idle') {
 }
 export function clearSprites() { cache.clear(); }
 
+// PNG data URL for DOM <img>. OffscreenCanvas has no toDataURL, so a normal canvas is used when there is a document.
+const urlCache = new Map();
 export function toDataURL(partId, size) {
   try {
     const px = Math.max(8, Math.min(512, Math.round(Number(size)) || 48));
-    const c = makeCanvas(px, px);
+    const key = normalizeId(partId) + '|' + px;
+    const hit = urlCache.get(key); if (hit) return hit;
+    let c = null;
+    if (typeof document !== 'undefined' && document && typeof document.createElement === 'function') {
+      try { c = document.createElement('canvas'); c.width = px; c.height = px; } catch (e) { c = null; }
+    }
+    if (!c) c = makeCanvas(px, px);
     if (!c) return '';
     const g = c.getContext('2d');
     if (!g) return '';
     draw(g, partId, 0, 0, px, 'idle');
-    if (typeof c.toDataURL === 'function') return c.toDataURL('image/png');
-    return '';
+    if (typeof c.toDataURL !== 'function') return '';
+    const url = c.toDataURL('image/png');
+    if (url) { if (urlCache.size > 200) urlCache.clear(); urlCache.set(key, url); }
+    return url;
   } catch (e) { warn('partIcon.toDataURL', e && e.message); return ''; }
 }
 export default { draw, toDataURL, getSprite };

@@ -171,7 +171,9 @@ export function createRenderer(canvas, opts = {}) {
     // Tab hidden / shown. While hidden, frames are skipped; on return the slow-frame count starts fresh.
     setHidden(v) { const h = !!v; if (h === hidden) return; hidden = h; if (!h) { frameMs = 16; quality.sample(0); } },
     // Dev info for the lab.
-    debugStats() { return { frameMs, particles: particles.count, floaters: floaters.count, items: sc.items.live, quality: quality.level, beatPos: sc.beatPos }; },
+    debugStats() { return { frameMs, particles: particles.count, floaters: floaters.count, items: sc.items.live, rings: sc.rings.live, threads: sc.threads.live, streaks: sc.streaks.live, recycled: particles.pool.stats.recycled + sc.items.stats.recycled, quality: quality.level, beatPos: sc.beatPos, dpr, width: W, height: H, column: CW }; },
+    // Dev only: fire n particles from the bucket (used by the lab to test the 300 cap).
+    debugBurst(n) { if (dead) return; const L = sc.L; particles.burst(L.cx, L.top + L.bucketH / 2, Math.max(0, n | 0), '#ffe3a1', 220, 0, 1400, 2.4, 60); },
     destroy() {
       if (dead) return; dead = true;
       try { particles.clear(); floaters.clear(); sc.reset(); clearSprites(); ctx && ctx.clearRect(0, 0, canvas.width, canvas.height); } catch (e) { /* ignore */ }
