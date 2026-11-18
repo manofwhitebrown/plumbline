@@ -50,6 +50,7 @@ export function depthText(r) {
 // "kept 30 · lost 70". A haul keeps it all.
 export function snapText(r) {
   if (!r || !r.snapped) return 'Kept it all';
+  if (r.gold <= 0) return 'No Gold to lose';
   return 'kept ' + fmt(r.kept) + ' · lost ' + fmt(r.lost);
 }
 

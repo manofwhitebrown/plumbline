@@ -69,3 +69,7 @@ test('visibleAt grows with time and ignores bad time', () => {
   assert.deepEqual(visibleAt(plan, NaN), ['title']);
   assert.deepEqual(visibleAt(null, 100), []);
 });
+
+test('a snap with no gold says so in plain words', () => {
+  assert.equal(snapText(normalizeResult({ outcome: 'snapped', gold: 0, kept: 0, depth: 50 })), 'No Gold to lose');
+});

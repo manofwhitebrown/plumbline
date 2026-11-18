@@ -5,6 +5,8 @@ import { iconHtml } from '../icons.js';
 import { hudModel, goldDelta, popText } from '../logic/dropModel.js';
 import { GAUGE_TICKS } from '../logic/danger.js';
 import { getSettings } from '../settings.js';
+import { ui } from '../soft.js';
+import { buzz } from '../../platform/haptics.js';
 
 const POPS = 3;
 const PILLS = 3;
@@ -21,7 +23,7 @@ export function createHud(cb, scope) {
   for (let i = 0; i < POPS; i++) pops.push(h('span', { class: 'num hud-pop', 'aria-hidden': 'true' }));
   const gold = h('div', { class: 'hud-gold', 'aria-label': 'Gold' }, svg(iconHtml('gold'), 'hud-icon'), goldNum, h('div', { class: 'hud-pops' }, ...pops));
   const pauseBtn = h('button', { class: 'hud-pause', type: 'button', 'aria-label': 'Pause' }, svg(iconHtml('pause')));
-  on(pauseBtn, 'click', () => { try { cb.onPause(); } catch (e) { /* never throw into the game */ } });
+  on(pauseBtn, 'click', () => { buzz('tap'); ui('open'); try { cb.onPause(); } catch (e) { /* never throw into the game */ } });
 
   const pills = [];
   for (let i = 0; i < PILLS; i++) {
