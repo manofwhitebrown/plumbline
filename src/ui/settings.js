@@ -1,5 +1,5 @@
 // Player settings. Saved in the 'settings' slice. Works even if saving is not ready yet.
-import { log } from './soft.js';
+import { log, dep } from './soft.js';
 
 export const DEFAULTS = {
   version: 1,
@@ -26,10 +26,11 @@ function clean(src, base) {
   return out;
 }
 
-// Connect to the save system when it exists.
-export async function initSettings() {
+// Connect to the save system when it exists (boot.js hands it in).
+export function initSettings() {
   try {
-    const save = await import(/* @vite-ignore */ '../core/save.js');
+    const save = dep('save');
+    if (!save) return data;
     save.registerSlice('settings', { version: 1, defaults: { ...DEFAULTS }, migrate: (old) => clean(old) });
     slice = { get: () => save.getSlice('settings'), dirty: () => save.markDirty('settings') };
     data = clean(slice.get());

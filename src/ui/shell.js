@@ -1,9 +1,15 @@
 // The screen shell: registers screens, moves between them, shows toasts and modals.
 import { log } from './soft.js';
+import { showToast } from './components/toast.js';
+import { openModal } from './components/modal.js';
+import { openSheet } from './components/sheet.js';
 
 const screens = new Map();
 const backStack = [];
 let rootEl = null;
+let chrome = null; // { layer, tabbar } when the page is ready
+const NO_TABS = new Set(['drop', 'results']);
+let overlays = 0;
 let current = null; // { id, def }
 let going = false;
 const toasts = [];
@@ -13,6 +19,11 @@ export const SCREEN_IDS = ['home', 'rig', 'drop', 'results', 'crew', 'workshop',
 // Tell the shell where to draw. Safe to call many times.
 export function init(el) {
   rootEl = el || null;
+}
+
+// chrome: { layer, tabbar } so the shell can show toasts and hide the tab bar.
+export function attachChrome(c) {
+  chrome = c || null;
 }
 
 export function registerScreen(id, def) {
@@ -50,6 +61,7 @@ export function go(id, params, opts) {
     const def = screens.get(id);
     current = { id, def, params };
     def.mount(rootEl, params || {});
+    updateChrome(id);
     return true;
   } catch (e) {
     log.error('shell.go: mount failed', id, e);
@@ -59,8 +71,21 @@ export function go(id, params, opts) {
   }
 }
 
+function updateChrome(id) {
+  if (!chrome || !chrome.tabbar) return;
+  chrome.tabbar.hidden = NO_TABS.has(id);
+  if (chrome.tabbar.setActive) chrome.tabbar.setActive(id);
+}
+
+export function setBadge(tabId, on) {
+  if (chrome && chrome.tabbar && chrome.tabbar.setBadge) chrome.tabbar.setBadge(tabId, !!on);
+}
+
 // Go back one screen. Returns false when there is nowhere to go.
 export function back() {
+  if (current && current.def && typeof current.def.onBack === 'function') {
+    try { if (current.def.onBack()) return true; } catch (e) { log.error('onBack failed', e); }
+  }
   const prev = backStack.pop();
   if (!prev) return false;
   return go(prev.id, prev.params, { replace: true });
@@ -74,6 +99,7 @@ export function toast(text, kind) {
   const msg = { text: String(text == null ? '' : text), kind: kind || 'info' };
   toasts.push(msg);
   if (toasts.length > 20) toasts.shift();
+  if (chrome && chrome.layer) { try { showToast(chrome.layer, msg); } catch (e) { log.error('toast failed', e); } }
   return msg;
 }
 
@@ -83,7 +109,32 @@ export function modal(spec) {
     log.warn('shell.modal: bad spec');
     return null;
   }
-  return { close() {} };
+  if (!chrome || !chrome.layer) return { close() {} };
+  try {
+    overlays++;
+    return openModal(chrome.layer, spec, () => { overlays = Math.max(0, overlays - 1); });
+  } catch (e) {
+    overlays = Math.max(0, overlays - 1);
+    log.error('modal failed', e);
+    return { close() {} };
+  }
+}
+
+// A bottom sheet with a title and any DOM content.
+export function sheet(title, content) {
+  if (!chrome || !chrome.layer) return { close() {} };
+  try {
+    overlays++;
+    return openSheet(chrome.layer, title, content, () => { overlays = Math.max(0, overlays - 1); });
+  } catch (e) {
+    overlays = Math.max(0, overlays - 1);
+    log.error('sheet failed', e);
+    return { close() {} };
+  }
+}
+
+export function hasOverlay() {
+  return overlays > 0;
 }
 
 export function _resetForTests() {
@@ -93,6 +144,8 @@ export function _resetForTests() {
   current = null;
   going = false;
   rootEl = null;
+  chrome = null;
+  overlays = 0;
 }
 
 export function _recentToasts() {

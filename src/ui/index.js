@@ -1,9 +1,38 @@
-// Mounts the app into #app.
+// Mounts the app into #app. main.js calls mountApp once, after the core is ready.
+import './styles/tokens.css';
+import './styles/base.css';
+import './styles/components.css';
+import './styles/screens.css';
+import { bootModules } from './boot.js';
 import * as shell from './shell.js';
+import { buildChrome } from './chrome.js';
+import { log } from './soft.js';
+import './screens/home.js';
+import './screens/rig.js';
+import './screens/drop.js';
+import './screens/results.js';
+import './screens/crew.js';
+import './screens/workshop.js';
+import './screens/codex.js';
+import './screens/rewards.js';
+import './screens/settings.js';
+import './screens/guide.js';
 
-export function mountApp(el) {
-  shell.init(el);
-  return shell;
+let mounted = null;
+
+export function mountApp(el, startScreen) {
+  const target = el || document.getElementById('app');
+  if (!target) { log.error('mountApp: no #app element'); return null; }
+  if (mounted) return mounted;
+  try {
+    bootModules();
+    mounted = buildChrome(target);
+    shell.go(startScreen || 'home');
+  } catch (e) {
+    log.error('mountApp failed', e);
+    target.textContent = 'Something went wrong. Please reload.';
+  }
+  return mounted;
 }
 
 export { shell };
