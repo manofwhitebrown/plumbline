@@ -1,0 +1,20 @@
+/* Guide screen. Cards of short text. Nothing here has a fixed width. */
+.screen-guide { overflow-y: auto; overflow-x: hidden; }
+.gd-top { flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4) 0 var(--space-2); }
+.gd-title { font-size: var(--fs-5); font-weight: 800; min-width: 0; }
+.gd-body { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-3) var(--space-4) var(--space-6); min-width: 0; }
+.gd-card { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.gd-card-head { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.gd-card-head .title { min-width: 0; overflow-wrap: anywhere; }
+.gd-step { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; background: var(--gold); color: var(--ink-900);
+  display: flex; align-items: center; justify-content: center; font-size: var(--fs-2); }
+.gd-line { font-size: var(--fs-3); line-height: 1.45; overflow-wrap: anywhere; }
+.gd-families { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-2); }
+.gd-family { padding: var(--space-3); border-radius: var(--radius-btn); background: var(--ink-800); border: 1px solid var(--line); min-width: 0; }
+.gd-ftitle { font-size: var(--fs-3); font-weight: 700; color: var(--gold-soft); }
+.gd-parts { list-style: none; margin: var(--space-2) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.gd-part { width: 72px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.gd-icon { width: 48px; height: 48px; object-fit: contain; display: block; }
+.gd-fallback { display: inline-flex; color: var(--muted); } .gd-fallback .icon { width: 100%; height: 100%; }
+.gd-pname { font-size: var(--fs-1); font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gd-go { display: flex; } .gd-go .btn { width: 100%; }

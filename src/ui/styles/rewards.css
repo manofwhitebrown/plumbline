@@ -1,0 +1,61 @@
+/* Rewards screen. Mobile first. The whole screen scrolls; nothing here uses a fixed width. */
+.screen-rewards { overflow-y: auto; overflow-x: hidden; }
+.screen-rewards .topbar { flex: 0 0 auto; }
+.rw-body { display: flex; flex-direction: column; gap: var(--space-4); padding: 0 var(--space-4) var(--space-6); min-width: 0; }
+.rw-title { font-size: var(--fs-5); font-weight: 800; }
+.rw-head { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.rw-head .grow { min-width: 0; }
+.rw-head > .icon { width: 32px; height: 32px; color: var(--gold); flex: 0 0 auto; }
+.rw-head .pill { flex: 0 0 auto; }
+.rw-daily, .rw-quests, .rw-achs { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.rw-daily .sub, .rw-quests .sub, .rw-achs .sub { overflow-wrap: anywhere; }
+
+/* Daily: 3 columns, Day 7 is a wide prize row. */
+.rw-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+.rw-slot { position: relative; min-width: 0; min-height: 84px; padding: var(--space-2); border-radius: var(--radius-btn); background: var(--ink-800);
+  border: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; }
+.rw-slot.big { grid-column: 1 / -1; min-height: 72px; flex-direction: row; justify-content: center; gap: var(--space-4); }
+.rw-day { font-size: var(--fs-1); font-weight: 700; color: var(--muted); }
+.rw-amt { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; min-width: 0; font-size: var(--fs-2); }
+.rw-amt .icon { width: 16px; height: 16px; flex: 0 0 auto; }
+.rw-amt .num { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.rw-amt.shard { color: var(--shard); } .rw-amt.gold { color: var(--gold-soft); }
+.rw-slot.claimed { background: var(--ink-700); border-color: var(--ok); }
+.rw-slot.claimed .rw-amt { opacity: .6; }
+.rw-check { position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; color: var(--ok); }
+.rw-slot.today { border-color: var(--gold); box-shadow: 0 0 18px rgba(246, 196, 83, .45); background: var(--ink-600); }
+.rw-slot.today .rw-day { color: var(--gold); }
+.rw-slot.next.today { animation: glowPulse 1.4s ease-in-out infinite; }
+
+/* Quests and achievements */
+.rw-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.rw-quest { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-btn); background: var(--ink-800); border: 1px solid var(--line); min-width: 0; }
+.rw-quest.ready { border-color: var(--gold); }
+.rw-quest.claimed { opacity: .65; }
+.rw-quest-top { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.rw-quest-top .grow { min-width: 0; }
+.rw-qtext { font-size: var(--fs-3); font-weight: 700; overflow-wrap: anywhere; }
+.rw-done { display: inline-flex; align-items: center; gap: 4px; color: var(--ok); font-weight: 700; font-size: var(--fs-2); flex: 0 0 auto; }
+.rw-done .icon { width: 20px; height: 20px; }
+.rw-quest .btn { flex: 0 0 auto; }
+.rw-quest .pill { flex: 0 0 auto; }
+.rw-quest .pill .icon, .rw-ach .pill .icon { width: 16px; height: 16px; }
+
+.rw-tabs { display: flex; gap: var(--space-2); }
+.rw-tab { flex: 1 1 0; min-width: 0; min-height: var(--tap-min); padding: 0 var(--space-3); border-radius: var(--radius-btn); border: 1px solid var(--line); background: var(--ink-800);
+  color: var(--muted); font-weight: 700; font-size: var(--fs-2); cursor: pointer; }
+.rw-tab.on { color: var(--ink-900); background: var(--gold); border-color: transparent; }
+.rw-ach { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-btn); background: var(--ink-800); border: 1px solid var(--line); min-width: 0; }
+.rw-ach .grow { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.rw-ach.locked .rw-qtext { color: var(--muted); }
+.rw-ach.done { border-color: var(--ok); }
+.rw-mark { width: 24px; height: 24px; flex: 0 0 auto; color: var(--muted); margin-top: 2px; }
+.rw-mark.ok { color: var(--ok); }
+.rw-ach .pill { flex: 0 0 auto; }
+.rw-ach-bar { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-1); }
+.rw-ach-bar .bar { flex: 1 1 auto; min-width: 0; }
+.rw-ach-bar .sub { flex: 0 0 auto; }
+.rw-empty { padding: var(--space-3) 0; text-align: center; }
+.rw-more { display: flex; gap: var(--space-3); }
+.rw-more .btn { flex: 1 1 0; min-width: 0; }
+@media (max-width: 340px) { .rw-ach { flex-wrap: wrap; } .rw-ach .pill { margin-left: 36px; } }

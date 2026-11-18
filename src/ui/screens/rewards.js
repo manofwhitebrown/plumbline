@@ -1,14 +1,53 @@
-// Stub for the "rewards" screen. The real screen replaces this.
-import { registerScreen } from '../shell.js';
+// Rewards: daily streak, daily quests, achievements. Meta owns every number; we show it.
+import { registerScreen, go, toast, setBadge } from '../shell.js';
+import { h, createScope } from '../dom.js';
+import { topbar } from '../components/topbar.js';
+import { button } from '../components/button.js';
+import { api } from '../api.js';
+import { bus } from '../soft.js';
+import { buildDaily } from './rewardsDaily.js';
+import { buildQuests } from './rewardsQuests.js';
+import { buildAchievements } from './rewardsAchievements.js';
+import '../styles/rewards.css';
 
-let host = null;
+let scope = null;
 
 registerScreen('rewards', {
   mount(el) {
-    host = el;
-    if (host && 'innerHTML' in host) host.innerHTML = '<section class="screen screen-rewards"></section>';
+    scope = createScope();
+    const meta = api.meta;
+    const bar = topbar({ settings: () => go('settings') }, scope);
+    const parts = [];
+    const refreshBadge = () => {
+      let can = false;
+      try { can = !!meta.daily.state().canClaim; } catch (e) { /* no dot */ }
+      setBadge('rewards', can);
+    };
+    const ctx = { meta, toast, scope, onChange: () => { refreshBadge(); parts.forEach((p) => p.update()); } };
+    const daily = buildDaily(ctx);
+    const quests = buildQuests(ctx);
+    const achs = buildAchievements(ctx);
+    parts.push(daily, quests, achs);
+
+    const more = h('div', { class: 'rw-more' },
+      button({ label: 'How to play', onPress: () => go('guide') }, scope),
+      button({ label: 'Settings', onPress: () => go('settings') }, scope));
+
+    const screen = h('section', { class: 'screen screen-rewards no-pad' },
+      bar,
+      h('div', { class: 'rw-body' },
+        h('h1', { class: 'rw-title', text: 'Rewards' }),
+        daily.el, quests.el, achs.el, more));
+    el.append(screen);
+
+    scope.sub(bus, 'meta:changed', () => { parts.forEach((p) => p.update()); refreshBadge(); });
+    scope.sub(bus, 'achievement:unlocked', () => achs.update());
+    // Keeps the countdown fresh and notices a new day.
+    scope.interval(() => { parts.forEach((p) => p.update()); refreshBadge(); }, 30000);
+    refreshBadge();
   },
   unmount() {
-    host = null;
+    if (scope) scope.dispose();
+    scope = null;
   },
 });
