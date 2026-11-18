@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumbline layout wall</title>
+<style>
+  :root { --ink-900:#070a12; --ink-800:#0d1220; --ink-700:#141b2e; --ink-600:#1d2740; --line:#2a3555; --text:#eef2ff; --muted:#8d97b8; --gold:#f6c453; --ok:#46e3a3; --danger:#ff4d5e; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ink-900); color:var(--text); font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  #bar { position:sticky; top:0; z-index:10; background:var(--ink-800); border-bottom:1px solid var(--line); padding:8px 12px; display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; }
+  #bar h1 { font-size:15px; margin:0 6px 0 0; }
+  label { display:inline-flex; gap:6px; align-items:center; color:var(--muted); }
+  label.check { color:var(--text); }
+  select, button { background:var(--ink-600); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:5px 9px; font:inherit; min-height:30px; cursor:pointer; }
+  button:hover { border-color:var(--gold); }
+  input[type=range] { accent-color:var(--gold); width:110px; }
+  #note { padding:6px 12px; color:var(--muted); font-size:12px; border-bottom:1px solid var(--ink-700); }
+  #wall { padding:12px; display:flex; flex-direction:column; gap:18px; }
+  .group h2 { margin:0 0 8px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .devs { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-start; }
+  .dev { display:flex; flex-direction:column; gap:4px; }
+  .cap { display:flex; gap:6px; align-items:center; font-size:12px; color:var(--muted); }
+  .cap b { color:var(--text); font-variant-numeric:tabular-nums; }
+  .cap button { padding:0 6px; min-height:22px; font-size:12px; }
+  .badge { margin-left:auto; padding:0 6px; border-radius:99px; font-size:11px; background:var(--ink-600); }
+  .badge.ok { color:var(--ok); } .badge.bad { color:var(--danger); background:#3a1620; cursor:pointer; }
+  .box { position:relative; background:#000; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .box iframe { position:absolute; left:0; top:0; border:0; background:#000; transform-origin:0 0; }
+  .notch { position:absolute; left:0; pointer-events:none; background:rgba(255,77,94,.28); transform-origin:0 0; display:none; font-size:11px; color:#fff; text-align:center; }
+  .notch.top { top:0; border-bottom:1px dashed #ff4d5e; border-radius:0 0 22px 22px; }
+  .notch.bot { bottom:0; border-top:1px dashed #ff4d5e; }
+  .notches .notch { display:block; }
+  #report { margin:0 12px 24px; padding:10px 12px; background:var(--ink-800); border:1px solid var(--line); border-radius:10px; font:12px/1.5 ui-monospace,Menlo,Consolas,monospace; white-space:pre-wrap; display:none; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <h1>Plumbline layout wall</h1>
+  <label>Screen <select id="selScreen"></select></label>
+  <label>Test state <select id="selFixture"><option>empty</option><option>busy</option><option selected>extreme</option></select></label>
+  <label class="check"><input id="cLarge" type="checkbox"> Large text</label>
+  <label class="check"><input id="cText" type="checkbox"> Text 130%</label>
+  <label class="check"><input id="cNotch" type="checkbox"> Notch (top 44, bottom 34)</label>
+  <label class="check"><input id="cRotate" type="checkbox"> Rotate</label>
+  <label>Show <select id="selGroup"><option value="all">all sizes</option></select></label>
+  <label>Zoom <input id="rZoom" type="range" min="25" max="100" value="50"><b id="vZoom">50%</b></label>
+  <button id="bReload">Reload all</button>
+  <button id="bCheck">Check all</button>
+</div>
+<div id="note">Each frame is the real game at that size (same address, <code>?debug=1&amp;screen=&lt;id&gt;&amp;fixture=&lt;id&gt;</code>). Rotate and the notch change the frames without reloading, so you can see if anything breaks.
+  "Check all" looks for sideways scroll, tap targets under 44 px and text under 12 px in every frame. Red badge: click it for the list.</div>
+<div id="wall"></div>
+<pre id="report"></pre>
+<script type="module" src="./layout-wall.js"></script>
+</body>
+</html>
