@@ -3,7 +3,23 @@
 Tone: calm, confident, a little mysterious. Short sentences. Everyday words.
 
 ## Words we use on screen
-Gold, Shards, Core Dust, Rig, Part, Drop, Haul Up, Snap, Strain, Depth, Biome, Crew, Workshop, Collapse, Codex, Goals, Combo, Loadout.
+Gold, Shards, Core Dust, Rig, Part, Drop, Haul Up, Snap, Strain, Depth, Biome, Crew, Workshop, Collapse, Codex, Goals, Combo, Loadout, Gem, Ore, Danger, Step.
+
+- **Gem**: a stone that rises past the bucket. Worth more the better it is.
+- **Ore**: rough rock that rises past the bucket. Worth less than a gem.
+- **Danger**: something that hurts the rope if you do not stop it (a rock, a bat, a root). Never say "hazard".
+- **Step**: one small move forward, such as one tutorial step. Never say "beat" or "tick".
+
+## Say this, not that
+| Not this | Say this |
+|---|---|
+| hazard | danger |
+| lane | column |
+| item | gem or ore (or "thing" if both) |
+| tier (on screen) | level, for example "one level better" |
+| beat | step |
+
+The "tier" row is a proposal from NEW-6. Until the Manager agrees, existing text that says tier may stay.
 
 ## Words we never show
 beat, lane, tick, entity, null, undefined, NaN, Infinity, seed, slice, bus, payload, debug.

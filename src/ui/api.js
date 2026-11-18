@@ -3,7 +3,7 @@
 import { dep, log } from './soft.js';
 
 const iconCache = new Map();
-const STARTER = { id: 'hook', name: 'Hook', family: 'collector', tags: ['collector'], desc: 'Collects the item in its lane.', cost: 0, unlock: { type: 'start', value: 0 } };
+const STARTER = { id: 'hook', name: 'Hook', family: 'collector', tags: ['collector'], desc: 'Collects the gem or ore in its column.', cost: 0, unlock: { type: 'start', value: 0 } };
 
 function emptyRig(cols, rows) {
   const cells = [];
