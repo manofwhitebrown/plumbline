@@ -26,7 +26,7 @@ export function mixSeed(seed, beat) {
 }
 
 export function newItem() {
-  return { kind: 'empty', tier: 1, value: 0, hazard: '', collected: false };
+  return { kind: 'empty', tier: 1, value: 0, hazard: '', collected: false, drifts: false };
 }
 
 // The biome for a depth (or the locked one when a cheat forces it).
@@ -49,19 +49,34 @@ export function spawnRow(run, beat, depth, def, row) {
     const it = row[lane];
     const pick = ok ? rng.weighted(table) : null;
     const u = rng.next(); // always drawn, so the stream never shifts
-    it.collected = false;
+    it.collected = false; it.drifts = false;
     if (!pick || typeof pick.kind !== 'string') { it.kind = 'empty'; it.tier = 1; it.value = 0; it.hazard = ''; continue; }
     it.kind = pick.kind;
     it.tier = fin(pick.tier, 1, 'tier');
     it.value = fin(pick.value, 0, 'item value');
     it.hazard = pick.hazard || '';
     if (it.kind === 'hazard') {
+      it.drifts = pick.drifts === true;
+      run.drift[lane] = u;
       const hs = def.hazardStrain || ENGINE.fallbackHazardStrain;
       it.value = fin(hs[it.hazard], ENGINE.fallbackHazardStrain[it.hazard] || 3, 'hazard strain');
     } else if (relicBonus > 0 && it.kind !== 'empty' && u < relicBonus) {
       it.kind = 'relic';
       it.value = it.value * ENGINE.relicFactor;
     }
+  }
+  // Bats hop to a free side lane (half of them). Uses the same draw `u`, so it stays seeded.
+  for (let lane = 0; lane < run.cols; lane++) {
+    const it = row[lane];
+    if (!it.drifts) continue;
+    it.drifts = false;
+    const u = run.drift[lane];
+    if (u >= 0.5) continue;
+    const to = u < 0.25 ? lane - 1 : lane + 1;
+    if (to < 0 || to >= run.cols || row[to].kind !== 'empty') continue;
+    const dst = row[to];
+    dst.kind = it.kind; dst.tier = it.tier; dst.value = it.value; dst.hazard = it.hazard; dst.collected = false;
+    it.kind = 'empty'; it.value = 0; it.hazard = '';
   }
   return row;
 }

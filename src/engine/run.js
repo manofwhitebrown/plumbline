@@ -91,7 +91,7 @@ export function createRun({ rig, mods, seed, deps } = {}) {
     rig: rg, mods: eff, seed: seedInt, rng: makeRng(seedInt), deps: d,
     cols: rg.cols, rows: rg.rows, parts, partIds, mem,
     goldMult: fin(eff.goldMult * (cheat ? cheat.goldMult : 1), 1, 'goldMult'),
-    row: Array.from({ length: rg.cols }, newItem), peekRow: Array.from({ length: rg.cols }, newItem),
+    drift: new Float64Array(rg.cols), row: Array.from({ length: rg.cols }, newItem), peekRow: Array.from({ length: rg.cols }, newItem),
     extras: Array.from({ length: ENGINE.maxExtraItems }, newItem), extraUsed: 0,
     firedThisBeat: 0, collectsThisBeat: 0, strainAdjust: 0, hazardStrain: 0, speedPending: 0,
     lastCollectValue: 0, chainR: -1, chainC: -1, triggerDepth: 0, out: null,

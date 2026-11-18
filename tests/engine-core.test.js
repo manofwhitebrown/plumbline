@@ -213,3 +213,20 @@ test('emit() of FIRE does not double count and CHAIN is ignored', () => {
   assert.equal(out.filter((e) => e.t === 'FIRE').length, 1);
   assert.equal(out.filter((e) => e.t === 'CHAIN').length, 0);
 });
+
+test('bats hop to a free side lane, and the same way every time', () => {
+  const bat = { kind: 'hazard', tier: 1, hazard: 'bat', value: 0, drifts: true };
+  const none = { kind: 'empty', tier: 1, value: 0 };
+  let moved = 0, stayed = 0;
+  for (let seed = 1; seed <= 60; seed++) {
+    const deps = { getPart: () => null, byDepth: () => ({ id: 'quartz', hazardStrain: { bat: 4 } }), lootTable: () => [[bat, 1], [none, 1]] };
+    const a = createRun({ rig: STARTER, mods: {}, seed, deps }), b = createRun({ rig: STARTER, mods: {}, seed, deps });
+    const ra = stepBeat(a).find((e) => e.t === 'SPAWN').lanes, rb = stepBeat(b).find((e) => e.t === 'SPAWN').lanes;
+    assert.deepEqual(ra, rb);
+    const peek = peekNext(createRun({ rig: STARTER, mods: {}, seed, deps }), 1)[0];
+    assert.deepEqual(peek, ra);
+    if (ra.some((l) => l.hazard === 'bat')) moved++; else stayed++;
+  }
+  assert.ok(moved > 0);
+  assert.ok(stayed > 0);
+});

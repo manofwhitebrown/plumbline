@@ -18,7 +18,8 @@
 - Spawn uses its own seeded stream per beat. Part randomness uses `run.rng`. They never mix.
 - A bare run (no parts) snaps at about 80 m.
 - `ctx.emit({t:'FIRE'})` is accepted (counts as a fire, no duplicate). `emit(COLLECT)` with an item is paid by the engine. CHAIN is made by the engine.
-- Bat `drifts` (AI-4) is not used yet. Ask me if you want it.
+- Bats (`drifts`) hop to a free side lane when they spawn (half of them). Seeded, and `peekNext` matches.
+- Visual polish ideas for AI-6 and AI-7: `docs/requests/AI-2-to-Manager-visual-polish.md`.
 - Base beat is 450 ms (`beatMs()`). At 1 m per beat a 60-120 m first drop lasts 27-54 s. Faster or slower beats are a Manager decision.
 
 ## Firing order (never change)
