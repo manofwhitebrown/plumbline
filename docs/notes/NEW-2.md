@@ -9,6 +9,12 @@ STATUS: IN PROGRESS (code and tests done; real-browser size checks not done yet)
 - Screens redraw on `meta:changed`. Cards are built once and only changed text is written. Listeners go away on unmount.
 - Tests: tests/ui-crew-logic, ui-workshop-logic, ui-crew-meta. `npm run check` is green (379 tests).
 
+## Smoke test (jsdom, outside the repo)
+- Mounted Crew and Workshop with empty, busy and 9.99e42 Gold saves. Tapped every button, both tabs, every chip, the detail sheet, and fired `meta:changed`.
+- Result: 0 console errors or warnings, no NaN / undefined text, no overlong labels. Crew 7 cards, Workshop 42 (26 parts + 16 upgrades).
+- This does NOT check pixels. Layout at the four sizes is still untested.
+- `src/cheats/fixtures.js` does not exist yet, so I built the saves with the meta API.
+
 ## In progress
 - Nothing is half done.
 
