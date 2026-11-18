@@ -2,9 +2,10 @@
 // The game uses the real modules. Tests may swap them with setProviders() or `deps` in createRun.
 import { biomes } from '../data/biomes.js';
 import { loot } from '../data/loot.js';
+import { getPart } from './parts/index.js';
 
 const providers = {
-  getPart: () => null,                    // replaced when the parts module is wired in
+  getPart: (id) => getPart(id),           // the real parts (AI-3)
   byDepth: (d) => biomes.byDepth(d),
   byId: (id) => biomes.byId(id),
   lootTable: (biome, luck) => loot.table(biome, luck),

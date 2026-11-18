@@ -52,6 +52,8 @@ export class Ctx {
   emit(e) {
     if (!e || typeof e.t !== 'string') return;
     if (e.t === 'COLLECT' && e.item) { this.collect(e.item); return; } // the engine does the money
+    if (e.t === 'FIRE') { this.touch(); return; }                      // the engine makes FIRE and CHAIN
+    if (e.t === 'CHAIN') return;
     this.touch();
     if (this.run.out) this.run.out.push(e);
   }

@@ -192,3 +192,24 @@ test('replayText gives readable lines', () => {
   assert.match(t, /-- beat 1/);
   assert.match(t, /start seed 1/);
 });
+
+test('the real parts module is wired in and a hook earns gold', async () => {
+  const { simulateRun: sim } = await import('../src/engine/index.js');
+  const res = sim({ rig: rigOf([[], [], ['', 'hook']]), mods: {}, seed: 1, policy: ({ run }) => (run.state.strain > 60 ? 'haul' : 'continue') });
+  assert.ok(Number.isFinite(res.gold));
+  const { getProviders } = await import('../src/engine/registry.js');
+  assert.ok(getProviders().getPart('hook'));
+  assert.equal(getProviders().getPart('nope'), null);
+});
+
+test('emit() of FIRE does not double count and CHAIN is ignored', () => {
+  const run = createRun({ rig: STARTER, mods: {}, seed: 1, deps: { getPart: () => null } });
+  const out = [];
+  run.out = out;
+  run.ctx.enter(2, 1, 9);
+  run.ctx.emit({ t: 'FIRE', r: 2, c: 1, partId: 'x' });
+  run.ctx.emit({ t: 'CHAIN', from: { r: 0, c: 0 }, to: { r: 1, c: 1 } });
+  run.ctx.emit(null);
+  assert.equal(out.filter((e) => e.t === 'FIRE').length, 1);
+  assert.equal(out.filter((e) => e.t === 'CHAIN').length, 0);
+});
