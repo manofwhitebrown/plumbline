@@ -3,6 +3,8 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 import './styles/screens.css';
+// Layout fixes from the layout gate (NEW-8). Must stay after the other styles.
+import.meta.glob('./styles/fixes/*.css', { eager: true });
 import { bootModules } from './boot.js';
 import * as shell from './shell.js';
 import { buildChrome } from './chrome.js';

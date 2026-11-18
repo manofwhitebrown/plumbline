@@ -1,0 +1,18 @@
+/* Layout fixes for the Rig screen (NEW-8). Loaded after all other CSS.
+   Why: rule 4 of LAYOUT_CHECK says tap targets need 44px and 8px between them. */
+
+/* Loadout and part-family chips were 36px tall (all sizes). */
+.chip { min-height: var(--tap-min); min-width: var(--tap-min); }
+
+/* Combo pills in the rig power line are buttons. They were 32px tall and had no min width (all sizes).
+   The gap between them was 6px. */
+.pill.combo { min-height: var(--tap-min); min-width: var(--tap-min); justify-content: center; }
+.power .combos { gap: var(--space-2); }
+
+/* Rig cells were 6px apart (5px on short screens). Make it 8px.
+   On short screens the columns were fixed at 58px, which is 328px for 5 columns:
+   too wide for a 320px phone. Let the columns shrink down to 44px. */
+.rig-grid { gap: var(--space-2); }
+@media (max-height: 720px) {
+  .rig-grid { grid-template-columns: repeat(var(--cols), minmax(44px, 58px)); gap: var(--space-2); }
+}
