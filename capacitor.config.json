@@ -1,0 +1,10 @@
+{
+  "appId": "com.nayeem.plumbline",
+  "appName": "Plumbline",
+  "webDir": "dist",
+  "backgroundColor": "#070a12",
+  "android": { "allowMixedContent": false },
+  "plugins": {
+    "StatusBar": { "style": "DARK", "backgroundColor": "#070a12", "overlaysWebView": true }
+  }
+}
