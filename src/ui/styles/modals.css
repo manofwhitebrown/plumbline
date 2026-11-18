@@ -1,0 +1,39 @@
+/* Modal frame: header with Close, its own scroll, safe-area padding. Used by every modal we own. */
+.modal.mx { padding: 0; gap: 0; overflow: hidden; display: flex; flex-direction: column; max-width: 440px; max-height: min(90%, 720px); }
+.modal.mx-sheet { max-width: none; max-height: 88%; border-radius: var(--radius-card) var(--radius-card) 0 0; border-bottom: 0; }
+.mx-head { flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-2) var(--space-2) var(--space-4); border-bottom: 1px solid var(--line); }
+.mx-title { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.mx-x { flex: 0 0 auto; }
+/* The middle part scrolls. The header and the buttons stay in view. */
+.modal.mx > .mx-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: var(--space-4); -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.modal.mx > .stack:last-child { flex: 0 0 auto; flex-direction: row; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: var(--ink-700); }
+.modal.mx > .stack:last-child > .btn { flex: 1 1 140px; min-width: 0; }
+.modal.mx > .stack:last-child > .hold { flex: 1 1 100%; }
+
+/* Welcome back */
+.welcome { padding: var(--space-2) 0; }
+.welcome-gold { gap: var(--space-3); min-height: 56px; }
+.welcome-gold .icon { width: 36px; height: 36px; }
+.welcome-gold .big-num { min-width: 6ch; text-align: center; overflow-wrap: anywhere; }
+
+/* Collapse */
+.big-core { font-size: var(--fs-5); color: var(--core); overflow-wrap: anywhere; }
+.collapse-gain { gap: var(--space-2); }
+.collapse-cols { align-items: stretch; gap: var(--space-3); }
+.collapse-col { flex: 1 1 0; min-width: 0; }
+.collapse-list { margin: var(--space-2) 0 0; padding-left: var(--space-4); display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-2); overflow-wrap: anywhere; }
+.collapse-col.resets .sub { color: var(--ember); }
+.collapse-col.keeps .sub { color: var(--ok); }
+
+/* Hidden panel */
+.cheat-panel { gap: var(--space-3); }
+.cheat-group { gap: var(--space-2); }
+.cheat-title { font-size: var(--fs-3); color: var(--gold-soft); }
+.cheat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(136px, 1fr)); gap: var(--space-2); }
+.cheat-btn { min-height: 52px; height: auto; padding: var(--space-2) var(--space-3); text-align: center; overflow-wrap: anywhere; font-size: var(--fs-2); }
+.cheat-btn.on { border-color: var(--gold); box-shadow: 0 0 12px rgba(246, 196, 83, .35); }
+.cheat-wide { grid-column: 1 / -1; }
+.cheat-out .btn { align-self: flex-start; }
+.layer > .fps-chip { position: absolute; top: var(--space-2); right: var(--space-2); pointer-events: none; padding: 2px var(--space-2); border-radius: var(--radius-pill);
+  background: rgba(7, 10, 18, .7); border: 1px solid var(--line); color: var(--ok); font-size: var(--fs-1); font-weight: 700; z-index: 70; }
+.pw-msg { text-align: left; min-height: 18px; }

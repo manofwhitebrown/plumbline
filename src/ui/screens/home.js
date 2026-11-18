@@ -1,15 +1,15 @@
 // Home: top bar, living surface scene, big Drop button, daily reward, Collapse banner.
-import { registerScreen, go, modal, setBadge } from '../shell.js';
+import { registerScreen, go, setBadge } from '../shell.js';
 import { h, svg, createScope } from '../dom.js';
 import { iconHtml } from '../icons.js';
 import { topbar } from '../components/topbar.js';
 import { button } from '../components/button.js';
-import { counter } from '../components/counter.js';
 import { api } from '../api.js';
-import { bus, fmt, fmtDepth, fmtTime } from '../soft.js';
+import { bus, fmt, fmtDepth } from '../soft.js';
 import { startDrop, bestDepth } from '../flow.js';
 import { surfaceScene } from './homeScene.js';
-import { openCollapse } from '../collapse.js';
+import { openCollapse } from '../modalsCollapse.js';
+import { maybeWelcomeBack } from '../modalsWelcome.js';
 
 let scope = null;
 
@@ -65,18 +65,3 @@ registerScreen('home', {
     scope = null;
   },
 });
-
-// Offline income: count up the gold, then Claim.
-function maybeWelcomeBack() {
-  let off = null;
-  try { off = api.meta.offline.peek(); } catch (e) { return; }
-  if (!off || !(off.gold > 0)) return;
-  const num = counter(0, { cls: 'big-num', format: (v) => fmt(v) });
-  const body = h('div', { class: 'stack center' },
-    h('p', { class: 'sub', text: 'Your crew worked for ' + fmtTime(off.ms) + ' while you were away.' }),
-    h('div', { class: 'row center' }, svg(iconHtml('gold')), num));
-  modal({ title: 'Welcome back', body, dismissable: false, actions: [{ label: 'Claim', kind: 'primary', onPress: () => {
-    try { api.meta.offline.claim(); } catch (e) { /* ignore */ }
-  } }] });
-  setTimeout(() => num.set(off.gold, 1400), 250);
-}
