@@ -2,7 +2,8 @@
 // Biome change cross-fades over 1.2 s with a soft light sweep.
 import { makeSprite, makeCanvas } from './canvasUtil.js';
 import { BIOME_IDS, biomePalette } from './palette.js';
-import { paintWallTile, TILE_H } from './wallTile.js';
+import { TILE_H } from './wallTile.js';
+import { paintWallLayer, hasGlow, LAYER_SCALE } from './art/wallArt.js'; // [GFX-1] procedural walls
 import { drawDecor } from './wellDecor.js';
 import { hash01 } from './rand.js';
 import { clamp01 } from './safe.js';
@@ -18,9 +19,17 @@ export function createWell() {
   const mx = new Float32Array(36), my = new Float32Array(36), ms = new Float32Array(36);
   for (let i = 0; i < 36; i++) { mx[i] = hash01(i * 3) ; my[i] = hash01(i * 5 + 1); ms[i] = 0.6 + hash01(i * 7 + 2) * 1.6; }
 
-  function tileFor(id) {
-    if (tiles[id] === undefined) tiles[id] = makeSprite(W, TILE_H, dpr, (g) => paintWallTile(g, W, biomePalette(id), id));
-    return tiles[id];
+  const sideWOf = () => Math.round(Math.max(18, W * 0.07));
+  // [GFX-1] one sprite per biome and layer: far / mid / glow are half resolution, near is two thin edge strips.
+  function tileFor(id, kind = 'far') {
+    const key = id + '|' + kind;
+    if (tiles[key] === undefined) {
+      const q = low ? 'low' : 'high';
+      if (kind === 'near') { const sw = sideWOf() * 2; tiles[key] = makeSprite(sw, TILE_H, dpr, (g) => paintWallLayer(g, sw, TILE_H, id, 'near', q)); }
+      else if (kind === 'glow' && !hasGlow(id)) tiles[key] = null;
+      else tiles[key] = makeSprite(W, TILE_H, dpr * LAYER_SCALE[kind], (g) => paintWallLayer(g, W, TILE_H, id, kind, q));
+    }
+    return tiles[key];
   }
   function coneFor(id) {
     if (cones[id] === undefined) cones[id] = makeSprite(120, 240, 1, (g) => {
@@ -37,40 +46,56 @@ export function createWell() {
     });
     return fogs[id];
   }
-  function layer(ctx, id, alpha, par, scroll, shadeA, x0, wd) {
-    const img = tileFor(id); if (!img || alpha <= 0.01) return;
-    const off = ((scroll * par) % TILE_H + TILE_H) % TILE_H;
+  // [GFX-1] Layers are built one per frame (queue) so a biome change never causes a long frame.
+  const queue = [], queued = {};
+  function prebuild(id) {
+    if (queued[id]) return; queued[id] = true;
+    queue.push([id, 'far'], [id, 'near']); if (!low) queue.push([id, 'mid'], [id, 'glow']);
+  }
+  function pump() { const j = queue.shift(); if (j) tileFor(j[0], j[1]); }
+  const peek = (id, kind) => tiles[id + '|' + kind];
+  // Draws a scrolling layer. f0..f1 = slice of the sprite width (0..1); dx, dw = where it lands on screen.
+  function layer(ctx, id, kind, alpha, par, scroll, shadeA, f0, f1, dx, dw) {
+    const img = peek(id, kind); if (!img || alpha <= 0.01) return;
+    const off = ((scroll * par) % TILE_H + TILE_H) % TILE_H, sx = img.width * f0, sw = img.width * (f1 - f0);
     ctx.globalAlpha = alpha;
-    for (let y = -off; y < H; y += TILE_H) ctx.drawImage(img, x0 * dpr, 0, wd * dpr, TILE_H * dpr, x0, Math.floor(y), wd, TILE_H + 1);
+    for (let y = -off; y < H; y += TILE_H) ctx.drawImage(img, sx, 0, sw, img.height, dx, Math.floor(y), dw, TILE_H + 1);
     ctx.globalAlpha = 1;
-    if (shadeA > 0) { ctx.globalAlpha = shadeA * alpha; ctx.fillStyle = '#040308'; ctx.fillRect(x0, 0, wd, H); ctx.globalAlpha = 1; }
+    if (shadeA > 0) { ctx.globalAlpha = shadeA * alpha; ctx.fillStyle = '#040308'; ctx.fillRect(dx, 0, dw, H); ctx.globalAlpha = 1; }
   }
 
   return {
     state: st,
-    resize(w, h, d, isLow) { W = w; H = h; dpr = d; low = !!isLow; for (const k of Object.keys(tiles)) delete tiles[k]; for (const k of Object.keys(grads)) delete grads[k]; edge = null;
+    resize(w, h, d, isLow) { W = w; H = h; dpr = d; low = !!isLow; for (const k of Object.keys(tiles)) delete tiles[k]; queue.length = 0; for (const k of Object.keys(queued)) delete queued[k]; for (const k of Object.keys(grads)) delete grads[k]; edge = null;
       sweep = makeSprite(160, 64, 1, (g) => { const gr = g.createLinearGradient(0, 0, 160, 0); gr.addColorStop(0, 'rgba(255,240,200,0)'); gr.addColorStop(0.5, 'rgba(255,240,200,0.5)'); gr.addColorStop(1, 'rgba(255,240,200,0)'); g.fillStyle = gr; g.fillRect(0, 0, 160, 64); }); },
-    setLow(v) { low = !!v; },
+    setLow(v) { v = !!v; if (v !== low) { low = v; for (const k of Object.keys(tiles)) delete tiles[k]; queue.length = 0; for (const k of Object.keys(queued)) delete queued[k]; } },
     setReduceMotion(v) { reduce = !!v; },
     setBiome(id, instant) {
       const to = BIOME_IDS.includes(id) ? id : 'clay';
       if (to === st.to) return;
       if (instant) { st.from = st.to = to; st.fade = 1; return; }
-      st.from = st.to; st.to = to; st.fade = 0; st.sweepT = 0; tileFor(to); // build before the fade starts
+      st.from = st.to; st.to = to; st.fade = 0; st.sweepT = 0; prebuild(to); // build before the fade starts
     },
     update(dtMs) { if (st.fade < 1) st.fade = Math.min(1, st.fade + dtMs / FADE_MS); if (st.sweepT < 1) st.sweepT = Math.min(1, st.sweepT + dtMs / FADE_MS); },
     draw(ctx, scrollPx, depth, t, strain01) {
+      prebuild(st.to); if (st.fade < 1) prebuild(st.from); pump();
       const fade = reduce ? 1 : st.fade, ids = idsBuf, two = st.fade < 1; // no new array per frame
       idsBuf[0] = two ? st.from : st.to; idsBuf[1] = st.to;
-      const sideW = Math.round(Math.max(18, W * 0.07));
+      const sideW = sideWOf();
       for (let n = 0; n < (two ? 2 : 1); n++) {
         const id = ids[n], a = !two ? 1 : n === 0 ? 1 : clamp01(fade);
         if (!grads[id]) { const g = ctx.createLinearGradient(0, 0, 0, H), p = biomePalette(id); g.addColorStop(0, p.top); g.addColorStop(1, p.bottom); grads[id] = g; }
         ctx.globalAlpha = a; ctx.fillStyle = grads[id]; ctx.fillRect(0, -50, W, H + 100); ctx.globalAlpha = 1;
-        layer(ctx, id, a * 0.55, 0.5, scrollPx, 0.5, 0, W);              // far wall, dark
+        layer(ctx, id, 'far', a, 0.5, scrollPx, 0.12, 0, 1, 0, W);        // far wall (already dark and soft)
+        if (!low) layer(ctx, id, 'mid', a * 0.6, 0.75, scrollPx, 0, 0, 1, 0, W); // mid wall details
+        if (!low && peek(id, 'glow')) { // glowing seams, slow pulse (steady with Reduce motion)
+          ctx.globalCompositeOperation = 'lighter';
+          layer(ctx, id, 'glow', a * (reduce ? 0.5 : 0.42 + 0.18 * Math.sin(t / 1700 + 1)), 0.75, scrollPx, 0, 0, 1, 0, W);
+          ctx.globalCompositeOperation = 'source-over';
+        }
         if (!low) { const cone = coneFor(id); if (cone) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * Math.max(0.05, 0.3 - depth / 1800); ctx.drawImage(cone, W * 0.1, 0, W * 0.8, H * 0.85); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; } }
-        layer(ctx, id, a, 1, scrollPx, 0, 0, sideW);                      // left near wall
-        layer(ctx, id, a, 1, scrollPx, 0, W - sideW, sideW);              // right near wall
+        layer(ctx, id, 'near', a, 1, scrollPx, 0, 0, 0.5, 0, sideW);      // left near wall
+        layer(ctx, id, 'near', a, 1, scrollPx, 0, 0.5, 1, W - sideW, sideW); // right near wall
         drawDecor(ctx, id, W, H, scrollPx * 1.25, sideW, a, t);
       }
       // edge shadow on the near walls

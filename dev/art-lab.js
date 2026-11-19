@@ -1,5 +1,6 @@
 // Art lab: draws every registered texture/sprite on a grid, with zoom, quality and timing.
 import '../src/render/art/swatches.js';
+import '../src/render/art/wallArt.js';
 import { listArt } from '../src/render/art/registry.js';
 
 const grid = document.getElementById('grid');
