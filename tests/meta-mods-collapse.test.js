@@ -33,7 +33,7 @@ test('getMods with every upgrade maxed stays in range', () => {
   const m = meta.getMods();
   checkMods(m);
   assert.equal(m.keepOnSnap, 0.6);
-  assert.equal(m.maxStrain, 180);
+  assert.equal(m.maxStrain, 1000);
   assert.equal(m.cols, 5); assert.equal(m.rows, 4);
   assert.equal(m.strainMult, 0.68);
 });
@@ -70,7 +70,7 @@ test('upgrades: buy, gate, currency, max level', () => {
   meta.addGold(1e9);
   const r = meta.upgrades.buy('rope');
   assert.equal(r.ok, true);
-  assert.equal(meta.getMods().maxStrain, 110);
+  assert.equal(meta.getMods().maxStrain, 145);
   assert.equal(meta.upgrades.buy('mender').ok, false, 'needs depth');
   assert.match(meta.upgrades.buy('mender').error, /Depth/);
   for (let i = 0; i < 20; i++) meta.upgrades.buy('rope');

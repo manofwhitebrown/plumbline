@@ -1,7 +1,7 @@
 // All the numbers of the drop engine live here, so they are easy to tune.
 // Change a number, run `npm test`, and the balance test shows what it did.
 export const ENGINE = Object.freeze({
-  baseBeatMs: 450,          // length of one beat in milliseconds
+  baseBeatMs: 800,          // length of one beat in milliseconds (first drop: 50-70 s never hauling, 40-58 s hauling at 80%)
   baseSpeed: 1,             // metres per beat
   tierValues: Object.freeze([1, 3, 9, 27, 81, 243]), // gem tiers 1..6 (used when a part changes a tier)
   relicFactor: 3,           // relicBonus turns a gem into a relic worth 3x

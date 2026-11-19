@@ -124,6 +124,8 @@ export function playBot(style = '70', opts = {}) {
   for (const u of unreachable) fail('unreachable unlock: ' + u);
 
   // Part checks (only meaningful when the run reached the end without trouble).
+  // A late rig naturally uses most of what you own, so "how often is it in the best rig" proves nothing.
+  // The fair question: how much does the best rig lose when this one part is banned? (see partImpacts)
   const owned = meta.ownedParts();
   const unused = [];
   const usage = {};
@@ -132,12 +134,46 @@ export function playBot(style = '70', opts = {}) {
   for (const id of Object.keys(boughtPartAt)) {
     if (id !== 'hook' && !rigsBuilt.some((r) => r.indexOf(id) !== -1)) unused.push(id);
   }
+  let impacts = {};
   if (problems.length === 0) {
     for (const id of unused) fail(`part never worth buying: ${id}`);
-    for (const id of Object.keys(usage)) if (lateRigs.length >= 5 && usage[id] / lateRigs.length > 0.6 && id !== 'hook') fail(`part in more than 60% of the best rigs: ${id} (${Math.round(100 * usage[id] / lateRigs.length)}%)`);
+    if (rig) {
+      impacts = partImpacts(meta.getMods(), owned, rig);
+      for (const id of Object.keys(impacts)) if (impacts[id] > MUST_HAVE_LOSS) fail(`must-have part: banning ${id} cuts the best rig's Gold by ${Math.round(100 * impacts[id])}% (limit ${Math.round(100 * MUST_HAVE_LOSS)}%)`);
+    }
   }
 
-  return { style, hours: simS / 3600, drops, timeline: tl, problems, owned, usage, rigs: rigsBuilt.length, goldEarned: earnedTotal, bestDepth: meta.stats.get().bestDepth };
+  return { style, hours: simS / 3600, drops, timeline: tl, problems, owned, usage, impacts, rigs: rigsBuilt.length, goldEarned: earnedTotal, bestDepth: meta.stats.get().bestDepth };
+}
+
+
+// ---- Part dominance -------------------------------------------------------------------------
+export const MUST_HAVE_LOSS = 0.7; // a part is "must-have" if banning it loses more than 70% of the best rig's Gold
+const IMPACT_SEEDS = 12;
+
+function rigGold(rig, mods) {
+  let total = 0;
+  const policy = ({ run }) => (run.state.strain >= 0.85 * run.state.maxStrain ? 'haul' : 'continue');
+  for (let i = 0; i < IMPACT_SEEDS; i++) {
+    try { total += simulateRun({ rig, mods: { ...mods, cheat: null }, seed: 7000 + i, policy }).kept; } catch (e) { /* counted as 0 */ }
+  }
+  return total / IMPACT_SEEDS;
+}
+
+// For every part type in the rig: the share of Gold lost when it is banned (0 = no loss, 1 = everything).
+// The rig is rebuilt without the part, so the player's best way around it is allowed.
+export function partImpacts(mods, owned, rig, budgetMs = 600) {
+  const out = {};
+  const base = rigGold(rig, mods);
+  if (!(base > 0)) return out;
+  const ids = Array.from(new Set(rig.cells.flat().filter(Boolean)));
+  for (const id of ids) {
+    if (id === 'hook') continue; // the Hook is the only Part you start with, so it is always allowed
+    const rest = { ...owned }; delete rest[id];
+    const alt = suggest.bestRig(mods, rest, { maxEvals: 60, budgetMs });
+    out[id] = Math.max(0, Math.min(1, 1 - rigGold(alt, mods) / base));
+  }
+  return out;
 }
 
 export function fmtT(s) {
@@ -155,6 +191,8 @@ export function printResult(r) {
   console.log('  first Collapse    : ' + fmtT(tl.collapse));
   console.log('  gold per hour     : ' + Math.round(tl.goldPerHour));
   console.log('  parts owned       : ' + Object.keys(r.owned).join(', '));
+  const imp = Object.entries(r.impacts || {}).sort((a, b) => b[1] - a[1]);
+  if (imp.length) console.log('  biggest part loss : ' + imp.slice(0, 4).map(([k, v]) => k + ' ' + Math.round(100 * v) + '%').join(', ') + ' (when banned)');
   if (r.problems.length) for (const p of r.problems) console.log('  FAIL ' + p);
   else console.log('  PASS');
 }

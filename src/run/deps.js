@@ -7,6 +7,7 @@ import { log } from '../core/log.js';
 import { now } from '../core/clock.js';
 import { fmt } from '../core/format.js';
 import { makeRng } from '../core/rng.js';
+import { ENGINE } from '../data/engine.js';
 
 function safeGlob(load) {
   try { return load() || {}; } catch (e) { return {}; } // in plain Node there is no glob
@@ -69,7 +70,7 @@ function build() {
     engine: typeof e.createRun === 'function' && typeof e.stepBeat === 'function' ? e : null,
     detectCombos: e.detectCombos || p.detectCombos || null,
     getPart: p.getPart || e.getPart || null,
-    baseBeatMs: Number(d.BEAT_MS || d.BASE_BEAT_MS || d.beatMs) || 450,
+    baseBeatMs: Number(ENGINE.baseBeatMs) || Number(d.BEAT_MS || d.BASE_BEAT_MS || d.beatMs) || 450, // ENGINE.baseBeatMs is the one source of truth
     meta: findMeta(merge(globs.meta)),
     save: typeof saveMod.registerSlice === 'function' ? saveMod : memorySave(),
     createLoop: typeof loopMod.createLoop === 'function' ? loopMod.createLoop : null,

@@ -82,7 +82,7 @@ test('parts, bucket and upgrade cheats', () => {
   assert.equal(meta.getMods().rows, 4);
   c.run('upg_max');
   assert.equal(meta.getMods().keepOnSnap, 0.6);
-  assert.equal(meta.getMods().maxStrain, 180);
+  assert.equal(meta.getMods().maxStrain, 1000);
   c.run('upg_reset');
   assert.equal(meta.getMods().maxStrain, 100);
   assert.equal(meta.getMods().cols, 4);

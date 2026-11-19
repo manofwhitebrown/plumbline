@@ -1,10 +1,11 @@
 // getMods(): the ONLY bridge from the meta game to the engine.
-import { LIMITS } from '../data/upgrades.js';
+import { LIMITS, UPGRADES } from '../data/upgrades.js';
 import { s } from './state.js';
 import { level } from './upgrades.js';
 import { clamp, num } from './safe.js';
 
 // Round to 4 places so 0.68 is 0.68, not 0.6799999.
+const per = (id) => { const u = UPGRADES.find((x) => x.id === id); return u ? u.per : 0; };
 const r4 = (x) => Math.round(x * 10000) / 10000;
 import { dailyTwistId } from './daily.js';
 import { applyTwist } from '../engine/twists.js';
@@ -18,10 +19,10 @@ export function getMods() {
   const bucket = level('bucket');
   const owned = Object.keys(st.parts).filter((id) => st.parts[id] > 0);
   const mods = {
-    maxStrain: clamp(LIMITS.baseMaxStrain + 10 * level('rope'), 100, 1000),
+    maxStrain: clamp(LIMITS.baseMaxStrain + per('rope') * level('rope'), 100, 1000),
     keepOnSnap: r4(clamp(LIMITS.baseKeepOnSnap + 0.05 * level('mender') + 0.05 * level('cd_snap'), 0.3, LIMITS.maxKeepOnSnap)),
     goldMult: r4(clamp(coreDustMult(), 1, 1e300)),
-    strainMult: r4(clamp(1 - 0.04 * level('grease'), LIMITS.minStrainMult, 1)),
+    strainMult: r4(clamp(1 - (per('grease') / 100) * level('grease'), LIMITS.minStrainMult, 1)),
     luck: r4(clamp(0.03 * level('lantern'), 0, 1)),
     startDepth: clamp(15 * level('deepstart'), 0, 5000),
     cols: bucket >= 1 ? 5 : 4,
