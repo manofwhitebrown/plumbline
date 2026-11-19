@@ -1,0 +1,6 @@
+/* MOTION-1. Screen entry is now driven by src/ui/motion/transitions.js (Web Animations, transform and opacity only).
+   polish.css (AI-2) also fades .screen in on mount; two stacked fades would feel soft and slow, so inside the screen host
+   the CSS one is switched off. Higher specificity than polish.css, which loads after this file. */
+.screen-host > .screen { animation: none; }
+.cine-layer { contain: strict; }
+@media (prefers-reduced-motion: reduce) { .cine-layer { display: none; } }

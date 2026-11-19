@@ -9,6 +9,7 @@ import { getSettings, onSettings } from '../settings.js';
 import { createDropController } from '../logic/dropController.js';
 import { createHud } from './dropHud.js';
 import { createPauseMenu } from './dropPause.js';
+import { beforeDrop } from '../motion/index.js'; // [MOTION-1]
 
 let scope = null;
 let controller = null;
@@ -117,7 +118,10 @@ registerScreen('drop', {
       const o = t && typeof t.runOptions === 'function' ? t.runOptions() : null;
       if (o && typeof o === 'object') opts = { ...o };
     } catch (e) { opts = {}; }
-    controller.start(opts);
+    // [MOTION-1] the cinematic delays the start; the run still starts exactly once, and only if this screen is still current.
+    const c0 = controller;
+    const startNow = () => { if (controller && controller === c0) controller.start(opts); };
+    try { beforeDrop(screen, startNow, (api.rigs && api.rigs.getRig && (api.rigs.getRig() || {}).parts || []).length || 5); } catch (e) { startNow(); }
   },
 
   // Esc, browser back and the Android back button open the pause menu. They never leave the drop.

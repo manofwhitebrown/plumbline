@@ -4,6 +4,9 @@ import { api } from './api.js';
 import { buzz, ui } from './soft.js';
 
 let starting = false;
+let runEndHook = null; // [MOTION-1] optional (payload, goFn) => true when it will call goFn itself
+
+export function setRunEndHook(fn) { runEndHook = typeof fn === 'function' ? fn : null; }
 
 // Go to the Drop screen. The screen itself starts the run. A double tap does nothing.
 export function startDrop() {
@@ -23,7 +26,10 @@ export function goTab(id) {
 export function wireRunEnd(bus) {
   if (!bus || typeof bus.on !== 'function') return () => {};
   return bus.on('run:ended', (payload) => {
-    shell.go('results', payload || {}, { replace: true });
+    const go = () => shell.go('results', payload || {}, { replace: true });
+    let took = false;
+    if (runEndHook) { try { took = !!runEndHook(payload, go); } catch (e) { took = false; } }
+    if (!took) go();
   });
 }
 
