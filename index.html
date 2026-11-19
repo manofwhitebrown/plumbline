@@ -28,27 +28,62 @@
       #app { box-shadow: 0 0 0 1px #2a3555, 0 0 80px rgba(246, 196, 83, .08); }
     }
     #splash { position: fixed; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 20px;
+      align-items: center; justify-content: center; gap: 20px; overflow: hidden;
       background: radial-gradient(ellipse at 50% 30%, #1d2740 0%, #0d1220 55%, #070a12 100%);
       transition: opacity .26s ease-out; z-index: 9999; }
     #splash.gone { opacity: 0; pointer-events: none; }
-    #splash .line { width: 2px; height: 64px; background: linear-gradient(#f6c453, transparent); }
-    #splash .weight { width: 22px; height: 22px; border-radius: 6px; background: #f6c453;
-      box-shadow: 0 0 24px #f6c45399; animation: sway 1.6s ease-in-out infinite; transform-origin: 50% -64px; }
-    #splash h1 { margin: 0; font-size: 28px; letter-spacing: .24em; font-weight: 700; color: #ffe3a1; }
-    #splash p { margin: 0; font-size: 14px; color: #8d97b8; }
-    @keyframes sway { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
-    @media (prefers-reduced-motion: reduce) { #splash .weight { animation: none; } }
+    #splash .hang { position: absolute; top: 0; left: 50%; width: 64px; margin-left: -32px; height: calc(50% - 6px);
+      display: flex; flex-direction: column; align-items: center; transform-origin: 50% 0; animation: sway 3.4s ease-in-out infinite; }
+    #splash .rope { flex: 1; width: 12px; min-height: 40px; border-radius: 0 0 2px 2px;
+      background: repeating-linear-gradient(58deg, #e6bf72 0 5px, #6b4a1c 5px 7px);
+      box-shadow: inset 3px 0 0 rgba(255,240,200,.25), inset -3px 0 0 rgba(0,0,0,.28); }
+    #splash .hook { width: 56px; height: 66px; margin-top: -2px; filter: drop-shadow(0 0 14px rgba(246,196,83,.45)); }
+    #splash .words { position: absolute; top: calc(50% + 80px); left: 0; right: 0; text-align: center; display: flex; flex-direction: column; gap: 14px; }
+    #splash .err { font-size: 12px; color: #ff9aa5; max-width: 320px; margin: 0 auto; word-break: break-word; }
+    #splash button { margin: 4px 6px 0; min-height: 44px; padding: 0 18px; border: 0; border-radius: 12px; background: #f6c453; color: #070a12; font-weight: 700; font-size: 15px; }
+    #splash button.alt { background: #1d2740; color: #eef2ff; }
+    @keyframes sway { 0%,100% { transform: rotate(-3.5deg); } 50% { transform: rotate(3.5deg); } }
+    @media (prefers-reduced-motion: reduce) { #splash .hang { animation: none; } }
   </style>
 </head>
 <body>
   <div id="app"></div>
   <div id="splash" role="status" aria-live="polite">
-    <div><div class="line"></div><div class="weight"></div></div>
-    <h1>PLUMBLINE</h1>
-    <p>Lowering the rope…</p>
+    <div class="hang">
+      <div class="rope"></div>
+      <svg class="hook" viewBox="0 0 64 76" aria-hidden="true">
+        <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".55" stop-color="#f6c453"/><stop offset="1" stop-color="#b9791a"/></linearGradient></defs>
+        <circle cx="32" cy="7" r="5.5" fill="none" stroke="url(#hg)" stroke-width="3"/>
+        <path d="M32 13 V44 C32 76 62 76 62 46 C62 36 54 32 47 34" fill="none" stroke="url(#hg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M29 20 V44 C29 66 50 70 57 52" fill="none" stroke="#fff6d6" stroke-opacity=".5" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="words"><h1>PLUMBLINE</h1><p id="splash-text">Lowering the rope…</p></div>
   </div>
   <noscript>Plumbline needs JavaScript to run.</noscript>
+  <script>
+    // Watchdog: if the game has not started in 12 seconds, say so and offer a way out.
+    (function () {
+      var firstError = '';
+      function note(m) { if (!firstError) firstError = String(m || '').slice(0, 160); }
+      window.addEventListener('error', function (e) { note(e.message); });
+      window.addEventListener('unhandledrejection', function (e) { note(e.reason && (e.reason.message || e.reason)); });
+      setTimeout(function () {
+        var s = document.getElementById('splash');
+        if (!s || s.classList.contains('gone') || !s.parentNode) return;
+        var p = document.getElementById('splash-text');
+        if (p) p.textContent = 'This is taking too long.';
+        var w = s.querySelector('.words');
+        if (!w) return;
+        if (firstError) { var e = document.createElement('div'); e.className = 'err'; e.textContent = firstError; w.appendChild(e); }
+        var row = document.createElement('div');
+        var a = document.createElement('button'); a.textContent = 'Reload'; a.onclick = function () { location.reload(); };
+        var b = document.createElement('button'); b.className = 'alt'; b.textContent = 'Reset saved data';
+        b.onclick = function () { try { localStorage.clear(); sessionStorage.clear(); } catch (x) {} location.reload(); };
+        row.appendChild(a); row.appendChild(b); w.appendChild(row);
+      }, 12000);
+    })();
+  </script>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
