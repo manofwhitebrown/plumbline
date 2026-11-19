@@ -47,7 +47,7 @@ export function createUiSounds(synth, voices) {
     },
     achievement() {
       ub({ freq: 784, vol: 0.11, dur: 0.3, send: 0.25 });
-      ub({ freq: 1175, vol: 0.11, dur: 0.38, delay: 0.1, send: 0.25 });
+      ub({ freq: 1175, vol: 0.11, dur: 0.3, delay: 0.1, send: 0.25 });
       ub({ freq: 1568, vol: 0.07, dur: 0.34, delay: 0.17, send: 0.3 });
       V.sparkle({ freq: 3900, vol: 0.035, delay: 0.2 });
       S.duck(0.6, 0.3, 0.8);

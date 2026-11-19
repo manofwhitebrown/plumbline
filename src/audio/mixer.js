@@ -4,7 +4,7 @@ import { warn } from './safe.js';
 // Master gain never goes above SAFE_MAX, so even all sliders at 100% stay below clipping.
 export const SAFE_MAX = 0.9;
 // Trims that bring a typical play scene to about -16 LUFS (measured offline, see docs/notes/AUDIO-2.md).
-export const SFX_TRIM = 1;
+export const SFX_TRIM = 2;
 export const MUSIC_TRIM = 0.7;
 
 const state = { muted: false, sfx: 0.8, music: 0.5, night: false };

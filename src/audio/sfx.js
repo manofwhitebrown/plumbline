@@ -73,11 +73,11 @@ export function createSfx(synth, voices, env) {
     tick(partId) {
       const h = hashString(partId);
       const f = hz(degreeToMidi(keyId(), h % 5, 84));
-      V.tick({ freq: Math.min(5200, f), vol: 0.045 });
+      V.tick({ freq: Math.min(5200, f), vol: 0.09 });
     },
     // Items chained between lanes: a rising whoosh. pan values are -1 to 1.
     whoosh(panFrom, panTo) {
-      V.whoosh({ from: 400, to: 3500, dur: 0.3, attack: 0.1, vol: 0.06, pan: panFrom || 0, panTo: Number.isFinite(panTo) ? panTo : undefined });
+      V.whoosh({ from: 400, to: 3500, dur: 0.3, attack: 0.1, vol: 0.14, pan: panFrom || 0, panTo: Number.isFinite(panTo) ? panTo : undefined });
     },
     miss() {
       V.whoosh({ from: 700, to: 220, dur: 0.14, attack: 0.02, vol: 0.045, q: 0.8 });
@@ -93,9 +93,9 @@ export function createSfx(synth, voices, env) {
     },
     // Rope twang, wood crack, deep boom, then a short silence.
     snap() {
-      V.pluck({ freq: 196, bright: 0.9, bend: 0.55, vol: 0.3, dur: 0.9, send: 0.3 });
+      V.pluck({ freq: 196, bright: 0.9, bend: 0.55, vol: 0.4, dur: 0.9, send: 0.3 });
       V.crack({ vol: 0.32, delay: 0.02, send: 0.15 });
-      V.boom({ vol: 0.55, delay: 0.05, dur: 2.0, send: 0.35 });
+      V.boom({ vol: 0.36, delay: 0.05, dur: 2.0, send: 0.35 });
       V.creak({ freq: 140, glide: 1.4, dur: 0.8, vol: 0.12, delay: 0.1, send: 0.3 });
       S.duck(0.03, 2.2, 1.6);
     },
@@ -130,8 +130,8 @@ export function createSfx(synth, voices, env) {
     // Every 50 m: a soft chime.
     milestone() {
       const key = keyId();
-      V.glass({ freq: hz(degreeToMidi(key, 5, 84)), vol: 0.07, dur: 0.9, send: 0.4 });
-      V.glass({ freq: hz(degreeToMidi(key, 7, 84)), vol: 0.05, dur: 0.9, delay: 0.09, send: 0.4 });
+      V.glass({ freq: hz(degreeToMidi(key, 5, 72)), vol: 0.09, dur: 0.9, send: 0.4 });
+      V.glass({ freq: hz(degreeToMidi(key, 7, 72)), vol: 0.065, dur: 0.9, delay: 0.09, send: 0.4 });
       S.duck(0.85, 0.2, 0.6);
     },
     // Deep bloom for Collapse.

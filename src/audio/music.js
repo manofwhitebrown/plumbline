@@ -8,9 +8,12 @@ import { midiToHz, degreeToMidi } from './scale.js';
 import { createRng } from './rng.js';
 import { createVoices } from './voices.js';
 import { warn } from './safe.js';
+import { target } from './param.js';
 
 export const STEP = 0.45; // one eighth note = one game beat
 const LOOKAHEAD = 0.4;
+// The score is written with small note volumes; this lifts it to a good level (set by offline loudness measurements).
+const GAIN = 11;
 
 const ss = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 const clamp01 = (x) => (Number.isFinite(x) ? Math.min(1, Math.max(0, x)) : 0);
@@ -21,35 +24,35 @@ const PRESETS = {
   clay: {
     pad: { chords: [[0, 2, 3], [1, 3, 4], [0, 1, 3]], base: 48, lp: 900, vol: 0.05, bars: [2, 3] },
     mel: { voice: 'pluck', base: 60, lo: 0, hi: 9, chance: 0.8, vol: 0.075, dur: 1.3, bright: 0.45 },
-    pulse: { base: 36, vol: 0.17 },
+    pulse: { base: 36, vol: 0.12 },
   },
   quartz: {
     pad: { chords: [[0, 2, 4], [1, 3, 5], [2, 4, 6]], base: 48, lp: 1800, vol: 0.045, bars: [2, 4] },
     mel: { voice: 'glass', base: 60, lo: 0, hi: 9, chance: 0.6, vol: 0.05, dur: 1.6 },
-    pulse: { base: 36, vol: 0.15 },
+    pulse: { base: 36, vol: 0.11 },
   },
   amber: {
     pad: { chords: [[0, 2, 3], [1, 3, 4], [0, 2, 4]], base: 48, lp: 700, vol: 0.055, bars: [3, 4] },
     mel: { voice: 'pluck', base: 48, lo: 2, hi: 9, chance: 0.55, vol: 0.07, dur: 1.5, bright: 0.3 },
-    pulse: { base: 36, vol: 0.17 },
+    pulse: { base: 36, vol: 0.12 },
   },
   magma: {
     pad: { chords: [[0, 2], [1, 3], [0, 3]], base: 36, lp: 500, vol: 0.06, bars: [3, 5] },
     mel: { voice: 'pluck', base: 48, lo: 0, hi: 6, chance: 0.4, vol: 0.06, dur: 1.6, bright: 0.25 },
-    pulse: { base: 24, vol: 0.2 },
+    pulse: { base: 24, vol: 0.14 },
     ember: { vol: 0.04, every: [2, 3] },
     tex: { kind: 'rumble', vol: 0.05, dur: 10, every: [6, 9], freq: 110 },
   },
   void: {
     pad: { chords: [[0, 2], [1, 3], [0, 3]], base: 36, lp: 380, vol: 0.05, bars: [4, 6] },
     mel: { voice: 'glass', base: 60, lo: 0, hi: 7, chance: 0.3, vol: 0.04, dur: 2.2 },
-    pulse: { base: 24, vol: 0.2 },
+    pulse: { base: 24, vol: 0.14 },
     tex: { kind: 'wind', vol: 0.04, dur: 9, every: [5, 8], freq: 380 },
   },
   abyss: {
     pad: { chords: [[0, 3], [1, 3], [0, 2]], base: 36, lp: 320, vol: 0.055, bars: [4, 6] },
     mel: { voice: 'glass', base: 48, lo: 0, hi: 7, chance: 0.25, vol: 0.04, dur: 2.6 },
-    pulse: { base: 24, vol: 0.22 },
+    pulse: { base: 24, vol: 0.15 },
     tex: { kind: 'wind', vol: 0.045, dur: 10, every: [4, 7], freq: 300 },
   },
   menu: {
@@ -73,8 +76,10 @@ export function createMusic(synth, voices, opts = {}) {
   const moodSend = ctx.createGain();
   const sting = ctx.createGain();
   const stingSend = ctx.createGain();
-  mood.gain.value = 0.6;
-  moodSend.gain.value = 0.6;
+  mood.gain.value = 0.6 * GAIN;
+  moodSend.gain.value = 0.6 * GAIN;
+  sting.gain.value = GAIN;
+  stingSend.gain.value = GAIN;
   mood.connect(S.buses.music);
   sting.connect(S.buses.music);
   try {
@@ -129,8 +134,8 @@ export function createMusic(synth, voices, opts = {}) {
       const L = layers[id];
       const on = id === a;
       try {
-        L.gain.gain.setTargetAtTime(on ? 1 : 0, t, on ? 1.0 : 0.7);
-        L.send.gain.setTargetAtTime(on ? 1 : 0, t, on ? 1.0 : 0.7);
+        target(L.gain.gain, on ? 1 : 0, t, on ? 1.0 : 0.7);
+        target(L.send.gain, on ? 1 : 0, t, on ? 1.0 : 0.7);
       } catch (e) {
         warn('layer fade failed', e);
       }
@@ -164,8 +169,8 @@ export function createMusic(synth, voices, opts = {}) {
     const s = Number.isFinite(seconds) && seconds > 0 ? seconds : 1.2;
     const t = S.now();
     try {
-      mood.gain.setTargetAtTime(v, t, s / 3);
-      moodSend.gain.setTargetAtTime(v, t, s / 3);
+      target(mood.gain, v * GAIN, t, s / 3);
+      target(moodSend.gain, v * GAIN, t, s / 3);
     } catch (e) {
       warn('mood failed', e);
     }
@@ -227,8 +232,8 @@ export function createMusic(synth, voices, opts = {}) {
     const t = S.now();
     try {
       for (const id in layers) {
-        layers[id].gain.gain.setTargetAtTime(0, t, 0.04);
-        layers[id].send.gain.setTargetAtTime(0, t, 0.04);
+        target(layers[id].gain.gain, 0, t, 0.04);
+        target(layers[id].send.gain, 0, t, 0.04);
       }
     } catch (e) {
       warn('snap fade failed', e);

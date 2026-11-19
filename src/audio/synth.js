@@ -2,6 +2,7 @@
 // Every sound starts and ends at silence with a gain ramp, so it never clicks or pops.
 // A "voice" is one sound (a bell, a pad note...). It can use several oscillators but counts once.
 import { warn } from './safe.js';
+import { target } from './param.js';
 import { createReverb } from './reverb.js';
 import { createRng } from './rng.js';
 
@@ -71,6 +72,14 @@ export function softClipCurve(n = 2049) {
   return c;
 }
 
+// WebAudio compressors add make-up gain so that a full-scale signal comes out near full scale
+// (the formula is in the spec). Night mode changes the thresholds, so we use the same formula
+// to keep its level close to the day level.
+function makeupTrim(compThr, compRatio, limThr, limRatio) {
+  const y = (thr, ratio) => thr - thr / ratio; // output level in dB for a 0 dB input
+  return Math.pow(10, (0.6 * (y(compThr, compRatio) + y(limThr, limRatio))) / 20);
+}
+
 // opts: { quality: 'low'|'high', clock: () => seconds (for offline rendering) }
 export function createSynth(ctx, opts = {}) {
   const has = (name) => typeof ctx[name] === 'function';
@@ -95,11 +104,15 @@ export function createSynth(ctx, opts = {}) {
   const revSfx = ctx.createGain(); // reverb sends follow the same volume as their bus
   const revMusic = ctx.createGain();
   const revMusicDuck = ctx.createGain();
+  const dcBlock = ctx.createBiquadFilter(); // removes DC offset and sub-audible rumble
   const body = ctx.createBiquadFilter(); // low shelf (only used by night mode)
   const air = ctx.createBiquadFilter(); // gentle high shelf
   const comp = ctx.createDynamicsCompressor();
   const limiter = ctx.createDynamicsCompressor();
 
+  dcBlock.type = 'highpass';
+  setValue(dcBlock.frequency, 20);
+  setValue(dcBlock.Q, 0.5);
   body.type = 'lowshelf';
   setValue(body.frequency, 160);
   setValue(body.gain, 0);
@@ -120,7 +133,8 @@ export function createSynth(ctx, opts = {}) {
   sfxBus.connect(preMaster);
   musicBus.connect(musicDuck);
   musicDuck.connect(preMaster);
-  preMaster.connect(body);
+  preMaster.connect(dcBlock);
+  dcBlock.connect(body);
   body.connect(air);
   air.connect(comp);
   comp.connect(limiter);
@@ -130,7 +144,7 @@ export function createSynth(ctx, opts = {}) {
       const shaper = ctx.createWaveShaper();
       shaper.curve = softClipCurve();
       try {
-        shaper.oversample = '2x';
+        shaper.oversample = 'none';
       } catch (e) {
         // Optional.
       }
@@ -243,19 +257,15 @@ export function createSynth(ctx, opts = {}) {
   }
 
   // ---- Voice tracking ----
+  // Fade a voice out fast. Uses its own "kill" gain, so the voice's envelope is never cancelled
+  // (cancelling future automation can snap a gain back to 1.0 and cause a burst).
   function steal(v, fade) {
     try {
       const t = now();
-      holdParam(v.g.gain, t);
-      v.g.gain.setTargetAtTime(0, t, fade || 0.012);
-      const stopT = t + (fade ? fade * 6 : 0.08);
-      for (const s of v.srcs) {
-        try {
-          s.stop(stopT);
-        } catch (e) {
-          // Not started yet or already stopped.
-        }
-      }
+      const f = fade || 0.012;
+      target(v.k.gain, 0, t, f);
+      const stopT = Math.max(t + f * 6, v.t0 + 0.001);
+      void stopT; // sources keep their own stop time: stopping twice is not portable
     } catch (e) {
       // Already gone.
     }
@@ -306,14 +316,16 @@ export function createSynth(ctx, opts = {}) {
       g.gain.exponentialRampToValueAtTime(FLOOR, t + dur);
       g.gain.linearRampToValueAtTime(0, t + dur + 0.02);
 
-      const nodes = [g];
-      let tap = g;
+      const k = ctx.createGain(); // kill gain, used only when a voice is stolen
+      g.connect(k);
+      const nodes = [g, k];
+      let tap = k;
       const wantPan = Number.isFinite(o.pan) && (o.pan !== 0 || Number.isFinite(o.panTo));
       if (wantPan && has('createStereoPanner')) {
         const p = ctx.createStereoPanner();
         p.pan.setValueAtTime(num(o.pan, 0, -1, 1), t);
         if (Number.isFinite(o.panTo)) p.pan.linearRampToValueAtTime(num(o.panTo, 0, -1, 1), t + dur * 0.8);
-        g.connect(p);
+        k.connect(p);
         nodes.push(p);
         tap = p;
       }
@@ -328,7 +340,7 @@ export function createSynth(ctx, opts = {}) {
       }
 
       const srcs = build(t, g, dur) || [];
-      const v = { g, srcs, nodes, music: !!o.music, keyId: o.key || null, t0: t };
+      const v = { g, k, srcs, nodes, music: !!o.music, keyId: o.key || null, t0: t };
       let alive = srcs.length;
       const stopT = t + dur + 0.04;
       for (const s of srcs) {
@@ -407,8 +419,8 @@ export function createSynth(ctx, opts = {}) {
       const rel = num(releaseSec, 0.9, 0.1, 8);
       for (const p of [musicDuck.gain, revMusicDuck.gain]) {
         holdParam(p, t);
-        p.setTargetAtTime(d, t, 0.03);
-        p.setTargetAtTime(1, t + hold, rel / 3);
+        target(p, d, t, 0.03);
+        p.setTargetAtTime(1, t + hold, rel / 3); // not anchored: it must continue from the duck
       }
     } catch (e) {
       // Ducking is optional.
@@ -419,13 +431,13 @@ export function createSynth(ctx, opts = {}) {
     try {
       const t = now();
       const sfx = num(l && l.sfx, 0.5, 0, 2);
-      const music = num(l && l.music, 0.5, 0, 2);
+      const music = num(l && l.music, 0.5, 0, 16);
       const m = num(l && l.master, 1, 0, 1);
-      sfxBus.gain.setTargetAtTime(sfx, t, 0.02);
-      revSfx.gain.setTargetAtTime(sfx, t, 0.02);
-      musicBus.gain.setTargetAtTime(music, t, 0.05);
-      revMusic.gain.setTargetAtTime(music, t, 0.05);
-      master.gain.setTargetAtTime(m, t, 0.02);
+      target(sfxBus.gain, sfx, t, 0.02);
+      target(revSfx.gain, sfx, t, 0.02);
+      target(musicBus.gain, music, t, 0.05);
+      target(revMusic.gain, music, t, 0.05);
+      target(master.gain, m, t, 0.02);
     } catch (e) {
       warn('levels failed', e);
     }
@@ -436,13 +448,14 @@ export function createSynth(ctx, opts = {}) {
     try {
       night = !!flag;
       const t = now();
-      comp.threshold.setTargetAtTime(night ? -30 : -20, t, 0.1);
-      comp.ratio.setTargetAtTime(night ? 7 : 3, t, 0.1);
-      limiter.threshold.setTargetAtTime(night ? -8 : -4, t, 0.1);
-      air.gain.setTargetAtTime(night ? -7 : -1.5, t, 0.1);
-      air.frequency.setTargetAtTime(night ? 3500 : 7000, t, 0.1);
-      body.gain.setTargetAtTime(night ? -4 : 0, t, 0.1);
-      preMaster.gain.setTargetAtTime(night ? 0.75 : 1, t, 0.1);
+      target(comp.threshold, night ? -30 : -20, t, 0.1);
+      target(comp.ratio, night ? 7 : 3, t, 0.1);
+      target(limiter.threshold, night ? -8 : -4, t, 0.1);
+      target(air.gain, night ? -7 : -1.5, t, 0.1);
+      target(air.frequency, night ? 3500 : 7000, t, 0.1);
+      target(body.gain, night ? -4 : 0, t, 0.1);
+      const trim = night ? (0.75 * makeupTrim(-30, 7, -8, 20)) / makeupTrim(-20, 3, -4, 20) : 1;
+      target(preMaster.gain, trim, t, 0.1);
     } catch (e) {
       warn('night mode failed', e);
     }

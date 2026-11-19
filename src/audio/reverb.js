@@ -2,6 +2,7 @@
 // Two convolvers swap with a crossfade so changing room never clicks.
 import { createRng } from './rng.js';
 import { warn } from './safe.js';
+import { target } from './param.js';
 
 // rt = seconds to fade 60 dB, len = impulse length, damp = [bright, dark] cutoff in Hz over time,
 // wet = base mix, low = extra low rumble.
@@ -103,10 +104,10 @@ export function createReverb(ctx, out, { enabled = true, now }) {
     const o = slots[1 - active];
     const tc = fade ? 0.35 : 0.05;
     try {
-      s.ret.gain.setTargetAtTime(wetFor(spaceId), t, tc);
-      s.send.gain.setTargetAtTime(1, t, tc);
-      o.ret.gain.setTargetAtTime(0, t, tc);
-      o.send.gain.setTargetAtTime(0, t, tc);
+      target(s.ret.gain, wetFor(spaceId), t, tc);
+      target(s.send.gain, 1, t, tc);
+      target(o.ret.gain, 0, t, tc);
+      target(o.send.gain, 0, t, tc);
     } catch (e) {
       warn('reverb apply failed', e);
     }
@@ -139,7 +140,7 @@ export function createReverb(ctx, out, { enabled = true, now }) {
     setEnabled(flag) {
       const t = now();
       try {
-        for (const s of slots) s.send.gain.setTargetAtTime(flag && s === slots[active] && spaceId ? 1 : 0, t, 0.05);
+        for (const s of slots) target(s.send.gain, flag && s === slots[active] && spaceId ? 1 : 0, t, 0.05);
       } catch (e) {
         // Optional.
       }
