@@ -26,16 +26,19 @@ export function createPacker(width, height, pad = 1) {
 }
 
 // The atlas. add(key, w, h, painter) paints into the sheet; get(key) returns a region.
-export function createAtlas({ sheetSize = 1024, dpr = 1, pad = 2 } = {}) {
+export function createAtlas({ sheetSize = 1024, overflowSize = 0, dpr = 1, pad = 2 } = {}) {
   const sheets = [];  // { canvas, ctx, packer }
   const regions = new Map();
   let bytes = 0;
 
-  function newSheet() {
-    const canvas = makeCanvas(sheetSize, sheetSize);
+  // Sheets after the first can be smaller (overflowSize) so a few extra sprites do not cost a whole big sheet.
+  function newSheet(minSide = 0) {
+    let size = sheets.length && overflowSize ? overflowSize : sheetSize;
+    if (minSide + pad > size) size = sheetSize;
+    const canvas = makeCanvas(size, size);
     const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
-    const s = { canvas, ctx, packer: createPacker(sheetSize, sheetSize, pad) };
-    sheets.push(s); bytes += sheetSize * sheetSize * 4;
+    const s = { canvas, ctx, packer: createPacker(size, size, pad) };
+    sheets.push(s); bytes += size * size * 4;
     return s;
   }
 
@@ -51,7 +54,7 @@ export function createAtlas({ sheetSize = 1024, dpr = 1, pad = 2 } = {}) {
       const w = Math.max(1, Math.ceil(cssW * dpr)), h = Math.max(1, Math.ceil(cssH * dpr));
       let sheet = sheets[sheets.length - 1] || newSheet();
       let pos = sheet.packer.place(w, h);
-      if (!pos) { sheet = newSheet(); pos = sheet.packer.place(w, h); }
+      if (!pos) { sheet = newSheet(Math.max(w, h)); pos = sheet.packer.place(w, h); }
       if (!pos) return null; // sprite bigger than a whole sheet
       const region = { key, sheet: sheets.indexOf(sheet), canvas: sheet.canvas, x: pos.x, y: pos.y, w, h, cssW, cssH };
       if (sheet.ctx && painter) {

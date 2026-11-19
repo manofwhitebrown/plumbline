@@ -3,6 +3,8 @@
 import { createAtlas, spriteKey } from './atlas.js';
 import { paintGemModel, paintGlint, gemFrames } from './gemModels.js';
 import { paintOreModel, paintRelicModel } from './oreRelic.js';
+import { paintRockModel, paintBatModel, paintRootModel } from './hazardModelsA.js';
+import { paintSteamModel, paintSteamRing, paintVoidModel, paintVoidDots, paintWarnModel } from './hazardModelsB.js';
 
 export const SIZE_SCALES = [0.5, 0.65, 0.8, 1, 1.25, 1.5]; // 6 sizes: lanes use 1, flying to the bucket shrinks
 export const BASE_IDX = 3;
@@ -16,7 +18,7 @@ export function pickSizeIdx(sizes, scale) {
 }
 
 export function buildItemAtlas(S, dpr, low = false) {
-  const atlas = createAtlas({ sheetSize: low ? 512 : 1024, dpr: Math.min(2, Math.max(1, dpr || 1)), pad: 2 });
+  const atlas = createAtlas({ sheetSize: low ? 512 : 1024, overflowSize: 512, dpr: Math.min(2, Math.max(1, dpr || 1)), pad: 2 });
   const sizes = low ? LOW_IDX.slice() : SIZE_SCALES.map((_, i) => i);
   for (const idx of sizes) {
     const Ss = Math.max(12, Math.round(S * SIZE_SCALES[idx]));
@@ -33,5 +35,15 @@ export function buildItemAtlas(S, dpr, low = false) {
       atlas.add(spriteKey('glint', tier, 'any', BASE_IDX, f), Sb, Sb, (g) => paintGlint(g, Sb, tier, (f + 0.5) / GLINT_FRAMES));
     }
   }
+  // Hazards: main size only. Keys: spriteKey('hz', 0, name, BASE_IDX, frame).
+  const Sh = Math.max(12, Math.round(S)), hk = (name, f = 0) => spriteKey('hz', 0, name, BASE_IDX, f);
+  atlas.add(hk('rock'), Sh, Sh, (g) => paintRockModel(g, Sh));
+  for (let f = 0; f < 3; f++) atlas.add(hk('bat', f), Sh, Sh, (g) => paintBatModel(g, Sh, f)); // 3 wing frames, also on low
+  atlas.add(hk('root'), Sh, Sh, (g) => paintRootModel(g, Sh));
+  for (let f = 0; f < (low ? 1 : 3); f++) atlas.add(hk('steam', f), Sh, Sh, (g) => paintSteamModel(g, Sh, low ? 1 : f));
+  atlas.add(hk('steamRing'), Sh, Sh, (g) => paintSteamRing(g, Sh));
+  atlas.add(hk('void'), Sh, Sh, (g) => paintVoidModel(g, Sh));
+  atlas.add(hk('voidDots'), Sh, Sh, (g) => paintVoidDots(g, Sh));
+  const Sw = Math.round(Sh * 1.5); atlas.add(hk('warn'), Sw, Sw, (g) => paintWarnModel(g, Sw));
   return { atlas, sizes, low, destroy: () => atlas.destroy() };
 }

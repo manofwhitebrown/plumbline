@@ -14,13 +14,19 @@
 - `items.js` draws gems, ore and relic from the atlas (`itemSprites.js` builds it). Glint every ~3 s, void/prism animate at 5 steps per second (no flashing), both off on low quality and Reduce motion. `index.js` got two one-line hooks (`items.setLow`, `items.setReduceMotion`) and frees the atlas on destroy.
 - Tests: `tests/render-art-gems.test.js` (7 tests: tiers differ, determinism, frames, size picking, atlas keys, memory caps, no-canvas safe).
 
+- Step 4 HAZARD MODELS: `art/hazardRim.js` (the shared red-orange rim and danger glow; gems never use it), `hazardModelsA.js` (rock: spiky boulder with glowing cracks; bat: 3 pre-rendered wing frames, scalloped wings, finger bones, glowing red eyes, fangs; root: thick twisting root with bark ridges and thorns), `hazardModelsB.js` (steam: three layers of round puffs with a hot base, 3 billow frames, plus a dashed warning ring; void orb: near-black sphere, violet horizon ring, lensing arc, 3 orbiting dots; warn glow), `hazardLab.js`.
+- Hazards are in the same atlas (`itemAtlas.js`, keys `spriteKey('hz', 0, name, BASE_IDX, frame)`). `itemSprites.js` is now just a thin wrapper. `items.js` draws them: warning glow pulses about 1.4 times a second; bat wings 4 steps at 110 ms; steam frames every 340 ms and ring pulse about 0.6 Hz; root sways; void dots orbit. Reduce motion: everything still (steady glow, bat level, no sway, no spin). Low: bat still flaps (needed to read), steam one frame, dots do not spin.
+- `atlas.js` got `overflowSize` (extra sheets can be smaller, so a few more sprites do not cost a whole sheet).
+- Looked at at 22/44/96/200 px and side by side with the gems at 24 px: hazards have a thick red-orange rim and angular or organic silhouettes, gems are polished and unrimmed, so they cannot be confused. Fixed two problems found by looking: the root's rim was hidden under its own body, and the steam was a glowing white ball (now real puffs).
+- Tests: `tests/render-art-hazards.test.js` (7 tests).
+
 ## In progress
 - Nothing half-done.
 
 ## Next (in order)
 2. (done, except embers / haze / spores, see Measurements)
 3. (done)
-4. Hazard models (bat with 3 flap frames).
+4. (done)
 5. Bucket and twisted rope (keep `rope.js` API).
 6. 26 part icons in `partIcon.js` (keep `draw` and `toDataURL`).
 7. Light and atmosphere in `polish/`.
@@ -33,7 +39,7 @@
 - Wall texture memory at DPR 2: about 1.1 MB per biome, about 6.5 MB for all six.
 - `well.draw` steady state: 0.1-0.5 ms per frame in Node (all layers, high quality).
 - Visual checks done by rendering PNGs headless (all 6 biomes at 360x640, DPR 2; seams checked by stacking tiles). Not yet seen on a real device or at 430x932 / 1440x900 / DPR 1 and 3.
-- Gems: atlas build 11-23 ms (92 sprites), 4 MB at DPR 2 for a 44 px item (2 MB on low); a gem draw costs about 5 us. Typical item size is about 6% of screen width (22-45 px). Texture memory so far: walls 6.5 MB + items 4 MB = about 10.5 MB of the 24 MB budget.
+- Items atlas with hazards: build 14-26 ms (104 sprites), 5 MB at DPR 2 for a 44 px item (2 MB on low); (before hazards it was 4 MB); a gem draw costs about 5 us. Typical item size is about 6% of screen width (22-45 px). Texture memory so far: walls 6.5 MB + items 4 MB = about 10.5 MB of the 24 MB budget.
 - A halo bug found by looking at renders: the soft glow behind gems did not fade to zero at the sprite edge (faint square). Fixed by limiting the glow radius to half the sprite.
 - Still to do for step 2: rising embers, heat haze bands, drifting spores (they belong with the ambience work in step 7, in `polish/ambience.js`).
 
