@@ -4,6 +4,7 @@ import { glyphsA } from './glyphsA.js';
 import { glyphsB } from './glyphsB.js';
 import { makeSprite, makeCanvas } from './canvasUtil.js';
 import { warn } from './safe.js';
+import { paintHeroIcon, FAMILIES } from './art/iconStyle.js'; // [GFX-1] hero look
 
 const GLYPHS = Object.assign({}, glyphsA, glyphsB);
 // plate colours by family
@@ -66,14 +67,32 @@ function drawUnit(g, key, state) {
   }
 }
 
+function flatDraw(ctx, partId, x, y, size, state) {
+  ctx.save();
+  ctx.translate(x + size / 2, y + size / 2); ctx.scale(size / 2, size / 2);
+  drawUnit(ctx, normalizeId(partId), state || 'idle');
+  ctx.restore();
+}
+
 export function draw(ctx, partId, x, y, size, state) {
   try {
     if (!ctx || !(size > 0) || !Number.isFinite(x) || !Number.isFinite(y)) return;
-    ctx.save();
-    ctx.translate(x + size / 2, y + size / 2); ctx.scale(size / 2, size / 2);
-    drawUnit(ctx, normalizeId(partId), state || 'idle');
-    ctx.restore();
+    if (typeof ctx.drawImage === 'function') { // hero look from a cached sprite, at the pixel ratio of this canvas
+      let scale = 1;
+      try { const tr = ctx.getTransform && ctx.getTransform(); if (tr && Number.isFinite(tr.a)) scale = Math.hypot(tr.a, tr.b); } catch (e) { scale = 1; }
+      const spr = getSprite(partId, size, Math.max(1, Math.min(3, Math.round(scale))), state || 'idle');
+      if (spr) { ctx.drawImage(spr, x, y, size, size); return; }
+    }
+    flatDraw(ctx, partId, x, y, size, state);
   } catch (e) { warn('partIcon.draw', e && e.message); try { ctx.restore(); } catch (e2) { /* ignore */ } }
+}
+
+// Paints one sprite: the hero icon, or the flat drawing when there is no scratch canvas.
+function paintSprite(g, partId, size, dpr, state) {
+  const key = normalizeId(partId);
+  const fam = FAMILIES[FAMILY_OF[key] || 'unknown'];
+  const glyph = GLYPHS[key] || ((c, k) => { c.beginPath(); c.arc(0, 0, 0.42, 0, 6.2832); c.lineWidth = 0.12; c.strokeStyle = k.light; c.stroke(); });
+  if (!paintHeroIcon(g, size, dpr, glyph, fam, state)) flatDraw(g, partId, 0, 0, size, state);
 }
 
 // Sprite cache: one small canvas per part, size and state. Used by the bucket for speed.
@@ -83,7 +102,7 @@ export function getSprite(partId, size, dpr = 1, state = 'idle') {
   let s = cache.get(key);
   if (s === undefined) {
     if (cache.size > 400) cache.clear();
-    s = makeSprite(size, size, dpr, (g) => draw(g, partId, 0, 0, size, state));
+    s = makeSprite(size, size, dpr, (g) => paintSprite(g, partId, size, dpr, state));
     cache.set(key, s);
   }
   return s;
@@ -105,7 +124,7 @@ export function toDataURL(partId, size) {
     if (!c) return '';
     const g = c.getContext('2d');
     if (!g) return '';
-    draw(g, partId, 0, 0, px, 'idle');
+    paintSprite(g, partId, px, 1, 'idle'); // [GFX-1] same hero look in DOM images
     if (typeof c.toDataURL !== 'function') return '';
     const url = c.toDataURL('image/png');
     if (url) { if (urlCache.size > 200) urlCache.clear(); urlCache.set(key, url); }
