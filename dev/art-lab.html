@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plumbline art lab</title>
+<style>
+  body { margin: 0; background: #070a12; color: #eef2ff; font: 13px system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 2; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 8px 12px; background: #0d1220; border-bottom: 1px solid #2a3555; }
+  button, select { background: #1d2740; color: #eef2ff; border: 1px solid #2a3555; border-radius: 6px; padding: 4px 10px; }
+  #grid { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px; }
+  figure { margin: 0; background: #141b2e; border: 1px solid #2a3555; border-radius: 8px; padding: 6px; }
+  figcaption { margin-top: 4px; max-width: 200px; color: #8d97b8; font-size: 11px; }
+  canvas { display: block; background: repeating-conic-gradient(#10172a 0 25%, #0b1020 0 50%) 0 0 / 12px 12px; image-rendering: auto; }
+  h2 { width: 100%; margin: 8px 0 0; font-size: 14px; color: #f6c453; }
+</style></head>
+<body>
+<header>
+  <b>Art lab</b>
+  <label>Quality <select id="q"><option>high</option><option>low</option></select></label>
+  <label>Zoom <select id="z"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label>
+  <label>DPR <select id="d"><option>1</option><option selected>2</option><option>3</option></select></label>
+  <button id="regen">Regenerate</button>
+  <span id="stats"></span>
+</header>
+<div id="grid"></div>
+<script type="module" src="./art-lab.js"></script>
+</body></html>
