@@ -15,8 +15,10 @@
 - tests/motion-transitions.test.js: plan table, reduce path, skip, no listeners left after dispose, shell hook safety.
 - tests/motion-core.test.js: easing maths, runner, director queue priority, skipping, reduce paths, no double plays.
 
+- dev/motion-lab.html + dev/motion-lab.js: a button for every built moment (drop start full and quick, haul, snap, six biome cards, record, milestone, biome and milestone together, new run), real bus wiring, screen-transition demo, speed 0.25x to 2x, Reduce motion toggle, HUD-zone overlay, skip button, frame-time readout (average, 95th percentile, worst, frames over 20 ms) and a 300-particle stress button. Open with `npm run dev`, then /dev/motion-lab.html. The log shows every onGo, so a double call is visible.
+- NOT YET DONE: the frame-time record with 300 particles and the watch-at-slow-speed pass. There is no browser in my environment, so nobody has watched these moments yet. Please run the lab and read the Frame time panel after the stress button.
+
 ## In progress / Next
-- dev/motion-lab.html (+ js): a button per moment, speed slider 0.25x to 2x, Reduce motion toggle, frame-time readout, 300-particle run. (Next.)
 - Results choreography, reward moments (daily chest, achievement banner, Collapse, codex page flip, first part purchase), micro-interactions (button press, number tickers, progress shine, primary breathing, tab indicator, list stagger).
 - Director wiring for meta:changed, achievement:unlocked, codex:new.
 - Wire springIn into components/sheet.js and modal.js (needs a hook request to NEW-4).
