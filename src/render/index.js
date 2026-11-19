@@ -18,6 +18,7 @@ import { num, clamp, clamp01, warn } from './safe.js';
 import { TOKENS } from './palette.js';
 import { createPolish } from './polish/index.js'; // [AI-2] polish hook
 import * as partIcon from './partIcon.js';
+import { models } from './models/index.js'; // [MODEL-1]
 
 export { partIcon };
 
@@ -44,6 +45,7 @@ export function createRenderer(canvas, opts = {}) {
     const q = quality.settings;
     particles.setCap(reduce ? Math.round(q.maxParticles * 0.4) : q.maxParticles);
     polish.setQuality(q.name);
+    models.setEnabled(q.name !== 'low'); // [MODEL-1] baked 3D art only on high quality
     well.setLow(q.name === 'low');
     items.setLow(q.name === 'low'); // [GFX-1]
   }

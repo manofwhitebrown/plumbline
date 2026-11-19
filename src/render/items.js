@@ -4,6 +4,12 @@ import { spriteKey } from './art/atlas.js';
 import { pickSizeIdx, BASE_IDX, GLINT_FRAMES } from './art/itemAtlas.js';
 import { PRISM_STEPS } from './palette.js';
 import { clamp01 } from './safe.js';
+import { models } from './models/index.js'; // [MODEL-1] baked 3D sprites; every call is null-safe (null = use the flat art)
+
+const GEM_KEYS = ['', 'gem:1', 'gem:2', 'gem:3', 'gem:4', 'gem:5', 'gem:6'];
+const ITEM_KEYS = ['gem:1', 'gem:2', 'gem:3', 'gem:4', 'gem:5', 'gem:6', 'ore', 'chest', 'hazard:rock', 'hazard:void'];
+// Draw a baked sprite centred at x,y with side s. Returns false when it is not ready (caller draws the flat art).
+function baked(ctx, key, frame, x, y, s) { const r = models.getSprite(key, frame); if (!r) return false; ctx.drawImage(r.img, r.x, r.y, r.w, r.h, x - s / 2, y - s / 2, s, s); return true; }
 
 export const KINDS = { gem: 1, ore: 2, hazard: 3, relic: 4 };
 
@@ -22,7 +28,7 @@ export function createItems() {
   }
   return {
     get size() { return sp ? sp.size : 0; },
-    rebuild(size, dpr) { lastSize = Math.max(16, Math.round(size)); lastDpr = dpr; build(); },
+    rebuild(size, dpr) { lastSize = Math.max(16, Math.round(size)); lastDpr = dpr; build(); try { models.bake(ITEM_KEYS, Math.round(size * dpr), 'high', { group: 'items' }); } catch (e) { /* flat art stays */ } },
     setLow(v) { v = !!v; if (v !== low) { low = v; build(); } },
     setReduceMotion(v) { reduce = !!v; },
     destroy() { disposeItemSprites(sp); sp = null; },
@@ -36,6 +42,7 @@ export function createItems() {
         const animate = !low && !reduce && ti >= 5; // void swirl and prism rainbow: 5 steps a second, never a flash
         const frame = animate ? (((Math.floor(t / 200 + seed * 8) % 8) + 8) % 8) : 0;
         ctx.globalAlpha = fade;
+        if (baked(ctx, GEM_KEYS[ti], t / 140 + seed * 7, x, y, s)) { ctx.globalAlpha = 1; return; } // [MODEL-1] turning 3D gem (its own highlights, no glint)
         drawArt(ctx, 'gem', ti, scale, x, y, s, frame);
         if (!low && !reduce) { // glint sweeps across every ~3 s (pre-rendered band, already masked by the gem shape)
           const k = (((t / 3200 + seed * 0.37) % 1) + 1) % 1;
@@ -43,7 +50,9 @@ export function createItems() {
         }
         ctx.globalAlpha = 1; return;
       } else if (kind === 'ore' || kind === 'relic') {
-        ctx.globalAlpha = fade; drawArt(ctx, kind, 0, scale, x, y, s, 0); ctx.globalAlpha = 1; return;
+        ctx.globalAlpha = fade;
+        if (!baked(ctx, kind === 'ore' ? 'ore' : 'chest', t / 170 + seed * 5, x, y, s)) drawArt(ctx, kind, 0, scale, x, y, s, 0); // [MODEL-1]
+        ctx.globalAlpha = 1; return;
       } else if (kind === 'hazard') {
         const hz = hazard === 'bat' || hazard === 'root' || hazard === 'void' || hazard === 'steam' ? hazard : 'rock';
         const still = reduce; // Reduce motion: no flapping, swaying, spinning or pulsing
@@ -57,14 +66,14 @@ export function createItems() {
           ctx.save(); ctx.translate(x, y); if (!still) ctx.rotate(Math.sin(t / 420 + seed) * 0.12);
           art(ctx, 'root', -s / 2, -s / 2, s, s, 0); ctx.restore();
         } else if (hz === 'void') {
-          art(ctx, 'void', x - s / 2, y - s / 2, s, s, 0);
+          if (!baked(ctx, 'hazard:void', 0, x, y, s)) art(ctx, 'void', x - s / 2, y - s / 2, s, s, 0); // [MODEL-1]
           ctx.save(); ctx.translate(x, y); if (!still && !low) ctx.rotate(t / 700 + seed); // orbiting dots
           art(ctx, 'voidDots', -s / 2, -s / 2, s, s, 0); ctx.restore();
         } else if (hz === 'steam') {
           art(ctx, 'steam', x - s / 2, y - s / 2, s, s, still || low ? 0 : (((Math.floor(t / 340 + seed * 3) % 3) + 3) % 3));
           ctx.globalAlpha = fade * (still ? 0.8 : 0.55 + 0.45 * Math.sin(t / 260 + seed)); // warning ring pulses about 0.6 times a second
           art(ctx, 'steamRing', x - s / 2, y - s / 2, s, s, 0);
-        } else art(ctx, 'rock', x - s / 2, y - s / 2, s, s, 0);
+        } else if (!baked(ctx, 'hazard:rock', still ? 0 : t / 220 + seed * 5, x, y, s)) art(ctx, 'rock', x - s / 2, y - s / 2, s, s, 0); // [MODEL-1]
         ctx.globalAlpha = 1; return;
       }
       if (!img) return;

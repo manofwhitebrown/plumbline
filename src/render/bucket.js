@@ -2,6 +2,7 @@
 import { makeSprite } from './canvasUtil.js';
 import { getSprite } from './partIcon.js';
 import { easeOut, clamp01 } from './safe.js';
+import { models } from './models/index.js'; // [MODEL-1] baked wooden barrel + brass trim (null-safe)
 
 const FLASH_MS = 140;
 
@@ -40,6 +41,10 @@ export function createBucket() {
       g.beginPath(); if (g.roundRect) g.roundRect(x - 4, y, w + 8, 15, 7); else g.rect(x - 4, y, w + 8, 15); g.fillStyle = rg; g.fill();
       g.fillStyle = 'rgba(255,255,255,0.55)'; g.fillRect(x + 6, y + 2, w - 12, 2);
     });
+    try { // [MODEL-1] bake the 3D barrel: wood under the tiles, brass over them
+      const d = L.dpr, bk = { w: Math.round((L.bucketW + 24) * d), h: Math.round((L.bucketH + 24) * d), innerW: Math.round(L.bucketW * d), innerH: Math.round(L.bucketH * d) };
+      models.bake(['bucket', 'bucket:trim'], 0, 'high', { group: 'bucket', bucket: bk });
+    } catch (e) { /* flat barrel stays */ }
     glow = makeSprite(64, 64, 1, (g) => {
       const gr = g.createRadialGradient(32, 32, 2, 32, 32, 32); gr.addColorStop(0, 'rgba(255,214,120,0.9)'); gr.addColorStop(1, 'rgba(255,214,120,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
     });
@@ -66,7 +71,13 @@ export function createBucket() {
       this.ensure(L);
       const oy = b.offY, sway = Math.sin(t / 900) * 0.012 + b.tilt;
       ctx.save(); ctx.translate(L.cx, L.top + L.bucketH * 0.2 + oy); ctx.rotate(sway); ctx.translate(-L.cx, -(L.top + L.bucketH * 0.2));
-      if (body) ctx.drawImage(body, L.cx - L.bucketW / 2 - 12, L.top - 12, L.bucketW + 24, L.bucketH + 24);
+      const mw = models.getSprite('bucket', 0), mt = models.getSprite('bucket:trim', 0), bx = L.cx - L.bucketW / 2 - 12, by = L.top - 12; // [MODEL-1]
+      if (mw && mt) { // baked wood, then the dark tile plate, then baked brass trim on top
+        ctx.drawImage(mw.img, mw.x, mw.y, mw.w, mw.h, bx, by, L.bucketW + 24, L.bucketH + 24);
+        ctx.fillStyle = 'rgba(10,8,14,0.78)'; const px = bx + 12 + L.pad - 4, py = by + 12 + L.rim + 2, pw = L.bucketW - L.pad * 2 + 8, ph = L.tile * L.rows + L.pad * 2 - 8;
+        ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(px, py, pw, ph, 12); else ctx.rect(px, py, pw, ph); ctx.fill();
+        ctx.drawImage(mt.img, mt.x, mt.y, mt.w, mt.h, bx, by, L.bucketW + 24, L.bucketH + 24);
+      } else if (body) ctx.drawImage(body, bx, by, L.bucketW + 24, L.bucketH + 24);
       const cols = L.cols, rows = L.rows, size = Math.round(L.tile * 0.86);
       for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
         const x = L.cellX0 + c * L.tile + (L.tile - size) / 2, y = L.cellY0 + r * L.tile + (L.tile - size) / 2;
