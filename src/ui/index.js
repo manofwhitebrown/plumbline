@@ -20,7 +20,8 @@ import './screens/rewards.js';
 import './screens/settings.js';
 import './screens/guide.js';
 import './motion/index.js'; // [MOTION-1] transitions hook
-import './styles/polish.css'; // [AI-2] looks only, loaded last
+import './styles/polish.css'; // [AI-2] looks only
+import './theme/index.js'; // [UIART-1] premium theme, loaded after polish.css so theme.css is last
 
 let mounted = null;
 

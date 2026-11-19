@@ -1,0 +1,189 @@
+/* PLUMBLINE theme (UIART-1). LOOKS ONLY. Loaded last, after polish.css.
+   Rules: colours, fonts, backgrounds, shadows, transitions. No sizes, margins, paddings or
+   positions of existing elements (the layout was verified on 12 sizes). Textures come from
+   textures.js as CSS variables (--tx-metal, --tx-leather, --tx-stone, --tx-grain) and every
+   rule has a plain-gradient fallback, so the theme still looks right without canvas. */
+
+/* ---------- 1. Fonts: two small OFL variable fonts, Latin only, swap + system fallbacks ---------- */
+@font-face { font-family: "Cinzel PL"; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url("/fonts/cinzel-latin-wght-normal.woff2") format("woff2-variations"), url("/fonts/cinzel-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Outfit PL"; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url("/fonts/outfit-latin-wght-normal.woff2") format("woff2-variations"), url("/fonts/outfit-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+/* ---------- 2. Tokens (new names are additive; old tokens keep their meaning) ---------- */
+:root {
+  --font-ui: "Outfit PL", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Cinzel PL", "Trajan Pro", Georgia, "Times New Roman", serif;
+  --ls-display: .035em; --ls-caps: .08em; --ls-num: .01em;
+  --fs-hero: var(--fs-6);
+
+  /* a touch brighter muted text so it holds 4.5:1 on cards and darkened backdrops */
+  --muted: #9aa4c4; --ember: #ff8a58;
+  --brass: #d8b268; --brass-d: #7a5b26; --brass-line: rgba(196, 154, 76, .42); --brass-hi: rgba(255, 228, 164, .26);
+  --leather: #2e2019; --leather-hi: #4a3426; --stone: #2a2d3b;
+  --metal-1: #222c45; --metal-2: #161d33;
+  --gold-grad: linear-gradient(180deg, #fff0c4 0%, #f6c453 46%, #d99a2b 100%);
+  --text-gold: linear-gradient(180deg, #fff6d6 0%, #f6c453 55%, #d9962a 100%);
+  --fam-collector: #6f94ff; --fam-processor: #ffb454; --fam-defense: #46e3a3; --fam-engine: #ff7a45; --fam-special: #b583ff;
+  --glow-gold: 0 0 18px -4px rgba(246, 196, 83, .55);
+  --rivet: radial-gradient(circle at 50% 38%, #f3d48c 0 1.1px, #a8802f 1.9px, rgba(0, 0, 0, .55) 2.8px, transparent 3.4px);
+  --rivets: var(--rivet) left 3px top 3px / 8px 8px no-repeat, var(--rivet) right 3px top 3px / 8px 8px no-repeat,
+    var(--rivet) left 3px bottom 3px / 8px 8px no-repeat, var(--rivet) right 3px bottom 3px / 8px 8px no-repeat;
+}
+/* Colorblind: Okabe-Ito set, no red/green pairs; shapes still come from the game (data-t). */
+[data-cb="1"] { --ok: #56b4e9; --danger: #e69f00; --ember: #d55e00; --shard: #56b4e9; --core: #cc79a7;
+  --tier-1: #56b4e9; --tier-2: #009e73; --tier-3: #e69f00; --tier-4: #d55e00; --tier-5: #cc79a7;
+  --fam-collector: #56b4e9; --fam-processor: #e69f00; --fam-defense: #009e73; --fam-engine: #d55e00; --fam-special: #cc79a7; }
+
+/* ---------- 3. Typography ---------- */
+body, button, input, select, textarea { font-family: var(--font-ui); }
+h1, h2, h3, .res-title, .rw-title, .pause-title, .cheat-title, .ws-name, .btn.big {
+  font-family: var(--font-display); letter-spacing: var(--ls-display); font-weight: 700; }
+.title { letter-spacing: .005em; }
+.sub, .tabbar button, .pill, .btn small, .reason { letter-spacing: .01em; }
+.num, .pill, .set-val, .crew-rate, .big-num, .hud-gold, .hud-depth, .res-gold, .res-depth-num, .rw-amt, .ws-cost {
+  font-variant-numeric: tabular-nums lining-nums; letter-spacing: var(--ls-num); }
+/* Hero numbers: engraved gold gradient fill with a dark drop edge. */
+.big-num, .res-gold .num, .res-depth-num, .hud-gold .num, .crew-rate, .welcome-gold .num {
+  font-family: var(--font-display); font-weight: 800;
+  background: var(--text-gold); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: var(--gold);
+  filter: drop-shadow(0 1px 0 rgba(60, 36, 6, .9)) drop-shadow(0 0 12px rgba(246, 196, 83, .28)); text-shadow: none; }
+
+/* ---------- 4. Materials ---------- */
+/* Dark brushed metal with a thin brass bevel and four rivets. */
+.card, .set-card, .ws-sheet, .res-summary, .pause-text {
+  background: var(--rivets), linear-gradient(180deg, rgba(255, 232, 180, .07), rgba(255, 232, 180, 0) 36%), linear-gradient(0deg, rgba(0, 0, 0, .3), rgba(0, 0, 0, 0) 45%),
+    var(--tx-metal, none) 0 0 / 128px 128px, linear-gradient(180deg, var(--metal-1), var(--metal-2)); border-color: var(--brass-line);
+  box-shadow: inset 0 1px 0 var(--brass-hi), inset 0 -1px 0 rgba(0, 0, 0, .55), 0 1px 2px rgba(0, 0, 0, .5), 0 12px 26px -12px rgba(0, 0, 0, .8); }
+/* Aged leather with stitched edges for lists. */
+.ws-card, .rw-quest, .rw-ach, .crew-card {
+  background: linear-gradient(180deg, rgba(255, 210, 150, .09), rgba(255, 210, 150, 0) 40%), linear-gradient(0deg, rgba(0, 0, 0, .3), rgba(0, 0, 0, 0) 50%),
+    var(--tx-leather, none) 0 0 / 128px 128px, var(--leather); border-color: rgba(120, 84, 50, .75);
+  outline: 1px dashed rgba(240, 200, 140, .3); outline-offset: -5px;
+  box-shadow: inset 0 1px 0 rgba(255, 220, 170, .16), inset 0 -1px 0 rgba(0, 0, 0, .5), 0 8px 18px -10px rgba(0, 0, 0, .8); }
+.ws-card.locked { filter: saturate(.7) brightness(.92); }
+/* Engraved headers: carved text over a thin brass rule (no blocks, so nothing looks like a patch). */
+.res-title, .rw-title, .set-head { background: linear-gradient(90deg, transparent, var(--brass-line) 18%, var(--brass-line) 82%, transparent) left bottom / 100% 1px no-repeat;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .1), 0 -1px 0 rgba(0, 0, 0, .85), 0 0 14px rgba(246, 196, 83, .22); color: var(--gold-soft); }
+
+/* Primary: gold with a real 3D bevel. Pressed: inner shadow, no lift. */
+.btn:where(:not(.ghost, .primary, .danger, .on, .disabled)) {
+  background: linear-gradient(180deg, #34415f 0%, #232c46 55%, #1b2238 100%); border-color: rgba(196, 154, 76, .35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 -2px 0 rgba(0, 0, 0, .4), 0 3px 0 #0b0f1c, 0 6px 12px -4px rgba(0, 0, 0, .6); }
+.btn.primary {
+  background: var(--gold-grad); border-color: #8a5d12; color: #2a1704; text-shadow: 0 1px 0 rgba(255, 244, 205, .7);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, .8), inset 0 -3px 0 rgba(150, 92, 12, .55), inset 1.5px 0 0 rgba(255, 255, 255, .25), 0 3px 0 #7a4f0d, 0 8px 18px -4px rgba(246, 196, 83, .5); }
+.btn.danger { background: linear-gradient(180deg, #ff8a95 0%, #ff4d5e 55%, #c62c3e 100%); border-color: #7d1220; color: #2a050b;
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, .5), inset 0 -3px 0 rgba(110, 10, 26, .5), 0 3px 0 #6a0f1d, 0 8px 16px -6px rgba(255, 77, 94, .5); }
+.btn:active, .btn.pressed { transform: translateY(2px); filter: brightness(.95); }
+.btn.primary:active, .btn.primary.pressed { box-shadow: inset 0 3px 8px rgba(110, 66, 8, .65), inset 0 -1px 0 rgba(255, 255, 255, .3), 0 1px 0 #7a4f0d, 0 2px 8px -2px rgba(246, 196, 83, .4); }
+.btn:where(:not(.ghost, .primary, .danger, .on, .disabled)):active { box-shadow: inset 0 3px 8px rgba(0, 0, 0, .6), 0 1px 0 #0b0f1c; }
+.btn.danger:active { box-shadow: inset 0 3px 8px rgba(90, 8, 20, .7), 0 1px 0 #6a0f1d; }
+.btn.ghost { box-shadow: none; text-shadow: none; }
+.btn.disabled, .btn[disabled] { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 2px 0 #0b0f1c; text-shadow: none; }
+.btn.primary.disabled, .btn.primary[disabled] { background: linear-gradient(180deg, #b9a77a, #8a7a52 60%, #6f6140); color: #1b1408; border-color: #4a3d1f; }
+.btn.pulse { animation: uiPulse 1100ms ease-in-out infinite; }
+@keyframes uiPulse { 50% { box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, .8), inset 0 -3px 0 rgba(150, 92, 12, .55), 0 3px 0 #7a4f0d, 0 8px 30px 0 rgba(246, 196, 83, .8); } }
+
+/* Hold button: a brass ring with a gold fill that sweeps across. */
+.hold { box-shadow: inset 0 0 0 2px rgba(255, 220, 160, .35), inset 0 0 0 4px rgba(60, 12, 20, .55), 0 3px 0 #6a0f1d, 0 8px 16px -6px rgba(255, 77, 94, .5); }
+.hold .hold-fill { background: linear-gradient(90deg, rgba(255, 214, 120, .55), rgba(255, 244, 205, .75)); box-shadow: 4px 0 14px rgba(255, 220, 140, .7); }
+
+/* Glass for modals and sheets: one soft blur layer (the scrim). The panel itself has no blur. */
+.scrim { background: radial-gradient(ellipse at 50% 40%, rgba(20, 16, 36, .66), rgba(4, 4, 10, .86)); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.modal, .sheet {
+  background: var(--rivets), linear-gradient(180deg, rgba(190, 210, 255, .1), rgba(190, 210, 255, .02) 40%), linear-gradient(180deg, rgba(26, 34, 58, .96), rgba(14, 19, 34, .98));
+  border-color: var(--brass-line); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), inset 0 0 0 1px rgba(0, 0, 0, .35), 0 24px 60px rgba(0, 0, 0, .7), 0 0 0 1px rgba(0, 0, 0, .5); }
+.sheet .grab { background: linear-gradient(180deg, var(--brass), var(--brass-d)); }
+
+/* Pills: currency capsules with a lamp glow. */
+.pill { background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0) 55%), var(--tx-metal, none) 0 0 / 128px 128px, #121a2e;
+  border-color: var(--brass-line); box-shadow: inset 0 1px 0 var(--brass-hi), inset 0 -1px 0 rgba(0, 0, 0, .5), 0 2px 6px rgba(0, 0, 0, .4); transition: box-shadow var(--dur-slow) var(--ease), transform var(--dur-fast) var(--ease); }
+.pill.gold { box-shadow: inset 0 1px 0 var(--brass-hi), 0 0 12px -3px rgba(246, 196, 83, .55); }
+.pill.shard { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 0 12px -3px rgba(127, 214, 255, .55); }
+.pill.core { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 0 12px -3px rgba(181, 131, 255, .55); }
+.pill.ui-bump { animation: uiBump 620ms var(--ease); }
+@keyframes uiBump { 0% { box-shadow: 0 0 0 0 rgba(246, 196, 83, .0); } 30% { box-shadow: 0 0 22px 2px rgba(246, 196, 83, .75); transform: scale(1.04); } 100% { transform: none; } }
+.pill .icon, .rw-amt .icon, .hud-icon, .res-icon { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .6)); }
+
+/* Progress: glowing fill with a moving highlight. */
+.bar { background: linear-gradient(180deg, #05070f, #0d1220); border-color: var(--brass-line); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .75), 0 1px 0 rgba(255, 255, 255, .06); }
+.bar > i { background-image: linear-gradient(180deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 55%), linear-gradient(90deg, #d9622f, var(--gold) 70%, var(--gold-soft)); box-shadow: 0 0 12px rgba(246, 196, 83, .6); overflow: hidden; }
+.bar > i::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 38%; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .55), rgba(255, 255, 255, 0)); transform: translateX(-120%); animation: uiSheen 2.6s ease-in-out infinite; }
+@keyframes uiSheen { 0%, 35% { transform: translateX(-120%); } 85%, 100% { transform: translateX(300%); } }
+.bar.ok > i { background-image: linear-gradient(180deg, rgba(255, 255, 255, .4), rgba(255, 255, 255, 0) 55%), linear-gradient(90deg, #1fb87f, var(--ok) 60%, var(--gold-soft)); box-shadow: 0 0 12px rgba(70, 227, 163, .55); }
+
+/* Gem-socket toggles and sliders. */
+.sw { background: linear-gradient(180deg, #05070f, #111933); border-color: var(--brass-line); box-shadow: inset 0 2px 5px rgba(0, 0, 0, .8), 0 1px 0 rgba(255, 255, 255, .08); }
+.sw::after { background: radial-gradient(circle at 35% 30%, #c9d2ee 0 18%, #7f8aab 55%, #4a5370 100%); box-shadow: 0 1px 3px rgba(0, 0, 0, .7), inset 0 -2px 3px rgba(0, 0, 0, .35); }
+.switch-row[aria-checked="true"] .sw { background: linear-gradient(180deg, #3a2608, #6b4510); border-color: var(--brass); box-shadow: inset 0 2px 5px rgba(0, 0, 0, .7), 0 0 14px -2px rgba(246, 196, 83, .6); }
+.switch-row[aria-checked="true"] .sw::after { background: radial-gradient(circle at 35% 30%, #fff6d6 0 20%, #f6c453 55%, #b57a1c 100%); box-shadow: 0 0 10px rgba(255, 214, 120, .9), 0 1px 3px rgba(0, 0, 0, .7); }
+.range { -webkit-appearance: none; appearance: none; }
+.range::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: linear-gradient(180deg, #05070f, #111933); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .8), 0 1px 0 rgba(255, 255, 255, .08); border: 1px solid var(--brass-line); }
+.range::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -10px; border-radius: 50%; border: 1px solid #8a5d12;
+  background: radial-gradient(circle at 35% 30%, #fff6d6 0 18%, #f6c453 55%, #b57a1c 100%); box-shadow: 0 0 10px rgba(246, 196, 83, .6), 0 2px 3px rgba(0, 0, 0, .7); }
+.range::-moz-range-track { height: 8px; border-radius: 999px; background: #0b1020; border: 1px solid var(--brass-line); }
+.range::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #8a5d12; background: radial-gradient(circle at 35% 30%, #fff6d6 0 18%, #f6c453 55%, #b57a1c 100%); }
+
+/* ---------- 5. Components ---------- */
+/* Tab bar: brass top rail, icon glow and an indicator that grows under the active tab. */
+.tabbar { background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(0, 0, 0, .2)), var(--tx-metal, none) 0 0 / 128px 128px, #0b1020;
+  border-top-color: var(--brass-line); box-shadow: 0 -1px 0 rgba(0, 0, 0, .8), 0 -10px 24px -8px rgba(0, 0, 0, .7), inset 0 1px 0 var(--brass-hi); }
+.tabbar button .icon { transition: transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+.tabbar button[aria-current="page"] .icon { transform: translateY(-1px) scale(1.08); filter: drop-shadow(0 0 6px rgba(246, 196, 83, .7)); }
+.tabbar button::after { content: ""; position: absolute; left: 22%; right: 22%; top: 0; height: 3px; border-radius: 0 0 4px 4px; background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  box-shadow: 0 0 12px rgba(246, 196, 83, .8); transform: scaleX(0); transition: transform var(--dur-slow) var(--ease); pointer-events: none; }
+.tabbar button[aria-current="page"]::after { transform: scaleX(1); }
+.tabbar button[aria-current="page"] { text-shadow: 0 0 12px rgba(246, 196, 83, .6); }
+
+/* Toasts: little banners with a brass edge and a state stripe. */
+.toast { background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(0, 0, 0, .12)), var(--tx-stone, none) 0 0 / 128px 128px, #232838;
+  border-color: var(--brass-line); box-shadow: inset 0 1px 0 var(--brass-hi), inset 4px 0 0 var(--brass), 0 10px 26px rgba(0, 0, 0, .65); }
+.toast.ok { box-shadow: inset 0 1px 0 var(--brass-hi), inset 4px 0 0 var(--ok), 0 10px 26px rgba(0, 0, 0, .65); }
+.toast.error { box-shadow: inset 0 1px 0 var(--brass-hi), inset 4px 0 0 var(--danger), 0 10px 26px rgba(0, 0, 0, .65); }
+.toast.warn { box-shadow: inset 0 1px 0 var(--brass-hi), inset 4px 0 0 var(--ember), 0 10px 26px rgba(0, 0, 0, .65); }
+
+/* Part cards: family-coloured frame and a slow rarity shine on the selected one. */
+.partcard, .ws-card[data-family] { --fam: var(--brass); }
+[data-family="collector"], [data-fam="collector"] { --fam: var(--fam-collector); } [data-family="processor"], [data-fam="processor"] { --fam: var(--fam-processor); }
+[data-family="defense"], [data-fam="defense"] { --fam: var(--fam-defense); } [data-family="engine"], [data-fam="engine"] { --fam: var(--fam-engine); }
+[data-family="special"], [data-fam="special"] { --fam: var(--fam-special); }
+.partcard { background: linear-gradient(180deg, color-mix(in srgb, var(--fam) 20%, transparent), transparent 55%), var(--tx-metal, none) 0 0 / 128px 128px, #141b2e;
+  border-color: color-mix(in srgb, var(--fam) 70%, #000); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 0 0 1px rgba(0, 0, 0, .4), 0 5px 10px -4px rgba(0, 0, 0, .7); position: relative; overflow: hidden; }
+.partcard::after { content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 40%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .22), transparent); transform: translateX(-160%) skewX(-12deg); pointer-events: none; }
+.partcard.sel::after { animation: uiShine 3.2s ease-in-out infinite; }
+.partcard.sel { border-color: var(--gold); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 0 18px rgba(246, 196, 83, .5), 0 5px 10px -4px rgba(0, 0, 0, .7); }
+@keyframes uiShine { 0%, 40% { transform: translateX(-160%) skewX(-12deg); } 80%, 100% { transform: translateX(420%) skewX(-12deg); } }
+.ws-card[data-family] { border-left-color: var(--fam); box-shadow: inset 3px 0 0 var(--fam), inset 0 1px 0 rgba(255, 220, 170, .16), 0 8px 18px -10px rgba(0, 0, 0, .8); }
+
+/* Empty, locked and error states: the small illustrations come from icons.js (illo-*). */
+.ui-state { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; color: var(--muted); }
+.ui-state .icon { width: 64px; height: 64px; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .6)); opacity: .95; }
+.ws-empty, .tray-empty, .rw-empty { color: var(--muted); border: 1px dashed var(--brass-line); border-radius: var(--radius-card); background: rgba(0, 0, 0, .22); }
+
+/* ---------- 6. Screen backdrops: one fixed layer behind the screens, painted by backdrops (textures.js) ---------- */
+.ui-bd { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #070a12 center / cover no-repeat; opacity: 0; transition: opacity var(--dur-slow) var(--ease); will-change: transform; }
+.ui-bd.on { opacity: 1; animation: uiDrift 46s ease-in-out infinite alternate; }
+.ui-bd::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7, 10, 18, .42), rgba(7, 10, 18, .56) 55%, rgba(7, 10, 18, .72)), radial-gradient(ellipse at 50% 45%, rgba(7, 10, 18, 0), rgba(7, 10, 18, .5)); }
+@keyframes uiDrift { from { transform: translate3d(-1.2%, -.6%, 0) scale(1.02); } to { transform: translate3d(1.2%, .6%, 0) scale(1.05); } }
+.screen-host > :is(.screen-home, .screen-rig, .screen-crew, .screen-workshop, .screen-codex, .screen-rewards, .screen-settings) { background: transparent; z-index: 1; }
+
+/* ---------- 7. Safe fallbacks ---------- */
+/* High contrast (system preference or data-contrast): no textures or backdrop, solid surfaces, strong edges. */
+@media (prefers-contrast: more) { :root { --text: #ffffff; --muted: #c9d0e8; } .ui-bd { display: none; }
+  .card, .set-card, .modal, .sheet, .pill, .partcard, .toast, .ws-card, .rw-quest, .rw-ach, .rw-day, .set-row { background: #0d1220; outline: 0; border-color: #e8d29a; box-shadow: none; }
+  .screen-host > .screen { background: #070a12; } .btn:where(:not(.primary, .danger, .ghost)) { background: #1d2740; border-color: #e8d29a; } }
+[data-contrast="1"] { --text: #ffffff; --muted: #c9d0e8; }
+[data-contrast="1"] .ui-bd { display: none; }
+[data-contrast="1"] .screen-host > .screen { background: #070a12; }
+[data-contrast="1"] :is(.card, .set-card, .modal, .sheet, .pill, .partcard, .toast, .ws-card, .rw-quest, .rw-ach, .rw-day, .set-row) { background: #0d1220; outline: 0; border-color: #e8d29a; box-shadow: none; }
+/* Large text: keep display type from getting too wide (Cinzel is a wide face). */
+[data-large="1"] :is(h1, h2, h3, .ws-name) { letter-spacing: .01em; }
+/* Old browsers without color-mix keep the plain card look. */
+@supports not (color: color-mix(in srgb, red, blue)) { .partcard { background: #141b2e; border-color: var(--line); } }
+/* Reduce motion: static light only. */
+[data-reduce="1"] .ui-bd.on, [data-reduce="1"] .bar > i::after, [data-reduce="1"] .partcard.sel::after, [data-reduce="1"] .pill.ui-bump, [data-reduce="1"] .btn.pulse { animation: none; }
+[data-reduce="1"] .tabbar button::after, [data-reduce="1"] .tabbar button .icon, [data-reduce="1"] .ui-bd { transition: none; }
+@media (prefers-reduced-motion: reduce) { .ui-bd.on, .bar > i::after, .partcard.sel::after, .pill.ui-bump, .btn.pulse { animation: none; } .ui-bd, .tabbar button::after { transition: none; } }
