@@ -36,7 +36,7 @@ export const PART_DATA = {
   // ---------- Processors ----------
   polisher: {
     name: 'Polisher', family: 'processor', tags: ['tier', 'gem'],
-    desc: 'Makes a passing gem one tier better.',
+    desc: 'Makes a passing gem one level better.',
     cost: 70, unlock: { type: 'gold', value: 40 }, tune: { tierUp: 1 },
   },
   multiplier: {
@@ -46,7 +46,7 @@ export const PART_DATA = {
   },
   smelter: {
     name: 'Smelter', family: 'processor', tags: ['ore', 'gem', 'tier'],
-    desc: 'Turns ore into a tier 1 gem, worth a little more.',
+    desc: 'Turns ore into a level 1 gem, worth a little more.',
     cost: 1900, unlock: { type: 'gold', value: 1800 }, tune: { toTier: 1, valueBoost: 1.25 },
   },
   splitter: {
@@ -66,7 +66,7 @@ export const PART_DATA = {
   },
   prism: {
     name: 'Prism', family: 'processor', tags: ['gem', 'pair', 'shimmer'],
-    desc: 'A tier 3+ gem shimmers for double when a Prism beside it also worked.',
+    desc: 'A level 3+ gem shimmers for double when a Prism beside it also worked.',
     cost: 25000, unlock: { type: 'depth', value: 350 }, tune: { minTier: 3, factor: 2 },
   },
   // ---------- Defense ----------
@@ -173,7 +173,7 @@ export const COMBO_DATA = {
   },
   prism_pair: {
     name: 'Prism Pair', tags: ['shimmer', 'pair'],
-    desc: 'Two Prisms side by side or one above the other. High tier gems shimmer.',
+    desc: 'Two Prisms side by side or one above the other. High level gems shimmer.',
   },
   battery_burst: {
     name: 'Battery Burst', tags: ['store', 'burst'],

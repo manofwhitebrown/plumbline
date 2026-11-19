@@ -25,7 +25,7 @@ export const QUESTS = [
   { id: 'q_combo10',  text: 'Reach a Combo of 10',             stat: 'combo',    kind: 'best', target: 10,   shards: 6,  minBest: 0 },
   { id: 'q_combo25',  text: 'Reach a Combo of 25',             stat: 'combo',    kind: 'best', target: 25,   shards: 10, minBest: 150 },
   { id: 'q_chains20', text: 'Set off 20 chains',               stat: 'chains',   kind: 'sum',  target: 20,   shards: 6,  minBest: 0 },
-  { id: 'q_block5',   text: 'Block 5 hazards',                 stat: 'blocked',  kind: 'sum',  target: 5,    shards: 6,  minBest: 0 },
+  { id: 'q_block5',   text: 'Block 5 dangers',                 stat: 'blocked',  kind: 'sum',  target: 5,    shards: 6,  minBest: 0 },
   { id: 'q_crew5',    text: 'Hire 5 Crew levels',              stat: 'crewBought', kind: 'sum', target: 5,   shards: 6,  minBest: 0 },
   { id: 'q_part1',    text: 'Buy a Workshop Part',  stat: 'partsBought', kind: 'sum', target: 1,  shards: 8,  minBest: 0 },
   { id: 'q_gold5k',   text: 'Earn 5K Gold',                    stat: 'goldEarned', kind: 'sum', target: 5000, shards: 6, minBest: 0 },

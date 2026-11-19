@@ -45,7 +45,7 @@
 .res-part-name { padding: 2px 8px; border-radius: var(--radius-pill); background: var(--ink-700); font-size: var(--fs-1); }
 .res-summary { max-width: 340px; overflow-wrap: anywhere; }
 
-.res-actions { flex: none; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+.res-actions { flex: none; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-4) calc(var(--space-4) + var(--sab, env(safe-area-inset-bottom, 0px)));
   background: linear-gradient(transparent, var(--ink-900) 40%); visibility: hidden; }
 .res-actions.in { visibility: visible; }
 .res-again { min-height: 64px; }

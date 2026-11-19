@@ -6,7 +6,7 @@
 .mx-x { flex: 0 0 auto; }
 /* The middle part scrolls. The header and the buttons stay in view. */
 .modal.mx > .mx-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: var(--space-4); -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-.modal.mx > .stack:last-child { flex: 0 0 auto; flex-direction: row; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: var(--ink-700); }
+.modal.mx > .stack:last-child { flex: 0 0 auto; flex-direction: row; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) var(--space-4) calc(var(--space-3) + var(--sab, env(safe-area-inset-bottom, 0px))); border-top: 1px solid var(--line); background: var(--ink-700); }
 .modal.mx > .stack:last-child > .btn { flex: 1 1 140px; min-width: 0; }
 .modal.mx > .stack:last-child > .hold { flex: 1 1 100%; }
 

@@ -37,7 +37,7 @@ export const TEMPLATES = [
     make(best, level) {
       const tier = tierFor(best);
       const target = [5, 10, 18][level] + Math.floor(best / 100) * 2;
-      const label = tier > 1 ? `Collect ${target} tier ${tier}+ gems` : `Collect ${target} gems`;
+      const label = tier > 1 ? `Collect ${target} level ${tier}+ gems` : `Collect ${target} gems`;
       return { target, tier, text: label, reward: 1 + level };
     },
   },

@@ -19,7 +19,7 @@ Gold, Shards, Core Dust, Rig, Part, Drop, Haul Up, Snap, Strain, Depth, Biome, C
 | tier (on screen) | level, for example "one level better" |
 | beat | step |
 
-The "tier" row is a proposal from NEW-6. Until the Manager agrees, existing text that says tier may stay.
+DECIDED by the Manager: players see "level", never "tier" (and "danger", never "hazard"). Developer files and code may keep the word tier.
 
 ## Words we never show
 beat, lane, tick, entity, null, undefined, NaN, Infinity, seed, slice, bus, payload, debug.
