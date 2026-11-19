@@ -95,7 +95,7 @@ export function createRenderer(canvas, opts = {}) {
 
   function step(rawDt, alpha) {
     const dt = clamp(num(rawDt, 16), 0, 250);
-    frameMs = frameMs * 0.9 + dt * 0.1;
+    frameMs = frameMs * 0.9 + dt * 0.1; models.noteFrame(frameMs); // [MODEL-1] baking backs off when the game is slow
     quality.sample(num(rawDt, 16)); // raw time: a hidden tab must not count as slow
     if (sc.slowT > 0) { sc.slowT -= dt; if (sc.slowT <= 0) sc.timeScale = 1; else sc.timeScale = 0.3 + 0.7 * (1 - sc.slowT / 600); }
     const sdt = dt * sc.timeScale; sc.time += dt;

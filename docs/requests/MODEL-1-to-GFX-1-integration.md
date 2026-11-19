@@ -11,4 +11,4 @@ Small edits made (please keep them when you edit these files):
 3. `src/render/index.js` (NEW-7): one import and one line in `applyQuality()`: `models.setEnabled(q.name !== 'low')`.
 
 Not touched: rope, partIcon, bats, roots, steam. The red warning glow under hazards stays (hazard rock also has its own red-orange rim baked in).
-Optional for NEW-7: call `models.noteFrame(frameMs)` each frame so baking backs off when the game is busy.
+`index.js` also calls `models.noteFrame(frameMs)` each frame so baking backs off when the game is busy.

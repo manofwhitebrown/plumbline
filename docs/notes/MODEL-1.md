@@ -17,7 +17,7 @@ Keys: gem:1..6, ore, chest, hook, hazard:rock, hazard:void, bucket, bucket:trim.
 - Full bake of 12 models, 41 css px items at dpr 2: about 0.5 s total, 5.2 MB atlas (cap 12 MB). Per-frame slice default 5 ms, 1.5-3 ms when the game is slow.
 - Frame counts cut from the brief's 24/16 to 8-16 (symmetric gems repeat sooner, sphere needs 1) to hit the time budget. Bucket is baked at 1x supersampling; items at 2x.
 - NOT done: a real browser/phone frame-time check with 40 gems on screen. I had no browser here. Please run `npm run dev` and watch `debugStats().frameMs`. A mid phone is likely 3-4x slower than this machine, so the 600 ms total bake target is probably missed (about 2 s), though it is spread over slices of 5 ms.
-- Not done: a handle arch on the bucket (two side ears only, so the sprite keeps its size); `models.noteFrame` is not called by the renderer yet.
+- Not done: a handle arch on the bucket (two side ears only, so the sprite keeps its size).
 
 ## Notes
 Deterministic: same seed gives the same pixels (tested). The prism and chest/hook swing instead of spinning. Hazard void orb is violet-rimmed; the old red warning glow is still drawn under it.
