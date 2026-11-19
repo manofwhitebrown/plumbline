@@ -21,7 +21,7 @@ export const PART_DATA = {
   magnet: {
     name: 'Magnet', family: 'collector', tags: ['grab', 'ore', 'wide'],
     desc: 'Grabs ore in its column and both side columns.',
-    cost: 40, unlock: { type: 'gold', value: 10 }, tune: {},
+    cost: 22, unlock: { type: 'gold', value: 10 }, tune: {}, // 22: affordable after the tutorial drop (about 23 Gold at 22 s); Polisher (70) stays under 3.2x of it
   },
   net: {
     name: 'Net', family: 'collector', tags: ['grab', 'gem', 'wide'],

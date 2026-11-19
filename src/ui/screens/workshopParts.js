@@ -89,7 +89,8 @@ export function partCardEl(row, handlers, scope) {
     el.classList.toggle('locked', st.state === 'locked');
     el.classList.toggle('owned', st.state === 'owned');
     lockIcon.hidden = st.state !== 'locked';
-    if (st.canBuy) el.setAttribute('data-tut', 'workshop-part'); else el.removeAttribute('data-tut');
+    // The tutorial points at the Buy button itself (tapping the card would only open its details).
+    if (st.canBuy) buy.setAttribute('data-tut', 'workshop-part'); else buy.removeAttribute('data-tut');
     buy.setState({ label: st.buyLabel, disabled: !st.canBuy, reason: st.reason || st.line });
     main.setAttribute('aria-label', st.name + '. ' + st.line + '. Details');
     return st;

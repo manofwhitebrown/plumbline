@@ -48,9 +48,9 @@ test('happy path: every step in order, then done', () => {
   bus.emit('run:started', {});
   assert.equal(t.flow.currentId(), 'drop-gems');
   assert.equal(t.last().button, 'Got it');
-  t.timers.advance(6000);
+  t.timers.advance(14000);
   assert.equal(t.flow.currentId(), 'drop-strain');
-  t.timers.advance(6000);
+  t.timers.advance(14000);
   assert.equal(t.flow.currentId(), 'drop-haul');
   // The tutorial waits for the player to press Haul Up.
   t.timers.advance(60000);
@@ -60,9 +60,14 @@ test('happy path: every step in order, then done', () => {
   bus.emit('run:ended', { outcome: 'hauled' });
   assert.equal(t.flow.currentId(), 'results-gold');
   t.last().onButton();
+  // The Results screen has no tab bar: the player is sent Home first.
+  assert.equal(t.flow.currentId(), 'results-home');
+  t.present.add('results-home');
+  t.timers.advance(300);
+  assert.equal(t.flow.currentId(), 'results-home', 'waits while the tab bar is hidden');
+  t.present.add('tab-workshop'); // the player tapped Home, the tab bar is back
+  t.timers.advance(300);
   assert.equal(t.flow.currentId(), 'tab-workshop');
-
-  t.present.add('tab-workshop');
   t.timers.advance(300);
   t.present.add('workshop-part');
   t.timers.advance(300);

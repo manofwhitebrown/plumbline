@@ -46,3 +46,38 @@ test('part impact: banning a part never reports a loss outside 0..1, the Hook is
   for (const v of Object.values(imp)) assert.ok(v >= 0 && v <= 1);
   assert.ok(MUST_HAVE_LOSS > 0.5 && MUST_HAVE_LOSS < 1);
 });
+
+test('tutorial: the first drop earns enough Gold to buy the first part by the time Haul is offered', async () => {
+  const { getPart } = await import('../src/engine/parts/index.js');
+  const { STEPS, FIRST_DROP_SEED, SAFE_DEPTH } = await import('../src/tutorial/steps.js');
+  const { emptyRig } = await import('../src/tutorial/suggest.js');
+  const hintMs = STEPS.filter((s) => s.id === 'drop-gems' || s.id === 'drop-strain').reduce((a, s) => a + s.on.find((o) => o.afterMs).afterMs, 0);
+  const beats = Math.round(hintMs / ENGINE.baseBeatMs);
+  const rig = emptyRig(4, 3); rig.cells[2][1] = 'hook';
+  const r = simulateRun({ rig, mods: { ...DEFAULT_MODS }, seed: FIRST_DROP_SEED, safeUntilDepth: SAFE_DEPTH, policy: ({ run }) => (run.state.beat >= beats ? 'haul' : 'continue') });
+  assert.ok(r.kept >= getPart('magnet').cost + 3, `tutorial drop earns ${r.kept} but the Magnet costs ${getPart('magnet').cost} (keep a margin of 3 Gold for a slightly early tap)`);
+});
+
+test('engine: safeUntilDepth means no Snap above that depth, normal drops can Snap there', async () => {
+  const { emptyRig } = await import('../src/tutorial/suggest.js');
+  const rig = emptyRig(4, 3); rig.cells[2][1] = 'hook';
+  const mods = { ...DEFAULT_MODS, strainMult: 4 }; // a rope that wears out fast, so Snaps would come early
+  let earlyWithout = 0, earlyWith = 0;
+  for (let seed = 1; seed <= 40; seed++) {
+    if (simulateRun({ rig, mods, seed }).depth < 40) earlyWithout++;
+    if (simulateRun({ rig, mods, seed, safeUntilDepth: 40 }).depth < 40) earlyWith++;
+  }
+  assert.ok(earlyWithout > 0, 'the test needs a rope that can Snap early');
+  assert.equal(earlyWith, 0, 'no Snap above the safe depth');
+});
+
+test('session: only the tutorial drop gets the fixed seed', async () => {
+  const { setup } = await import('./run-helpers.js');
+  const { session } = await import('../src/run/session.js');
+  const t = setup();
+  assert.equal(session.start({ tutorial: true, seed: 7, safeUntilDepth: 40 }).seed, 7);
+  session.abort(); t.off();
+  const t2 = setup();
+  assert.notEqual(session.start({ seed: 7 }).seed, 7, 'a seed without tutorial:true is ignored');
+  session.abort(); t2.off();
+});

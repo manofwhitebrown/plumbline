@@ -1,5 +1,7 @@
 /* ---- shared small bits ---- */
 .topbar { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); }
+.topbar > .row { flex-wrap: wrap; min-width: 0; row-gap: var(--space-1); } /* three wide pills wrap instead of running into the buttons */
+.topbar > .iconbtn, .home-top > .iconbtn { flex: 0 0 auto; }
 .iconbtn { padding: 0; width: var(--tap-min); position: relative; } .iconbtn .icon { width: 26px; height: 26px; }
 .center { text-align: center; justify-content: center; align-items: center; }
 .big-num { font-size: var(--fs-6); color: var(--gold-soft); }

@@ -17,18 +17,23 @@
 
 export const FIRST_DROP_SEED = 7;
 export const SAFE_DEPTH = 40;
+// Timing note: the two hint steps take 14 s each (beats are 800 ms), so Haul is offered at about 28 s (35 m, inside the safe 40 m),
+// when the fixed-seed first drop has earned about 27 Gold. The Magnet costs 22, so the first part can be bought.
 
 export const STEPS = [
   { id: 'home-drop', targets: ['home-drop'], text: 'Tap Drop.', mode: 'action', group: 'drop',
     on: [{ bus: 'run:started' }], skipTo: 'drop-gems' },
   { id: 'drop-gems', targets: ['well'], text: 'Gems rise past your bucket. The Hook collects them for Gold.', mode: 'info', group: 'drop',
-    on: [{ afterMs: 6000 }, { bus: 'run:ended', goto: 'results-gold' }], skipTo: 'drop-strain' },
+    on: [{ afterMs: 14000 }, { bus: 'run:ended', goto: 'results-gold' }], skipTo: 'drop-strain' },
   { id: 'drop-strain', targets: ['strain'], text: 'The rope gets tighter the deeper you go.', mode: 'info', group: 'drop',
-    on: [{ afterMs: 6000 }, { bus: 'run:ended', goto: 'results-gold' }], skipTo: 'drop-haul' },
+    on: [{ afterMs: 14000 }, { bus: 'run:ended', goto: 'results-gold' }], skipTo: 'drop-haul' },
   { id: 'drop-haul', targets: ['haul'], text: 'Tap Haul Up to keep what you found.', mode: 'action', group: 'drop',
     on: [{ bus: 'run:ended', goto: 'results-gold' }], skipTo: 'results-gold' },
   { id: 'results-gold', targets: ['results-gold'], text: 'That is your Gold. Spend it in the Workshop.', mode: 'info',
-    on: [{ afterMs: 9000 }], skipTo: 'tab-workshop' },
+    on: [{ afterMs: 9000 }], skipTo: 'results-home' },
+  // The Results screen has no tab bar, so first send the player Home (found by playing in a real browser).
+  { id: 'results-home', targets: ['results-home'], text: 'Tap Home.', mode: 'action',
+    on: [{ appears: 'tab-workshop' }], skipTo: 'tab-workshop', maxMs: 30000, maxTo: 'tab-workshop' },
   { id: 'tab-workshop', targets: ['tab-workshop'], text: 'Open the Workshop.', mode: 'action',
     on: [{ appears: 'workshop-part' }], skipTo: 'final', maxMs: 25000, maxTo: 'final' },
   { id: 'workshop-buy', targets: ['workshop-part'], text: 'Buy your first part.', mode: 'action',
@@ -46,7 +51,7 @@ export const STEPS = [
 // Where to pick up after a reload. A drop or results screen is gone after a reload.
 export function resumeId(stepId) {
   if (stepId === 'drop-gems' || stepId === 'drop-strain' || stepId === 'drop-haul') return 'home-drop';
-  if (stepId === 'results-gold') return 'tab-workshop';
+  if (stepId === 'results-gold' || stepId === 'results-home') return 'tab-workshop';
   return STEPS.some((s) => s.id === stepId) ? stepId : STEPS[0].id;
 }
 

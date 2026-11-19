@@ -90,6 +90,7 @@ registerScreen('results', {
     const again = button({ label: 'Drop again', kind: 'primary', big: true, onPress: () => { startDrop(); } }, scope);
     again.classList.add('res-again');
     const home = button({ label: 'Home', kind: 'secondary', onPress: () => { goTab('home'); } }, scope);
+    home.setAttribute('data-tut', 'results-home'); // the tutorial points here: this screen has no tab bar
     const tweak = button({ label: 'Tweak rig', kind: 'ghost', onPress: () => { goTab('rig'); } }, scope);
     tweak.classList.add('res-tweak');
     const actions = h('div', { class: 'res-actions rv' }, again, h('div', { class: 'res-row' }, home, tweak));
