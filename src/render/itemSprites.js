@@ -1,52 +1,12 @@
 // Pre-drawn item pictures (gems, ore, relic, hazards). Drawn once per size.
 import { makeSprite } from './canvasUtil.js';
-import { TIER_COLORS, PRISM, hazardColors } from './palette.js';
+import { hazardColors } from './palette.js';
+import { buildItemAtlas } from './art/itemAtlas.js'; // [GFX-1] gems, ore, relic live in an atlas now
 
 function poly(g, pts) { g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) g.lineTo(pts[i], pts[i + 1]); g.closePath(); }
 function fillPoly(g, pts, a, b) {
   const gr = g.createLinearGradient(pts[0], pts[1], pts[pts.length - 2], pts[pts.length - 1]);
   gr.addColorStop(0, a); gr.addColorStop(1, b); g.fillStyle = gr; poly(g, pts); g.fill();
-}
-
-// Gem with 5 facets. c = {base, light, dark}.
-export function paintGem(g, S, c, tier) {
-  const m = S * 0.1, w = S - m * 2, cx = S / 2;
-  const top = m + w * 0.12, mid = m + w * 0.38, bot = S - m;
-  const L = m, R = S - m, tl = m + w * 0.22, tr = S - m - w * 0.22;
-  g.shadowColor = c.base; g.shadowBlur = S * 0.18;
-  poly(g, [tl, top, tr, top, R, mid, cx, bot, L, mid]); g.fillStyle = c.dark; g.fill();
-  g.shadowBlur = 0;
-  fillPoly(g, [tl, top, cx, top, cx, mid, L, mid], c.light, c.base);        // upper left
-  fillPoly(g, [cx, top, tr, top, R, mid, cx, mid], c.base, c.light);        // upper right
-  fillPoly(g, [L, mid, cx, mid, cx, bot], c.base, c.dark);                  // lower left
-  fillPoly(g, [cx, mid, R, mid, cx, bot], c.dark, c.base);                  // lower right
-  if (tier >= 4) { fillPoly(g, [cx - w * 0.16, top, cx + w * 0.16, top, cx + w * 0.1, mid, cx - w * 0.1, mid], '#ffffff', c.light); g.globalAlpha = 0.5; g.fill(); g.globalAlpha = 1; }
-  g.lineWidth = Math.max(1, S * 0.04); g.lineJoin = 'round'; g.strokeStyle = 'rgba(255,255,255,0.7)';
-  poly(g, [tl, top, tr, top, R, mid, cx, bot, L, mid]); g.stroke();
-  g.beginPath(); g.moveTo(L, mid); g.lineTo(R, mid); g.moveTo(cx, top); g.lineTo(cx, bot);
-  g.lineWidth = Math.max(0.6, S * 0.02); g.strokeStyle = 'rgba(255,255,255,0.25)'; g.stroke();
-}
-
-export function paintOre(g, S) {
-  const cx = S / 2, cy = S / 2, r = S * 0.4;
-  g.beginPath();
-  for (let i = 0; i < 9; i++) { const a = i / 9 * 6.2832, rr = r * (0.82 + 0.18 * Math.sin(i * 2.3 + 1)); g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * 0.9); }
-  g.closePath();
-  const gr = g.createLinearGradient(0, 0, S, S); gr.addColorStop(0, '#8a8f9c'); gr.addColorStop(1, '#3a3e4a'); g.fillStyle = gr; g.fill();
-  g.lineWidth = S * 0.03; g.strokeStyle = 'rgba(255,255,255,0.25)'; g.stroke();
-  g.beginPath(); g.moveTo(S * 0.28, S * 0.62); g.lineTo(S * 0.45, S * 0.45); g.lineTo(S * 0.58, S * 0.55); g.lineTo(S * 0.74, S * 0.34);
-  g.lineWidth = S * 0.09; g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = '#f6c453'; g.stroke();
-  g.lineWidth = S * 0.03; g.strokeStyle = '#fff3c4'; g.stroke();
-}
-
-export function paintRelic(g, S) {
-  const x = S * 0.12, w = S * 0.76, top = S * 0.22, body = S * 0.5;
-  g.beginPath(); g.moveTo(x, body); g.lineTo(x, top + S * 0.12); g.quadraticCurveTo(x, top - S * 0.04, S / 2, top - S * 0.04); g.quadraticCurveTo(x + w, top - S * 0.04, x + w, top + S * 0.12); g.lineTo(x + w, body); g.closePath();
-  g.fillStyle = '#b06a30'; g.fill();
-  g.fillStyle = '#8a4a20'; g.fillRect(x, body, w, S * 0.3);
-  g.fillStyle = '#f6c453'; g.fillRect(x - 1, body - S * 0.04, w + 2, S * 0.08); g.fillRect(x + w * 0.2, top, S * 0.07, S * 0.58); g.fillRect(x + w * 0.8 - S * 0.07, top, S * 0.07, S * 0.58);
-  g.fillStyle = '#ffe3a1'; g.fillRect(S / 2 - S * 0.06, body - S * 0.08, S * 0.12, S * 0.18);
-  g.lineWidth = S * 0.03; g.strokeStyle = 'rgba(255,255,255,0.35)'; g.beginPath(); g.moveTo(x + 2, top + S * 0.1); g.quadraticCurveTo(S / 2, top - S * 0.02, x + w - 2, top + S * 0.1); g.stroke();
 }
 
 export function paintRock(g, S) {
@@ -100,12 +60,12 @@ export function paintWarn(g, S) {
 }
 
 // Build everything for one size. Returns a plain object of canvases (or null entries).
-export function buildItemSprites(S, dpr) {
+// [GFX-1] Gems, ore and relic come from the atlas (art/itemAtlas.js); hazards are still drawn here.
+export function buildItemSprites(S, dpr, low = false) {
   const mk = (fn) => makeSprite(S, S, dpr, fn);
-  const out = { size: S, gems: [null], prism: [], ore: mk((g) => paintOre(g, S)), relic: mk((g) => paintRelic(g, S)),
+  const out = { size: S, art: buildItemAtlas(S, dpr, low),
     rock: mk((g) => paintRock(g, S)), bats: [0, 1, 2].map((w) => mk((g) => paintBat(g, S, w))), root: mk((g) => paintRoot(g, S)),
     voidOrb: mk((g) => paintVoid(g, S)), warn: makeSprite(S * 1.5, S * 1.5, dpr, (g) => paintWarn(g, S * 1.5)) };
-  for (let t = 1; t <= 5; t++) out.gems.push(mk((g) => paintGem(g, S, TIER_COLORS[t], t)));
-  for (let i = 0; i < PRISM.length; i += 2) out.prism.push(mk((g) => paintGem(g, S, PRISM[i], 6)));
   return out;
 }
+export function disposeItemSprites(sp) { if (sp && sp.art) sp.art.destroy(); }

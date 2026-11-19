@@ -45,9 +45,10 @@ export function createRenderer(canvas, opts = {}) {
     particles.setCap(reduce ? Math.round(q.maxParticles * 0.4) : q.maxParticles);
     polish.setQuality(q.name);
     well.setLow(q.name === 'low');
+    items.setLow(q.name === 'low'); // [GFX-1]
   }
   function applyMotion() {
-    sc.reduceMotion = reduce; camera.reduceMotion = reduce; rope.reduceMotion = reduce; well.setReduceMotion(reduce); vignette.setReduceMotion(reduce);
+    sc.reduceMotion = reduce; camera.reduceMotion = reduce; rope.reduceMotion = reduce; well.setReduceMotion(reduce); vignette.setReduceMotion(reduce); items.setReduceMotion(reduce);
     if (reduce) { sc.timeScale = 1; sc.slowT = 0; }
     polish.setReduceMotion(reduce);
     applyQuality();
@@ -192,6 +193,7 @@ export function createRenderer(canvas, opts = {}) {
       if (dead) return; dead = true;
       try { particles.clear(); floaters.clear(); sc.reset(); clearSprites(); ctx && ctx.clearRect(0, 0, canvas.width, canvas.height); } catch (e) { /* ignore */ }
       try { polish.destroy(); } catch (e) { /* ignore */ }
+      try { items.destroy(); } catch (e) { /* ignore */ } // [GFX-1] frees the sprite atlas
       ctx = null;
     },
   };

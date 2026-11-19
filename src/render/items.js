@@ -1,15 +1,29 @@
 // Draws things that rise past the bucket. Uses pre-drawn sprites, so each draw is cheap.
-import { buildItemSprites } from './itemSprites.js';
+import { buildItemSprites, disposeItemSprites } from './itemSprites.js';
+import { spriteKey } from './art/atlas.js';
+import { pickSizeIdx, BASE_IDX, GLINT_FRAMES } from './art/itemAtlas.js';
 import { PRISM_STEPS } from './palette.js';
 import { clamp01 } from './safe.js';
 
 export const KINDS = { gem: 1, ore: 2, hazard: 3, relic: 4 };
 
 export function createItems() {
-  let sp = null;
+  let sp = null, lastSize = 0, lastDpr = 1, low = false, reduce = false;
+  function build() { disposeItemSprites(sp); sp = lastSize ? buildItemSprites(lastSize, lastDpr, low) : null; }
+  // Draws one atlas sprite (gem, ore, relic) centred at x,y with side s.
+  function drawArt(ctx, kind, tier, scale, x, y, s, frame) {
+    const art = sp.art; if (!art) return false;
+    const idx = pickSizeIdx(art.sizes, scale);
+    // animation frames only exist at the main size; other sizes use frame 0
+    const f = idx === BASE_IDX ? frame : 0;
+    return art.atlas.draw(ctx, spriteKey(kind, tier, 'any', idx, f), x - s / 2, y - s / 2, s, s);
+  }
   return {
     get size() { return sp ? sp.size : 0; },
-    rebuild(size, dpr) { sp = buildItemSprites(Math.max(16, Math.round(size)), dpr); },
+    rebuild(size, dpr) { lastSize = Math.max(16, Math.round(size)); lastDpr = dpr; build(); },
+    setLow(v) { v = !!v; if (v !== low) { low = v; build(); } },
+    setReduceMotion(v) { reduce = !!v; },
+    destroy() { disposeItemSprites(sp); sp = null; },
     // Draw one item. (x, y) is its centre. scale 1 = normal. fade 0..1. t = time in ms. seed = tiny per-item number.
     draw(ctx, kind, tier, hazard, x, y, scale, fade, t, seed) {
       if (!sp || fade <= 0.01) return;
@@ -17,10 +31,18 @@ export function createItems() {
       let img = null;
       if (kind === 'gem') {
         const ti = Math.max(1, Math.min(6, Math.floor(tier) || 1));
-        img = ti === 6 ? sp.prism[Math.floor(t / 120 + seed) % sp.prism.length] : sp.gems[ti];
-      } else if (kind === 'ore') img = sp.ore;
-      else if (kind === 'relic') img = sp.relic;
-      else if (kind === 'hazard') {
+        const animate = !low && !reduce && ti >= 5; // void swirl and prism rainbow: 5 steps a second, never a flash
+        const frame = animate ? (((Math.floor(t / 200 + seed * 8) % 8) + 8) % 8) : 0;
+        ctx.globalAlpha = fade;
+        drawArt(ctx, 'gem', ti, scale, x, y, s, frame);
+        if (!low && !reduce) { // glint sweeps across every ~3 s (pre-rendered band, already masked by the gem shape)
+          const k = (((t / 3200 + seed * 0.37) % 1) + 1) % 1;
+          if (k < 0.3) { ctx.globalAlpha = fade * Math.sin((k / 0.3) * Math.PI); drawArt(ctx, 'glint', ti, 1, x, y, s, Math.min(GLINT_FRAMES - 1, Math.floor((k / 0.3) * GLINT_FRAMES))); }
+        }
+        ctx.globalAlpha = 1; return;
+      } else if (kind === 'ore' || kind === 'relic') {
+        ctx.globalAlpha = fade; drawArt(ctx, kind, 0, scale, x, y, s, 0); ctx.globalAlpha = 1; return;
+      } else if (kind === 'hazard') {
         if (sp.warn) { // red warning rim: pulses fast so it reads in under 200 ms
           ctx.globalAlpha = fade * (0.7 + 0.3 * Math.sin(t / 110 + seed));
           ctx.drawImage(sp.warn, x - s * 0.75, y - s * 0.75, s * 1.5, s * 1.5);
@@ -42,15 +64,6 @@ export function createItems() {
       if (!img) return;
       ctx.globalAlpha = fade;
       ctx.drawImage(img, x - s / 2, y - s / 2, s, s);
-      if (kind === 'gem') { // slow glint that slides across the face
-        const k = ((t / 1600 + seed * 0.37) % 1);
-        if (k < 0.35) {
-          const g = Math.sin((k / 0.35) * Math.PI), gx = x - s * 0.25 + k * s * 1.4, gy = y - s * 0.3 + k * s * 0.3, r = s * 0.12 * g;
-          ctx.globalAlpha = fade * g; ctx.fillStyle = '#fff';
-          ctx.beginPath(); ctx.moveTo(gx, gy - r * 2); ctx.lineTo(gx + r * 0.4, gy - r * 0.4); ctx.lineTo(gx + r * 2, gy); ctx.lineTo(gx + r * 0.4, gy + r * 0.4);
-          ctx.lineTo(gx, gy + r * 2); ctx.lineTo(gx - r * 0.4, gy + r * 0.4); ctx.lineTo(gx - r * 2, gy); ctx.lineTo(gx - r * 0.4, gy - r * 0.4); ctx.closePath(); ctx.fill();
-        }
-      }
       ctx.globalAlpha = 1;
     },
   };

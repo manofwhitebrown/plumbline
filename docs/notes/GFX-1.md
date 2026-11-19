@@ -9,12 +9,17 @@
 - `well.js` now uses 4 sprite layers per biome: far (parallax 0.5), mid (0.75, high only), near edge strips (1.0), glow (additive, slow pulse, high only, steady under Reduce motion). Layers are built one per frame from a queue, so a biome change never makes a long frame. `wallTile.js` is a thin wrapper kept for compatibility. Biome blend and fog are the existing ones (unchanged).
 - Tests: `tests/render-art-walls.test.js` (every biome x layer x quality paints without throwing, is deterministic, tiles in y, no-canvas safe). It caught a real seam bug (non-integer frequency multipliers) that is now fixed.
 
+- Step 3 GEM MODELS: `art/gemFacets.js` (facet fill lit from top-left, facet rings, rim, glow, specular), `gemModelsA.js` (T1 quartz hexagon with 6 facets + table, T2 emerald step-cut with 3 nested rings, T3 amber teardrop cabochon with a fossil inclusion), `gemModelsB.js` (T4 ruby brilliant with 8 kite facets + table, T5 void angular shard with glowing core and 8-frame swirl, T6 prism with white beam and animated 6-band rainbow, 8 frames), `gemModels.js` (lookup, glint mask), `oreRelic.js` (ore: faceted rock, gold vein, sparkle flecks; relic: wooden chest, brass bands/corners/rivets, glowing keyhole), `itemAtlas.js` (atlas: 6 size steps 0.5-1.5 x, animation frames, 5 glint frames per tier; low = 3 sizes, no animation, no glint), `gemLab.js` (art lab entries).
+- Every tier has its own SHAPE (hexagon, rectangle, drop, round brilliant, angular shard, triangle) so colour-blind players can tell them apart. Checked by rendering at 22, 44, 96 and 200 px.
+- `items.js` draws gems, ore and relic from the atlas (`itemSprites.js` builds it). Glint every ~3 s, void/prism animate at 5 steps per second (no flashing), both off on low quality and Reduce motion. `index.js` got two one-line hooks (`items.setLow`, `items.setReduceMotion`) and frees the atlas on destroy.
+- Tests: `tests/render-art-gems.test.js` (7 tests: tiers differ, determinism, frames, size picking, atlas keys, memory caps, no-canvas safe).
+
 ## In progress
 - Nothing half-done.
 
 ## Next (in order)
 2. (done, except embers / haze / spores, see Measurements)
-3. Gem models (6 distinct shapes) into the atlas, 6 sizes each, glint strip.
+3. (done)
 4. Hazard models (bat with 3 flap frames).
 5. Bucket and twisted rope (keep `rope.js` API).
 6. 26 part icons in `partIcon.js` (keep `draw` and `toDataURL`).
@@ -28,6 +33,8 @@
 - Wall texture memory at DPR 2: about 1.1 MB per biome, about 6.5 MB for all six.
 - `well.draw` steady state: 0.1-0.5 ms per frame in Node (all layers, high quality).
 - Visual checks done by rendering PNGs headless (all 6 biomes at 360x640, DPR 2; seams checked by stacking tiles). Not yet seen on a real device or at 430x932 / 1440x900 / DPR 1 and 3.
+- Gems: atlas build 11-23 ms (92 sprites), 4 MB at DPR 2 for a 44 px item (2 MB on low); a gem draw costs about 5 us. Typical item size is about 6% of screen width (22-45 px). Texture memory so far: walls 6.5 MB + items 4 MB = about 10.5 MB of the 24 MB budget.
+- A halo bug found by looking at renders: the soft glow behind gems did not fade to zero at the sprite edge (faint square). Fixed by limiting the glow radius to half the sprite.
 - Still to do for step 2: rising embers, heat haze bands, drifting spores (they belong with the ambience work in step 7, in `polish/ambience.js`).
 
 STATUS: IN PROGRESS
