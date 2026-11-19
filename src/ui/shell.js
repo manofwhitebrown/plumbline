@@ -13,10 +13,16 @@ let overlays = 0;
 let current = null; // { id, def }
 let going = false;
 const toasts = [];
+let motionHook = null; // [MOTION-1] optional { before(root, from, to, back), after(token) }
 
 export const SCREEN_IDS = ['home', 'rig', 'drop', 'results', 'crew', 'workshop', 'codex', 'rewards', 'settings', 'guide'];
 
 // Tell the shell where to draw. Safe to call many times.
+// [MOTION-1] Optional motion hook. Never changes what go() does, only adds movement around it.
+export function setMotionHook(hook) {
+  motionHook = hook && typeof hook.before === 'function' ? hook : null;
+}
+
 export function init(el) {
   rootEl = el || null;
 }
@@ -57,11 +63,14 @@ export function go(id, params, opts) {
   try {
     const keepHistory = !(opts && opts.replace);
     if (current && keepHistory && current.id !== id) backStack.push({ id: current.id, params: current.params });
+    let tok = null;
+    if (motionHook) { try { tok = motionHook.before(rootEl, current && current.id, id, !!(opts && opts.back)); } catch (e) { tok = null; } }
     safeUnmount();
     const def = screens.get(id);
     current = { id, def, params };
     def.mount(rootEl, params || {});
     updateChrome(id);
+    if (motionHook && tok) { try { motionHook.after(tok); } catch (e) { /* motion never breaks navigation */ } }
     return true;
   } catch (e) {
     log.error('shell.go: mount failed', id, e);
@@ -88,7 +97,7 @@ export function back() {
   }
   const prev = backStack.pop();
   if (!prev) return false;
-  return go(prev.id, prev.params, { replace: true });
+  return go(prev.id, prev.params, { replace: true, back: true });
 }
 
 export function currentId() {
