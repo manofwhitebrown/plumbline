@@ -5,11 +5,13 @@
 - src/ui/motion/timeline.js: createRunner (skip, speed, Reduce motion finishes instantly with the final state).
 - src/ui/motion/director.js: priority queue, no overlap, dedupe window, skipGroup, audio and haptic hooks, throwing moments never block.
 - src/ui/motion/transitions.js + index.js: plan() (tab fade with 12 px parallax, forward slide, back reverses, results rise, drop fade), ghost cross-fade (skipped when the old screen has a canvas), tap or key skips, springIn() for sheets and modals (panel settles, backdrop fades, blur stays static). All 220-300 ms, transform and opacity only.
+- src/render/cinematics/: pool.js (300-cap particle pool), fxLayer.js (click-through overlay canvas + grey tint layer, never takes pointer events), common.js, dropStart.js (full 1500 ms for the first 3 drops of a session, then 500 ms), haulFinish.js (900 ms), snapDrama.js (1100 ms: 80 ms freeze, 0.35x slow for 600 ms, no red, no big shake). Each calls onGo exactly once (end, skip or Reduce motion).
+- tests/motion-cinematics.test.js.
 - tests/motion-transitions.test.js: plan table, reduce path, skip, no listeners left after dispose, shell hook safety.
 - tests/motion-core.test.js: easing maths, runner, director queue priority, skipping, reduce paths, no double plays.
 
 ## In progress / Next
-- Wire springIn into components/sheet.js and modal.js (hook request, see below), tab indicator slide. Then dropStart, haul finish, snap drama, biome card, record and milestones.
+- Wire springIn into components/sheet.js and modal.js (hook request, see below), tab indicator slide. Then director bus wiring and the run-end and drop-start hooks (they need onGo to delay Results and the run start), haul finish, snap drama, biome card, record and milestones.
 - Results choreography, reward moments, micro-interactions.
 - Bus wiring in the director (run:started, run:events, run:ended, meta:changed, achievement:unlocked, codex:new).
 - dev/motion-lab.html (+ js) with a button per moment, speed slider, Reduce motion toggle, frame-time readout.
