@@ -26,7 +26,8 @@ jobs:
       # Make the android folder only if it is missing.
       - name: Add Android project if missing
         run: '[ -d android ] || npx cap add android'
-      - run: sh tools/android-assets.sh
+      - run: sudo apt-get install -y -q imagemagick || true
+      - run: sh tools/android-assets.sh || true
       - run: npx cap sync android
 
       # ---- Debug APK on every push to main ----
