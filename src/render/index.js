@@ -17,6 +17,7 @@ import { clearSprites } from './partIcon.js';
 import { num, clamp, clamp01, warn } from './safe.js';
 import { TOKENS } from './palette.js';
 import { createPolish } from './polish/index.js'; // [AI-2] polish hook
+import { createDepth } from './depth/index.js'; // [DEPTH-1] depth hook
 import * as partIcon from './partIcon.js';
 import { models } from './models/index.js'; // [MODEL-1]
 
@@ -34,6 +35,7 @@ export function createRenderer(canvas, opts = {}) {
   const tmp = { x: 0, y: 0 };
   // [AI-2] polish hook: extra light, ambience and wall detail. Keep these calls when editing (see docs/manager/POLISH_SPLIT.md).
   const polish = createPolish({ reduceMotion: reduce, quality: o.quality === 'low' ? 'low' : 'high' });
+  const depthLayer = createDepth({ reduceMotion: reduce, quality: o.quality === 'low' ? 'low' : 'high' }); // [DEPTH-1] shaft depth layer (all calls guarded inside; see docs/requests/DEPTH-1-to-NEW-7-hook.md)
   const pst = { depth: 0, biomeId: 'clay', strain01: 0, danger: 0, speed: 1, bucket: { x: 0, y: 0 }, lanes: null, laneCount: 4, arriveY: 0, w: 360, h: 640, time: 0 };
   function fillPolish() {
     const L = sc.L;
@@ -44,7 +46,7 @@ export function createRenderer(canvas, opts = {}) {
   function applyQuality() {
     const q = quality.settings;
     particles.setCap(reduce ? Math.round(q.maxParticles * 0.4) : q.maxParticles);
-    polish.setQuality(q.name);
+    polish.setQuality(q.name); depthLayer.setQuality(q.name); // [DEPTH-1]
     models.setEnabled(q.name !== 'low'); // [MODEL-1] baked 3D art only on high quality
     well.setLow(q.name === 'low');
     items.setLow(q.name === 'low'); // [GFX-1]
@@ -52,13 +54,13 @@ export function createRenderer(canvas, opts = {}) {
   function applyMotion() {
     sc.reduceMotion = reduce; camera.reduceMotion = reduce; rope.reduceMotion = reduce; well.setReduceMotion(reduce); vignette.setReduceMotion(reduce); items.setReduceMotion(reduce);
     if (reduce) { sc.timeScale = 1; sc.slowT = 0; }
-    polish.setReduceMotion(reduce);
+    polish.setReduceMotion(reduce); depthLayer.setReduceMotion(reduce); // [DEPTH-1]
     applyQuality();
   }
   function relayout() {
     CW = Math.min(W, MAX_COL); colX = Math.floor((W - CW) / 2);
     computeLayout(sc.L, CW, H, dpr, sc.rig.cols, sc.rig.rows);
-    items.rebuild(sc.L.itemSize, dpr); bucket.rebuild(sc.L); well.resize(CW, H, dpr, quality.level === 'low'); vignette.build(CW, H, dpr); polish.resize(CW, H, dpr);
+    items.rebuild(sc.L.itemSize, dpr); bucket.rebuild(sc.L); well.resize(CW, H, dpr, quality.level === 'low'); vignette.build(CW, H, dpr); polish.resize(CW, H, dpr); depthLayer.resize(CW, H, dpr); // [DEPTH-1]
   }
   applyMotion();
   computeLayout(sc.L, CW, H, dpr, 4, 3);
@@ -108,7 +110,7 @@ export function createRenderer(canvas, opts = {}) {
     if (sc.flashA > 0) sc.flashA = Math.max(0, sc.flashA - dt / 260);
     camera.update(sdt); well.update(sdt); rope.update(sdt); bucket.update(sdt, H); vignette.update(sdt);
     updateItems(sdt); fx.runDue();
-    fillPolish(); polish.update(dt, pst);
+    fillPolish(); polish.update(dt, pst); depthLayer.update(dt, pst); // [DEPTH-1]
     particles.update(sdt); floaters.update(sdt);
     const th = sc.threads.items, rg = sc.rings.items, st = sc.streaks.items;
     for (let i = 0; i < th.length; i++) if (th[i].alive && (th[i].life -= dt) <= 0) sc.threads.release(th[i]);
@@ -128,12 +130,14 @@ export function createRenderer(canvas, opts = {}) {
     ctx.save();
     camera.apply(ctx, CW, H);
     well.draw(ctx, sc.depthVis * PX_PER_M, sc.depthVis, t, sc.strain01);
+    depthLayer.drawWalls(ctx, pst); // [DEPTH-1] covers the flat well when active
     polish.drawBack(ctx, pst);
     drawItems(ctx, false, t);
     const oy = bucket.offY;
     rope.draw(ctx, L.cx, -20, L.cx, Math.max(0, L.attachY + oy * 0.0 + (sc.hauled ? Math.min(0, oy) : 0)), sc.strain01, t, sc.depthVis * PX_PER_M);
     bucket.draw(ctx, L, sc.rig, t);
     drawItems(ctx, true, t);
+    depthLayer.drawForeground(ctx, pst); // [DEPTH-1] edge silhouettes, never over lanes
     polish.drawFront(ctx, pst);
     particles.draw(ctx); drawFx(ctx, sc, oy); floaters.draw(ctx);
     ctx.restore();
@@ -172,6 +176,7 @@ export function createRenderer(canvas, opts = {}) {
     pushEvents(events) {
       if (dead || !Array.isArray(events)) return;
       for (let i = 0; i < events.length; i++) { try { fx.handle(events[i]); } catch (e) { warn('event', e && e.message); } }
+      depthLayer.pushEvents(events); // [DEPTH-1]
     },
     frame(dtMs, alpha) {
       if (dead || !ctx || hidden) return;
@@ -196,6 +201,7 @@ export function createRenderer(canvas, opts = {}) {
       try { particles.clear(); floaters.clear(); sc.reset(); clearSprites(); ctx && ctx.clearRect(0, 0, canvas.width, canvas.height); } catch (e) { /* ignore */ }
       try { polish.destroy(); } catch (e) { /* ignore */ }
       try { items.destroy(); } catch (e) { /* ignore */ } // [GFX-1] frees the sprite atlas
+      try { depthLayer.destroy(); } catch (e) { /* ignore */ } // [DEPTH-1]
       ctx = null;
     },
   };
