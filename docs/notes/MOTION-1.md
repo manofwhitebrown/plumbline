@@ -16,11 +16,10 @@
 - tests/motion-core.test.js: easing maths, runner, director queue priority, skipping, reduce paths, no double plays.
 
 ## In progress / Next
-- Wire springIn into components/sheet.js and modal.js (hook request, see below), tab indicator slide. Then (biome card, record and milestone are done), haul finish, snap drama, biome card, record and milestones.
-- Director wiring still missing for: meta:changed, achievement:unlocked, codex:new.
-- Results choreography, reward moments, micro-interactions.
-- Bus wiring in the director (run:started, run:events, run:ended, meta:changed, achievement:unlocked, codex:new).
-- dev/motion-lab.html (+ js) with a button per moment, speed slider, Reduce motion toggle, frame-time readout.
+- dev/motion-lab.html (+ js): a button per moment, speed slider 0.25x to 2x, Reduce motion toggle, frame-time readout, 300-particle run. (Next.)
+- Results choreography, reward moments (daily chest, achievement banner, Collapse, codex page flip, first part purchase), micro-interactions (button press, number tickers, progress shine, primary breathing, tab indicator, list stagger).
+- Director wiring for meta:changed, achievement:unlocked, codex:new.
+- Wire springIn into components/sheet.js and modal.js (needs a hook request to NEW-4).
 
 ## Hooks in other owners' screens
 1. src/ui/shell.js (3 small guarded edits): `setMotionHook(hook)` export, `motionHook.before/after` around the screen swap in go(), and back() now passes `{ replace: true, back: true }`. No API change; a throwing hook is swallowed.
