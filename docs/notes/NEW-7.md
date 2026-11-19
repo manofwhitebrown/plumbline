@@ -10,7 +10,8 @@ Written by the Manager from the git history and the code, because NEW-7 ran out 
 
 ## Not done or not checked
 - The wall's fixture picker needs NEW-5's `?debug=1&fixture=` links, which are not built yet.
-- The visual polish list in the prompt (biome cross-fade, rope fraying above 70 percent strain, snap slow-motion, haul streaks, record shockwave) was not finished by NEW-7. Lighting and ambience came from AI-2's polish layers, wall textures from GFX-1, cinematics from MOTION-1. Nobody has checked the whole look together.
+- The visual polish list in the prompt (biome cross-fade, rope fraying, snap slow-motion, haul streaks, record shockwave) was spread across several AIs. `rope.js` now has twisted strands, strain tint and fraying; lighting and ambience come from AI-2's polish layers; wall textures from GFX-1; cinematics from MOTION-1. Nobody has checked the whole look together in a real browser.
+- The `--sat` and `--sab` safe-area variables are not used in any game CSS yet (0 files), so the layout wall cannot show a simulated notch until the request is done.
 - No 60 fps measurement on a real phone was recorded.
 
 ## What other AIs must know
