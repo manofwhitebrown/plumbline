@@ -6,6 +6,8 @@ import { buzz, ui } from '../soft.js';
 import './motion.css';
 import { createTransitions } from './transitions.js';
 import { createStage } from './stage.js';
+import { wireDirector } from './wiring.js';
+import { bus, dep } from '../soft.js';
 
 const isReduced = () => { try { return !!getSettings().reduceMotion; } catch (e) { return false; } };
 
@@ -17,6 +19,7 @@ const CUES = {
   'drop:beat0': () => { ui('tap'); buzz('tap'); }, 'drop:beat1': () => { ui('tap'); buzz('tap'); }, 'drop:beat2': () => { ui('open'); buzz('tap'); },
   'drop:fall': () => ui('open'),
   'haul:haul': () => ui('claim'),
+  'record:record': () => buzz('record'), 'milestone:chime': () => ui('open'),
   'snap:snap': () => buzz('snap'), 'snap:thud': () => ui('close'),
 };
 export const stage = createStage({ isReduced, cue: (kind, k) => { const f = CUES[kind + ':' + k]; if (f) { try { f(); } catch (e) { /* ignore */ } } } });
@@ -37,3 +40,10 @@ export function beforeResults(payload, goFn) {
   try { return stage.playBlocking(host, kind, { onGo: goFn }); } catch (e) { return false; }
 }
 setRunEndHook(beforeResults);
+
+// Bus wiring for in-run moments (biome cards, new record, 50 m markers).
+export const wiring = wireDirector({
+  bus, stage,
+  getHost: () => (typeof document !== 'undefined' && shell.currentId() === 'drop' ? document.querySelector('.screen-drop') : null),
+  biomeName: (id) => { try { const b = dep('biomes'); const d = b && b.byId ? b.byId(id) : null; return (d && d.name) || id; } catch (e) { return id; } },
+});

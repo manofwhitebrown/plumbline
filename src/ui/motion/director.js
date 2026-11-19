@@ -25,6 +25,7 @@ export function createDirector(opts) {
       const win = moment.dedupeMs == null ? 600 : moment.dedupeMs;
       const last = recent.get(moment.id);
       if (last != null && clock - last < win) return false;
+      if (moment.skipIfBusy && (current || queue.length)) return false; // decoration that is stale if it cannot play now
       if (current && current.moment.id === moment.id) return false;
       if (queue.some((q) => q.id === moment.id)) return false;
       recent.set(moment.id, clock);

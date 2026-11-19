@@ -20,7 +20,7 @@ export function createStage(opts) {
   const director = createDirector({ reduce: false, audio: () => {}, haptic: () => {} });
   let id = 0, last = 0, listening = false, dead = false;
 
-  function onSkip() { director.skipGroup(BLOCKING); }
+  function onSkip() { director.skipAll(); } // a tap or key ends whatever plays; the event itself is never stopped
   function listen(on) {
     if (!win || !win.addEventListener) return;
     if (on && !listening) { win.addEventListener('pointerdown', onSkip, true); win.addEventListener('keydown', onSkip, true); listening = true; }
@@ -62,8 +62,26 @@ export function createStage(opts) {
     if (ok) ensureLoop();
     return ok;
   }
+  // Any moment spec: { id, group, priority, dedupeMs, skipIfBusy, make(layer-maker) -> runner def }.
+  function playMoment(host, spec) {
+    if (dead || !host || !spec || typeof spec.build !== 'function') return false;
+    director.setReduce(isReduced());
+    const ok = director.play({
+      id: spec.id, group: spec.group || 'hud', priority: spec.priority == null ? 1 : spec.priority, dedupeMs: spec.dedupeMs, skipIfBusy: !!spec.skipIfBusy,
+      make() {
+        let layer = null;
+        const def = spec.build({ host, layer: () => (layer || (layer = makeLayer(host))), cue: (k) => { if (!isReduced()) cueFn(spec.id, k); } });
+        if (!def) return null;
+        const fin = def.finish;
+        def.finish = () => { try { fin(); } finally { if (layer && layer.destroy) layer.destroy(); } };
+        return def;
+      },
+    });
+    if (ok) ensureLoop();
+    return ok;
+  }
   return {
-    director, playBlocking, ensureLoop,
+    director, playBlocking, playMoment, ensureLoop,
     get busy() { return !!(director.current || director.pending); },
     skip() { onSkip(); },
     dispose() { dead = true; if (id && caf) caf(id); id = 0; listen(false); director.dispose(); },

@@ -7,13 +7,17 @@
 - src/ui/motion/transitions.js + index.js: plan() (tab fade with 12 px parallax, forward slide, back reverses, results rise, drop fade), ghost cross-fade (skipped when the old screen has a canvas), tap or key skips, springIn() for sheets and modals (panel settles, backdrop fades, blur stays static). All 220-300 ms, transform and opacity only.
 - src/ui/motion/stage.js: rAF only while something plays (no idle loop, no timers), per-moment overlay layer, tap or key skips blocking cinematics without swallowing the event. index.js: beforeDrop and beforeResults, cue map using only existing sounds and buzzes (new sounds such as a thud or whoosh would be a request to the audio owner).
 - tests/motion-stage.test.js.
+- src/render/cinematics/biomeCard.js (1400 ms, text-only card at top:96px just under the HUD zone, light sweep, subtitles such as The Amber Veins), records.js (NEW RECORD: shockwave, unfurling ribbon, glints, 1600 ms; 50 m MILESTONE marker, 700 ms, skipped when anything else is playing). src/ui/motion/wiring.js: the director's bus listener (run:started, run:events BIOME, RECORD, MILESTONE; one card per biome per run, one record per run; events sorted so the biome card wins over a milestone on the same step). Tap or key now ends any playing moment (never swallowing the event).
+- tests/motion-moments.test.js.
+- KNOWN RISK: the biome card sits at top:96px, directly below the 88 px HUD zone. I could not see the real lane layout from here, so it needs a look in the lab and in the layout wall to confirm it does not cover gems near the bucket. If it does, move it to src/render/layout.js numbers (top plus bucket height) in a follow-up.
 - src/render/cinematics/: pool.js (300-cap particle pool), fxLayer.js (click-through overlay canvas + grey tint layer, never takes pointer events), common.js, dropStart.js (full 1500 ms for the first 3 drops of a session, then 500 ms), haulFinish.js (900 ms), snapDrama.js (1100 ms: 80 ms freeze, 0.35x slow for 600 ms, no red, no big shake). Each calls onGo exactly once (end, skip or Reduce motion).
 - tests/motion-cinematics.test.js.
 - tests/motion-transitions.test.js: plan table, reduce path, skip, no listeners left after dispose, shell hook safety.
 - tests/motion-core.test.js: easing maths, runner, director queue priority, skipping, reduce paths, no double plays.
 
 ## In progress / Next
-- Wire springIn into components/sheet.js and modal.js (hook request, see below), tab indicator slide. Then director bus wiring for the remaining moments (the drop start, haul and snap hooks are done), haul finish, snap drama, biome card, record and milestones.
+- Wire springIn into components/sheet.js and modal.js (hook request, see below), tab indicator slide. Then (biome card, record and milestone are done), haul finish, snap drama, biome card, record and milestones.
+- Director wiring still missing for: meta:changed, achievement:unlocked, codex:new.
 - Results choreography, reward moments, micro-interactions.
 - Bus wiring in the director (run:started, run:events, run:ended, meta:changed, achievement:unlocked, codex:new).
 - dev/motion-lab.html (+ js) with a button per moment, speed slider, Reduce motion toggle, frame-time readout.
