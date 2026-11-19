@@ -2,6 +2,7 @@
 import { makeSprite } from './canvasUtil.js';
 import { getSprite } from './partIcon.js';
 import { easeOut, clamp01 } from './safe.js';
+import { getLantern } from './art/lanternArt.js'; // [GFX-1] hero lantern
 import { models } from './models/index.js'; // [MODEL-1] baked wooden barrel + brass trim (null-safe)
 
 const FLASH_MS = 140;
@@ -9,7 +10,7 @@ const FLASH_MS = 140;
 export function createBucket() {
   let body = null, glow = null, kw = -1, kh = -1, kd = -1;
   const flash = new Float32Array(20);
-  const b = { offY: 0, tilt: 0, lift: 0, fall: 0, fallV: 0, mode: 0 /* 0 idle, 1 lifting, 2 falling */, t: 0 };
+  const b = { low: false, reduceMotion: false, offY: 0, tilt: 0, lift: 0, fall: 0, fallV: 0, mode: 0 /* 0 idle, 1 lifting, 2 falling */, t: 0 };
 
   function build(L) {
     body = makeSprite(L.bucketW + 24, L.bucketH + 24, L.dpr, (g) => {
@@ -98,10 +99,16 @@ export function createBucket() {
       const lx = L.cx - L.bucketW / 2 + 10, ly = L.top + 14, sw2 = Math.sin(t / 700) * 4;
       ctx.strokeStyle = '#8a6226'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + sw2 * 0.5, ly + 12); ctx.stroke();
       const fl = 0.75 + Math.sin(t / 90) * 0.1 + Math.sin(t / 37) * 0.05;
-      if (glow) { ctx.globalAlpha = 0.55 * fl; ctx.drawImage(glow, lx + sw2 * 0.5 - 24, ly + 18 - 24, 48, 48); ctx.globalAlpha = 1; }
-      ctx.fillStyle = '#d9a441'; ctx.fillRect(lx + sw2 * 0.5 - 4, ly + 11, 8, 3);
-      ctx.fillStyle = '#ffe9a8'; ctx.fillRect(lx + sw2 * 0.5 - 3, ly + 14, 6, 8);
-      ctx.fillStyle = '#d9a441'; ctx.fillRect(lx + sw2 * 0.5 - 4, ly + 22, 8, 2);
+      if (glow) { ctx.globalAlpha = (b.reduceMotion ? 0.5 : 0.55 * fl); ctx.drawImage(glow, lx + sw2 * 0.5 - 30, ly + 22 - 30, 60, 60); ctx.globalAlpha = 1; }
+      const lan = getLantern(L.dpr);
+      if (lan) { // [GFX-1] cage, glass and a flame that flickers (still on low quality and Reduce motion)
+        const fi = b.low || b.reduceMotion ? 0 : Math.floor(t / 95) % lan.frames.length;
+        ctx.drawImage(lan.frames[fi], lx + sw2 * 0.5 - lan.w / 2, ly + 8, lan.w, lan.h);
+      } else {
+        ctx.fillStyle = '#d9a441'; ctx.fillRect(lx + sw2 * 0.5 - 4, ly + 11, 8, 3);
+        ctx.fillStyle = '#ffe9a8'; ctx.fillRect(lx + sw2 * 0.5 - 3, ly + 14, 6, 8);
+        ctx.fillStyle = '#d9a441'; ctx.fillRect(lx + sw2 * 0.5 - 4, ly + 22, 8, 2);
+      }
       ctx.restore();
       return oy;
     },

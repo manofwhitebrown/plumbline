@@ -5,6 +5,8 @@ import { computeLayout, tileCx, tileCy, RISE_BEATS, HUD_TOP, HUD_BOTTOM, MAX_COL
 import { createCamera } from './camera.js';
 import { createWell, PX_PER_M } from './well.js';
 import { createRope } from './rope.js';
+import { destroyRopeTiles } from './art/ropeArt.js'; // [GFX-1]
+import { destroyLantern } from './art/lanternArt.js'; // [GFX-1]
 import { createBucket } from './bucket.js';
 import { createItems } from './items.js';
 import { createParticles } from './particles.js';
@@ -50,9 +52,10 @@ export function createRenderer(canvas, opts = {}) {
     models.setEnabled(q.name !== 'low'); // [MODEL-1] baked 3D art only on high quality
     well.setLow(q.name === 'low');
     items.setLow(q.name === 'low'); // [GFX-1]
+    rope.low = q.name === 'low'; bucket.low = rope.low; // [GFX-1] flat rope and still lantern on low quality
   }
   function applyMotion() {
-    sc.reduceMotion = reduce; camera.reduceMotion = reduce; rope.reduceMotion = reduce; well.setReduceMotion(reduce); vignette.setReduceMotion(reduce); items.setReduceMotion(reduce);
+    sc.reduceMotion = reduce; camera.reduceMotion = reduce; rope.reduceMotion = reduce; bucket.reduceMotion = reduce; well.setReduceMotion(reduce); vignette.setReduceMotion(reduce); items.setReduceMotion(reduce);
     if (reduce) { sc.timeScale = 1; sc.slowT = 0; }
     polish.setReduceMotion(reduce); depthLayer.setReduceMotion(reduce); // [DEPTH-1]
     applyQuality();
@@ -153,7 +156,7 @@ export function createRenderer(canvas, opts = {}) {
         if (nw === W && nh === H && nd === dpr && canvas && canvas.width === Math.round(nw * nd) && sized) return; // nothing changed: keep sprites
         W = nw; H = nh; dpr = nd; sized = true;
         if (canvas) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); if (canvas.style) { canvas.style.width = W + 'px'; canvas.style.height = H + 'px'; } }
-        clearSprites(); relayout();
+        rope.dpr = dpr; clearSprites(); relayout(); // [GFX-1] rope tiles follow the pixel ratio
       } catch (e) { warn('resize', e && e.message); }
     },
     setRun(view, rig) {
@@ -199,6 +202,7 @@ export function createRenderer(canvas, opts = {}) {
     destroy() {
       if (dead) return; dead = true;
       try { particles.clear(); floaters.clear(); sc.reset(); clearSprites(); ctx && ctx.clearRect(0, 0, canvas.width, canvas.height); } catch (e) { /* ignore */ }
+      try { destroyRopeTiles(); destroyLantern(); } catch (e) { /* ignore */ } // [GFX-1]
       try { polish.destroy(); } catch (e) { /* ignore */ }
       try { items.destroy(); } catch (e) { /* ignore */ } // [GFX-1] frees the sprite atlas
       try { depthLayer.destroy(); } catch (e) { /* ignore */ } // [DEPTH-1]
