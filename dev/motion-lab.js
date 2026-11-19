@@ -5,6 +5,7 @@ import { wireDirector } from '../src/ui/motion/wiring.js';
 import { createTransitions } from '../src/ui/motion/transitions.js';
 import { _resetDropCount } from '../src/render/cinematics/dropStart.js';
 import { BIOME_IDS, BIOMES } from '../src/render/palette.js';
+import { installMicro } from '../src/ui/motion/micro.js';
 
 const $ = (id) => document.getElementById(id);
 const frame = $('frame');
@@ -14,7 +15,10 @@ const log = (m) => { const el = $('log'); const d = document.createElement('div'
 const stage = createStage({ isReduced: () => lab.reduce, cue: (kind, k) => log('cue ' + kind + ':' + k) });
 const handlers = {};
 const bus = { on: (n, f) => { (handlers[n] = handlers[n] || []).push(f); return () => {}; }, emit: (n, p) => (handlers[n] || []).forEach((f) => f(p)) };
-wireDirector({ bus, stage, getHost: () => frame, biomeName: (id) => id[0].toUpperCase() + id.slice(1) });
+let daily = { streak: 1, canClaim: true }, owned = ['hook'];
+wireDirector({ bus, stage, getHost: () => frame, getOverlayHost: () => frame, biomeName: (id) => id[0].toUpperCase() + id.slice(1),
+  info: { achievement: () => 'Deep Diver', codex: () => 'Amber Veins', targets: () => ({ gold: { x: 60, y: 40 }, shards: { x: 300, y: 40 }, coreDust: { x: 180, y: 40 } }), dailyState: () => daily, ownedParts: () => owned, partIcon: () => '' } });
+bus.emit('meta:changed', { what: 'gold' });
 
 let depthN = 100;
 const ev = (events) => bus.emit('run:events', { events });
@@ -28,6 +32,11 @@ function go(kind) {
     record: () => { depthN += 12; ev([{ t: 'RECORD', depth: depthN }]); return true; },
     milestone: () => { depthN += 50; ev([{ t: 'MILESTONE', depth: depthN }]); return true; },
     'biome+milestone': () => { ev([{ t: 'MILESTONE', depth: 250 }, { t: 'BIOME', id: 'amber', depth: 250 }]); return true; },
+    daily: () => { daily = { streak: daily.streak + 1, canClaim: false }; bus.emit('meta:changed', { what: 'daily' }); return true; },
+    achievement: () => { bus.emit('achievement:unlocked', { id: 'a' + Math.random() }); return true; },
+    codex: () => { bus.emit('codex:new', { id: 'c' + Math.random() }); return true; },
+    collapse: () => { bus.emit('meta:collapsed', { coreDustGain: 12 }); return true; },
+    part: () => { owned = ['hook', 'drill']; bus.emit('meta:changed', { what: 'parts' }); owned = ['hook']; return true; },
     newrun: () => { bus.emit('run:started', {}); return true; },
   }[kind];
   if (!ok) return;
@@ -43,10 +52,17 @@ $('zones').addEventListener('change', (e) => document.body.classList.toggle('hid
 $('skip').addEventListener('click', () => { stage.skip(); log('skipped'); });
 frame.addEventListener('pointerdown', () => { if (stage.busy) log('tap: skipped'); });
 
+// ---- micro-interactions demo (same module the game installs) ---------------------------------
+const micro = installMicro({ doc: document, root: document.body, isReduced: () => lab.reduce });
+let n = 0; $('glowme').addEventListener('click', () => { const el = $('numdemo'); const to = n + 1000 + Math.round(Math.random() * 9000); const from = n; n = to; const t0 = performance.now(); const step = (now) => { const k = Math.min(1, (now - t0) / 700); el.textContent = String(Math.round(from + (to - from) * k)); if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); });
+let fill = 0.1; $('barbtn').addEventListener('click', () => { fill = fill >= 1 ? 0.1 : Math.min(1, fill + 0.3); $('barfill').style.transform = 'scaleX(' + fill + ')'; });
+$('stag').addEventListener('click', () => { const ul = $('stagdemo'); ul.innerHTML = ''; for (let i = 0; i < 12; i++) { const li = document.createElement('li'); li.textContent = 'Row ' + (i + 1) + (i >= 8 ? ' (not animated, max 8)' : ''); li.style.cssText = 'padding:8px;border:1px solid #2a3555;border-radius:8px;background:#141b2e'; ul.append(li); } micro.staggerIn(document.body); });
+$('pressme').addEventListener('click', () => log('pressed (the release spring plays on pointer up)'));
+for (const b of document.querySelectorAll('button')) b.classList.add('btn');
 // ---- sequence and stress --------------------------------------------------------------------
 $('seq').addEventListener('click', async () => {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  for (const k of ['drop-full', 'biome-quartz', 'milestone', 'record', 'snap', 'haul']) {
+  for (const k of ['drop-full', 'biome-quartz', 'milestone', 'record', 'achievement', 'daily', 'codex', 'collapse', 'part', 'snap', 'haul']) {
     if (k.startsWith('biome-')) { ev([{ t: 'BIOME', id: k.slice(6), depth: 100 }]); log('biome quartz'); } else go(k);
     while (stage.busy) await wait(100); await wait(250);
   }

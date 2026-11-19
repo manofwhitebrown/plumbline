@@ -57,6 +57,15 @@
       <div class="row" id="biomes"></div>
       <div class="row"><button data-m="record">New record</button><button data-m="milestone">50 m milestone</button><button data-m="biome+milestone">Biome and milestone together</button><button data-m="newrun">New run (reset once-per-run)</button></div>
     </section>
+    <section><h2>Reward moments (through the real bus wiring)</h2>
+      <div class="row"><button data-m="daily">Daily claim chest</button><button data-m="achievement">Achievement unlock</button><button data-m="codex">Codex discovery</button><button data-m="collapse">Collapse ceremony</button><button data-m="part">First part purchase</button></div>
+    </section>
+    <section><h2>Micro-interactions</h2>
+      <div class="row"><button class="primary-demo" id="pressme">Press me (release spring)</button><button id="glowme">Count up a number</button><b class="num" id="numdemo">0</b></div>
+      <div class="bar" style="position:relative;height:8px;border-radius:8px;background:#070a12;border:1px solid #2a3555;overflow:hidden;margin:6px 0"><i id="barfill" style="position:absolute;inset:0;transform-origin:left;transform:scaleX(.1);background:linear-gradient(90deg,#ff9a3c,#f6c453);transition:transform 420ms cubic-bezier(.2,.8,.2,1)"></i></div>
+      <div class="row"><button id="barbtn">Fill the bar</button><button id="stag">Stagger a list</button></div>
+      <ul id="stagdemo" data-stagger style="list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px"></ul>
+    </section>
     <section><h2>Screen transitions</h2>
       <div id="demo"><div class="scr" id="scr">Home</div></div>
       <div class="row"><button data-t="home:rig">Home to Rig (tab)</button><button data-t="workshop:rig">Workshop to Rig (tab, reverse)</button><button data-t="settings:rewards:back">Settings back</button><button data-t="drop:results">Drop to Results</button></div>

@@ -18,10 +18,22 @@
 - dev/motion-lab.html + dev/motion-lab.js: a button for every built moment (drop start full and quick, haul, snap, six biome cards, record, milestone, biome and milestone together, new run), real bus wiring, screen-transition demo, speed 0.25x to 2x, Reduce motion toggle, HUD-zone overlay, skip button, frame-time readout (average, 95th percentile, worst, frames over 20 ms) and a 300-particle stress button. Open with `npm run dev`, then /dev/motion-lab.html. The log shows every onGo, so a double call is visible.
 - NOT YET DONE: the frame-time record with 300 particles and the watch-at-slow-speed pass. There is no browser in my environment, so nobody has watched these moments yet. Please run the lab and read the Frame time panel after the stress button.
 
-## In progress / Next
-- Results choreography, reward moments (daily chest, achievement banner, Collapse, codex page flip, first part purchase), micro-interactions (button press, number tickers, progress shine, primary breathing, tab indicator, list stagger).
-- Director wiring for meta:changed, achievement:unlocked, codex:new.
-- Wire springIn into components/sheet.js and modal.js (needs a hook request to NEW-4).
+## Added in the last pass
+- src/ui/motion/micro.js: button release spring (the press-in itself is polish.css), number glow pulse on counters (not on the Drop HUD), tab indicator that slides, list stagger-in (max 8, 40 ms apart), sheets and modals spring in (MutationObserver on `.scrim`). All by delegation or observation: no screen edits.
+- src/ui/motion/motion.css: idle breathing on primary buttons (not on the Drop screen), progress bar shine sweep, tab indicator and glow styles. Reduce motion turns all of it off.
+- src/ui/motion/results.js: Results spring choreography layered on the screen's own reveal (title and depth settle, gold ticks with a rising pitch hint, shards fly to the shard pill, done goals are stamped, buttons slide up, a tap ends it all).
+- src/render/cinematics/rewards.js: daily chest (1.8 s), Collapse ceremony (2.6 s), achievement banner (2 s), codex page flip (1.6 s), first part purchase tile drop (0.9 s), shard flight (0.7 s).
+- src/ui/motion/wiring.js: now also listens to achievement:unlocked, codex:new, meta:collapsed (0 Core Dust from the cheat path is ignored), meta:changed (daily chest when the streak changes and the claim is used; part drop when exactly 2 parts are owned).
+- Hook requests for every owner: docs/requests/MOTION-1-to-NEW-1-results.md, -NEW-2-crew-workshop.md, -NEW-3-codex-rewards.md, -NEW-4-settings-modals.md. These list the class names and events I rely on; none needs a code edit.
+- tests/motion-rewards.test.js.
+
+## Known gaps and honest limits
+- NOT WATCHED: no browser was available to me, so I have not seen any moment run, have no frame-time numbers (60 fps with 300 particles is unverified), and have not done the normal and slow-speed watch pass. Do that in dev/motion-lab.html, then fix anything abrupt, floaty, cluttered or slow.
+- Sounds: only existing audio.ui sounds (tap, open, close, claim) and buzzes are used. There is no pitch parameter, so the gold "ticking pitch" is a cue with a pitch hint that currently plays a plain tap. A real rising tick, a thud and a whoosh need a request to the audio owner.
+- Targets for flying items (gold, shards, Core Dust counters) use `[data-tut="gold"]`, `.pill.gold` and similar selectors. If those do not exist the items fly to the top corners.
+- Sheets and modals spring in, but there is no exit animation (the components remove the scrim at once).
+- The biome card sits at top:96px under the HUD zone; check it against the real lanes.
+- Daily chest, Collapse and the part drop are inferred from bus events, because no screen emits a dedicated event for them.
 
 ## Hooks in other owners' screens
 1. src/ui/shell.js (3 small guarded edits): `setMotionHook(hook)` export, `motionHook.before/after` around the screen swap in go(), and back() now passes `{ replace: true, back: true }`. No API change; a throwing hook is swallowed.
@@ -33,4 +45,4 @@
 
 Requests written: docs/requests/MOTION-1-to-Manager-hook.md (shell.js, index.js, flow.js, polish.css override) and docs/requests/MOTION-1-to-NEW-1-hook.md (drop.js).
 
-STATUS: IN PROGRESS
+STATUS: CODE COMPLETE, WATCH PASS PENDING (see Known gaps). Not marking DONE until someone has run the lab and the frame times are recorded.

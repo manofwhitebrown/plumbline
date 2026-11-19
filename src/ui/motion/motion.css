@@ -4,3 +4,19 @@
 .screen-host > .screen { animation: none; }
 .cine-layer { contain: strict; }
 @media (prefers-reduced-motion: reduce) { .cine-layer { display: none; } }
+
+/* ---- micro-interactions (opacity and transform only) ---- */
+.tabbar { position: relative; }
+.tab-indicator { position: absolute; left: 0; bottom: 0; width: 28px; height: 3px; border-radius: 3px 3px 0 0; background: var(--gold, #f6c453); box-shadow: 0 0 10px rgba(246, 196, 83, .6); pointer-events: none; will-change: transform; }
+.num { position: relative; }
+.num.num-glow::after { content: ''; position: absolute; inset: -4px -8px; border-radius: 10px; pointer-events: none; background: radial-gradient(closest-side, rgba(255, 227, 161, .45), rgba(255, 227, 161, 0)); opacity: 0; animation: numGlow 420ms cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes numGlow { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
+/* the primary button breathes very slightly while idle (not on the Drop screen) */
+.screen:not(.screen-drop) .btn.primary:not(.disabled) { animation: btnBreathe 3.4s ease-in-out infinite; }
+@keyframes btnBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.012); } }
+.btn.primary:active { animation: none; }
+/* progress bars: a soft shine sweeps across the fill after it grows */
+.bar > i::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .35), rgba(255, 255, 255, 0)); transform: translate3d(-120%, 0, 0); animation: barShine 2.8s ease-in-out 600ms infinite; }
+@keyframes barShine { 0% { transform: translate3d(-120%, 0, 0); } 35%, 100% { transform: translate3d(320%, 0, 0); } }
+#app[data-reduce="1"] .btn.primary, #app[data-reduce="1"] .bar > i::after, #app[data-reduce="1"] .num.num-glow::after { animation: none; }
+@media (prefers-reduced-motion: reduce) { .btn.primary, .bar > i::after, .num.num-glow::after { animation: none !important; } }
