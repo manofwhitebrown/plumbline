@@ -52,7 +52,7 @@ export function makeFinder(doc) {
         const cells = [];
         for (let i = 0; i < list.length; i++) {
           const el = list[i];
-          cells.push({ r: Number(attr(el, 'data-r')), c: Number(attr(el, 'data-c')), part: attr(el, 'data-part') || '', ref: el });
+          cells.push({ r: Number(attr(el, 'data-r')), c: Number(attr(el, 'data-c')), part: (attr(el, 'data-part') === 'empty' ? '' : attr(el, 'data-part')) || '', ref: el });
         }
         const pick = pickGoodCell(cells);
         const rect = pick ? readRect(pick.ref) : null;
