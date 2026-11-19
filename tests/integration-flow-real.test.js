@@ -213,3 +213,57 @@ test('no NaN or negative numbers with the biggest rig over many runs', () => {
   }
   saveMod.resetAll();
 });
+
+test('whole journey: new save, tutorial drop, results, Workshop, Crew, welcome back, Collapse, drop again', async () => {
+  const { s: metaSlice } = await import('../src/meta/state.js');
+  const offlineMod = await import('../src/meta/offline.js');
+  const t = setup();
+  // 1. a brand new save starts the tutorial
+  assert.equal(tutorial.shouldStart(), true);
+  // 2. the first drop uses the tutorial options (fixed seed, safe start)
+  const opts = tutorial.runOptions();
+  const r1 = session.start(opts ? { ...opts } : {});
+  assert.equal(r1.ok, true);
+  loop.tick(25);
+  assert.equal(session.getView().status, 'running');
+  assert.equal(session.haul().ok, true);
+  // 3. results are ready and the gold was paid once
+  const res = session.getResult();
+  assert.ok(res && res.outcome === 'hauled' && res.kept >= 0);
+  assert.equal(t.count('run:ended'), 1);
+  // 4. Workshop: buy a part
+  meta.addGold(1e7);
+  const id = parts.allParts().map((p) => p.id).find((pid) => pid !== 'hook' && meta.canBuyPart(pid));
+  assert.ok(id, 'there is a part the player can buy');
+  const g1 = meta.gold();
+  assert.equal(meta.buyPart(id).ok, true);
+  assert.ok(meta.gold() < g1);
+  assert.ok(meta.ownedParts()[id] >= 1);
+  // 5. Crew: hire and earn per second
+  const crewId = meta.crew.list()[0].id;
+  assert.equal(meta.crew.buy(crewId).ok, true);
+  assert.ok(meta.crew.perSecond() > 0);
+  // 6. Welcome back: gold waits and is paid once
+  offlineMod.skip(3 * 3600 * 1000);
+  const away = meta.offline.peek();
+  assert.ok(away && away.gold > 0);
+  const gA = meta.gold();
+  assert.equal(meta.offline.claim().ok, true);
+  assert.ok(meta.gold() > gA);
+  assert.equal(meta.offline.claim().ok, false, 'a second claim pays nothing');
+  // 7. Collapse
+  const st = metaSlice();
+  st.bestDepth = 5000; st.goldThisCollapse = 1e12; st.gold = 1e12;
+  assert.equal(meta.collapse.available(), true);
+  const c = meta.collapse.do();
+  assert.equal(c.ok, true);
+  assert.ok(meta.coreDust() > 0);
+  assert.deepEqual(Object.keys(meta.ownedParts()), ['hook']);
+  assert.ok(runApi.rigs.getRig().cells.flat().filter(Boolean).every((p) => p === 'hook'));
+  // 8. the player can drop again
+  assert.equal(session.start().ok, true);
+  loop.tick(10);
+  session.abort();
+  t.off();
+  saveMod.resetAll();
+});

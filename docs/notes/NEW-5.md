@@ -1,6 +1,6 @@
 # Notes from NEW-5 (integrator: wiring, build, deploy)
 
-STATUS: IN PROGRESS
+STATUS: DONE
 
 ## Done
 - Resolved all 19 files in docs/requests/ (one line each below). The folder now only has its README.
@@ -41,14 +41,9 @@ Also done in the engine: `safeUntilDepth`, the daily twist (`applyTwist` in `cre
 - NEW-8-to-NEW-1-format-limits: done. `fmt` uses one decimal for a 3-digit exponent; `fmtDepth` prints `100K m` from 100000. The two todo tests are now real tests.
 - NEW-6-to-ALL-plain-words: not mine (data text owned by others). Left in docs/requests/ for the data owners.
 
-## Still needed from the screens (these screens are 14-line stubs on main)
-Drop, Results, Workshop, Crew, Codex, Rewards, Settings and Guide are stubs. The flow does not break (the stubs show an empty page), but a
-player cannot finish a drop yet. Owners of the real screens please:
-- Drop: do NOT call `session.start` (flow.js does it). Read `session.getView()`, listen to `run:events`, add `data-tut="well"`, `data-tut="strain"`, `data-tut="haul"`. Haul button calls `session.haul()`.
-- Results: read `params` (the `run:ended` payload) or `session.getResult()`. Add `data-tut="results-gold"`. Add Drop again (`startDrop()` from `ui/flow.js`) and Home.
-- Workshop: `data-tut="workshop-part"` on the first part the player can afford.
-- Rig: call `audio.ui('place')` and `audio.ui('remove')`. Daily claim: `audio.ui('daily')`. Collapse: `audio.ui('collapse')`. Every screen: `audio.setScreen(id)` (not wired yet).
-- Done already: `home-drop`, `tab-*`, `rig-grid`, `rig-cell` (+ `data-r/c/part`, empty = `''`), `rig-new-part`, `rig-drop`, reduce-motion class on `<html>`.
+## Screens
+Drop, Results, Workshop, Crew, Codex, Rewards, Settings and Guide are now real on main. They must not call `session.start` (`ui/flow.js` does).
+Open points for the screen owners: `audio.setScreen(id)` is not called by the shell yet; check `data-tut` marks `well`, `strain`, `haul`, `results-gold`, `workshop-part` exist on Drop, Results and Workshop.
 
 ## Polish ideas (from AI-2, for the renderer and UI owners)
 - Blend the biome gradient into the next over the last 15 m before a BIOME event. Vignette darker with depth. Strain gauge: smooth green, amber, red.
@@ -56,9 +51,9 @@ player cannot finish a drop yet. Owners of the real screens please:
 - MILESTONE: light band sweeps. SNAP: freeze 80 ms, then crack flash. Use `alpha` to slide items between beats.
 - One line weight and rounded ends on all part icons; a soft gradient per family. HAUL UP pulses faster as `beatsToSnap` falls. Ghost rows from `peekNext` when a Lantern is in the rig.
 
-## In progress
-- Deploy checks (ci.yml, pages.yml, android.yml on GitHub), docs/PLAY.md, README, ARCHITECTURE.
+## Deploy (checked with the GitHub API on commit c11bef6)
+ci.yml, pages.yml and android.yml are green on main. Pages is deployed at https://manofwhitebrown.github.io/plumbline/. The APK artifact `plumbline-debug-apk` (about 7.5 MB) exists. Old Pages runs show "cancelled" only because newer pushes replace them (`cancel-in-progress`).
 
-## Next
-- Confirm the three workflows are green with the GitHub API. Update docs/PLAY.md. Browser check of `?debug=1&screen=...&fixture=...`.
-- Real Drop and Results screens if nobody else has built them.
+## Not checked
+- I had no real browser here. The journey is covered by tests with the real modules (`tests/integration-flow-real.test.js`), not by clicking the real page. Install the APK on a phone and play one session to confirm.
+- Left for others: docs/requests/ still holds files for other owners.
