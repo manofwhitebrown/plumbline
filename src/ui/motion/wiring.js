@@ -68,7 +68,8 @@ export function wireDirector(opts) {
       state.streak = d.streak;
     }
     if (what === 'parts') {
-      const owned = safe(info.ownedParts);
+      let owned = safe(info.ownedParts);
+      if (owned && typeof owned === 'object' && !Array.isArray(owned)) owned = Object.keys(owned).filter((k) => owned[k] > 0);
       if (Array.isArray(owned) && owned.length === 2) { // exactly one bought on top of the starting hook: the first purchase
         const id = owned.find((x) => x !== 'hook') || owned[1];
         reward('partDrop', ({ host }) => makePartDrop(host, { src: safe(info.partIcon, id), x: 0.5, y: 0.42 }));

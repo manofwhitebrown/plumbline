@@ -11,6 +11,14 @@ export const FAMILIES = [
 // Count how many times each id appears.
 export function countIds(list) {
   const out = {};
+  // The game keeps owned parts as a map { id: copies }. Older callers pass a list.
+  if (list && typeof list === 'object' && !Array.isArray(list)) {
+    for (const id of Object.keys(list)) {
+      const n = Math.floor(Number(list[id]));
+      if (Number.isFinite(n) && n > 0) out[id] = n;
+    }
+    return out;
+  }
   for (const x of Array.isArray(list) ? list : []) {
     const id = typeof x === 'string' ? x : x && x.id;
     if (!id) continue;
