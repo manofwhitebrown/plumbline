@@ -126,6 +126,8 @@ registerScreen('results', {
     // A tap anywhere skips. (The buttons are hidden until the end, so this cannot press one.)
     scope.on(screen, 'pointerdown', () => { if (!reveal.isDone()) reveal.skip(); });
     reveal.start(() => { actions.classList.add('in'); });
+    // Safety net: if the animation frames stall, show everything after 4 s so the screen is never blank.
+    scope.timeout(() => { if (!reveal.isDone()) reveal.skip(); }, 4000);
   },
 
   // Back goes Home, never into the finished drop.

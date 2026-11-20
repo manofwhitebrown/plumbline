@@ -46,7 +46,14 @@ export function beforeResults(payload, goFn) {
   const host = typeof document !== 'undefined' ? document.querySelector('.screen-drop') : null;
   if (!host || shell.currentId() !== 'drop') return false;
   const kind = payload && payload.outcome === 'snapped' ? 'snap' : 'haul';
-  try { return stage.playBlocking(host, kind, { onGo: goFn }); } catch (e) { return false; }
+  // Safety net: Results must show within 1.8 s, even if the animation stalls or waits behind another moment.
+  let went = false, timer = 0;
+  const go = () => { if (went) return; went = true; if (timer) clearTimeout(timer); timer = 0; try { goFn(); } catch (e) { /* never block Results */ } };
+  timer = setTimeout(() => { if (went) return; try { stage.skip(); } catch (e) { /* ignore */ } go(); }, 1800);
+  let took = false;
+  try { took = stage.playBlocking(host, kind, { onGo: go }); } catch (e) { took = false; }
+  if (!took) go();
+  return true;
 }
 setRunEndHook(beforeResults);
 

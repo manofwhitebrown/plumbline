@@ -11,9 +11,9 @@ export function counter(initial, opts, scope) {
   const el = h('span', { class: 'num' + (o.cls ? ' ' + o.cls : ''), text: format(state.value) });
   let raf = 0;
 
-  function frame(now) {
+  function frame() {
     raf = 0;
-    const v = state.update(now);
+    const v = state.update(performance.now()); // same clock as set(), so the count never stalls or jumps
     setText(el, format(v));
     if (!state.done) raf = requestAnimationFrame(frame);
   }
