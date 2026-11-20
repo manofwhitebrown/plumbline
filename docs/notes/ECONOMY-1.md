@@ -21,3 +21,14 @@
 - Pushed: boon caps cut (strain cap 0.4, hazard 0.5, coolPerGem 0.006, Cool Head 0.0015). Next: tests pin Cooler/Oil Can/Brace/Manager/rope numbers (test 518, 218, crew, upgrades), so those stay as they are unless the test owners agree.
 STATUS: NOT DONE (in progress)
 - Pushed: biome gold factors flattened (1, 1.3, 1.7, 2.2, 2.8, 3.4). Tested alone: engine numbers (strainPerMeter, depthBonusDiv) break tests 145 and 255 (pinned Gold example and first drop 45-90 s), so not applied.
+- Pushed: Crew tiers 2 to 6 output cut (smithy 4, cart 16, lamp 80, assay 400, foundry 2000 Gold/s). Winch Hand (1) and Manager (x3) stay: tests pin them.
+- Measured with boons on (--play=on, 6 h cap), after biome + crew + boon-cap changes:
+
+| Style | 100 m | 250 m | 500 m (Collapse ready) | 1000 m | Gold/h |
+|---|---|---|---|---|---|
+| haul at 50% | 9 min | 20 min | 3.94 h | 3.94 h | 4.7e7 |
+| haul at 70% | 3.8 min | 16.5 min | 63 min | 63 min | 3.5e7 |
+| haul at 85% | 3.7 min | 13.6 min | 50 min | 1.63 h | 1.8e9 |
+| haul at 100% | 8.6 min | 19 min | 30 min | 58 min | 3.7e7 |
+
+  Far too fast with boons on. The cause is the deep-drop Gold tail plus stacked rare boons, not the Crew. Next: cut the tail (legendary boons, Gold caps), then re-measure.
