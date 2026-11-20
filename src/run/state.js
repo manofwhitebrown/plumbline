@@ -7,7 +7,7 @@ export function freshState() {
     ended: false,        // set first when a drop finishes, so finishing happens once
     run: null, loop: null, mods: null, rig: null, seed: 0, goals: [], tally: createTally(),
     bestBefore: 0, recordSent: false, snap: null, lastBeatMs: 0, beats: 0, errors: 0,
-    view: null, result: null, frameCbs: [], recoveredChecked: false, counter: 0, hauling: false, lifecycle: false, tutorial: false,
+    view: null, result: null, frameCbs: [], recoveredChecked: false, counter: 0, hauling: false, lifecycle: false, tutorial: false, choosing: false, pickTimer: 0,
   };
 }
 

@@ -45,6 +45,11 @@ export function finishRun(outcome) {
     cheated, fmt: deps.fmt,
   });
 
+  const pl = S.run.play; // [HOOK-1] what the play layer earned
+  if (pl) {
+    payout.shardsEarned = (Number(payout.shardsEarned) || 0) + (pl.shardsWon || 0);
+    payout.play = { boons: pl.boons.slice(), relics: pl.relics.slice(), shards: pl.shardsWon, guardians: pl.gd ? pl.gd.beaten.slice() : [], stats: pl.stats };
+  }
   try {
     applyPayout(payout, S.seed, st.biomeId, cheated);
   } catch (e) {

@@ -24,7 +24,7 @@ function beatMsFor(speed) {
 
 function viewNow(status) {
   return buildView(S.run, {
-    goals: S.goals, bestDepth: S.bestBefore, status,
+    goals: S.goals, bestDepth: S.bestBefore, status, playView: deps.engine && deps.engine.playView,
     riskInfo: deps.engine && deps.engine.riskInfo,
   });
 }
@@ -76,11 +76,42 @@ function afterEvents(events) {
   for (let i = 0; i < done.length; i++) deps.bus.emit('goal:done', { goal: done[i], view: S.view });
 
   if (S.ended) return;
+  if (st.status === 'choosing') { openPicker(); return; } // [HOOK-1] a boon offer pauses the drop
   if (st.status !== 'running') { finishRun(st.status === 'hauled' ? 'hauled' : 'snapped'); return; }
   const ms = beatMsFor(st.speed);
   if (ms !== S.lastBeatMs && S.loop) { S.lastBeatMs = ms; call(S.loop, 'setBeatMs', ms); }
   if (S.beats % CHECKPOINT_EVERY === 0) writeCheckpoint();
   autoHaulCheck(st);
+}
+
+// [HOOK-1] A boon or Merchant offer is open: stop the beat clock until the player picks (or the timer runs out).
+function openPicker() {
+  call(S.loop, 'pause');
+  S.choosing = true;
+  clearTimeout(S.pickTimer);
+  const secs = Number(S.view && S.view.play && S.view.play.seconds) || 6;
+  if (typeof setTimeout === 'function') S.pickTimer = setTimeout(() => { if (S.choosing) chooseBoon(null); }, (secs + 2) * 1000); // safety net if no screen answers
+}
+
+export function chooseBoon(id) {
+  if (!S.choosing || S.ended || !S.run || !deps.engine || typeof deps.engine.chooseBoon !== 'function') return { ok: false };
+  let events = [];
+  try { const out = deps.engine.chooseBoon(S.run, id === undefined ? null : id); if (Array.isArray(out)) events = out; } catch (e) { deps.log.warn('run: chooseBoon failed'); }
+  if (S.run.state.status === 'choosing') return { ok: false }; // junk id: the offer stays open
+  S.choosing = false; clearTimeout(S.pickTimer);
+  afterEvents(events);
+  if (!S.ended && S.status === 'running') call(S.loop, 'resume');
+  return { ok: true };
+}
+
+// [HOOK-1] Tap skills (Brace, Surge, Flare). Safe to call twice: a second press finds no charge.
+export function useSkill(id) {
+  if (S.status !== 'running' || S.ended || S.choosing || !S.run || !deps.engine || typeof deps.engine.useSkill !== 'function') return { ok: false };
+  let events = [];
+  try { const out = deps.engine.useSkill(S.run, id); if (Array.isArray(out)) events = out; } catch (e) { deps.log.warn('run: useSkill failed'); }
+  if (!events.length) return { ok: false };
+  afterEvents(events);
+  return { ok: true };
 }
 
 // Auto-Haul Assist (Workshop upgrade): haul by itself when the strain reaches the chosen level.
@@ -128,7 +159,8 @@ export function start(opts = {}) {
       : ((Number(deps.now()) % 2147483647) ^ Math.imul(S.counter, 2654435761)) >>> 0;
     const safe = Number(opts && opts.safeUntilDepth);
     S.tutorial = !!(opts && opts.tutorial);
-    S.run = deps.engine.createRun({ rig, mods, seed: S.seed, safeUntilDepth: Number.isFinite(safe) && safe > 0 ? safe : 0 });
+    const playOpt = opts && opts.play === false ? undefined : (opts && typeof opts.play === 'object' ? opts.play : (S.tutorial ? undefined : {})); // [HOOK-1] off in the tutorial drop
+    S.run = deps.engine.createRun({ rig, mods, seed: S.seed, safeUntilDepth: Number.isFinite(safe) && safe > 0 ? safe : 0, play: playOpt });
     if (!S.run || !S.run.state) throw new Error('engine gave no run');
     S.bestBefore = records.bestDepth();
     S.goals = goalsApi.generate({ bestDepth: S.bestBefore, rng: deps.makeRng(S.seed ^ 0x9e3779b9) });
@@ -150,7 +182,7 @@ export function start(opts = {}) {
 }
 
 export function haul() {
-  if (S.status !== 'running' || S.ended || S.hauling || !S.run) return { ok: false };
+  if (S.status !== 'running' || S.ended || S.hauling || !S.run || S.choosing) return { ok: false };
   S.hauling = true;
   let events = [];
   try {
@@ -175,7 +207,7 @@ export function pause() {
 }
 
 export function resume() {
-  if (S.status !== 'paused' || S.ended) return { ok: false };
+  if (S.status !== 'paused' || S.ended || S.choosing) return { ok: false };
   call(S.loop, 'resume');
   S.status = 'running';
   deps.bus.emit('run:resumed', { view: S.view });
@@ -245,5 +277,5 @@ export function onFrameTick(fn) {
   return () => { const i = S.frameCbs.indexOf(fn); if (i >= 0) S.frameCbs.splice(i, 1); };
 }
 
-export const session = { start, haul, pause, resume, abort, getView, getResult, isRunning, recover, onFrame: onFrameTick, debugView, debugResults };
+export const session = { chooseBoon, useSkill, start, haul, pause, resume, abort, getView, getResult, isRunning, recover, onFrame: onFrameTick, debugView, debugResults };
 export default session;

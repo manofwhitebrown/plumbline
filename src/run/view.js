@@ -41,7 +41,10 @@ export function buildView(run, ctx = {}) {
     risk = { beatsToSnap: 9999, goldAtRisk: 0, keepIfSnap: 0 };
   }
 
+  let play = null;
+  if (run && run.play && typeof ctx.playView === 'function') { try { play = ctx.playView(run); } catch (e) { play = null; } } // [HOOK-1]
   return {
+    play,
     status: ctx.status || s.status || 'idle',
     depth, gold: Math.max(0, num(s.gold)),
     strain, maxStrain, strain01,
