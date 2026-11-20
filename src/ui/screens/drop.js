@@ -9,6 +9,7 @@ import { getSettings, onSettings } from '../settings.js';
 import { createDropController } from '../logic/dropController.js';
 import { createHud } from './dropHud.js';
 import { createPauseMenu } from './dropPause.js';
+import { createPlayUi } from './dropPlay.js'; // [HOOK-1] boons, skills, banners
 import { beforeDrop } from '../motion/index.js'; // [MOTION-1]
 
 let scope = null;
@@ -60,7 +61,9 @@ registerScreen('drop', {
       onPause: () => controller && controller.openPause(),
     }, scope);
 
-    const screen = h('section', { class: 'screen no-pad screen-drop' }, stage, ...hud.nodes, pause.el);
+    let playNodes = [];
+    try { playNodes = createPlayUi({ bus, session }, scope).nodes; } catch (e) { log.warn('drop: play ui failed'); } // [HOOK-1] optional layer
+    const screen = h('section', { class: 'screen no-pad screen-drop' }, stage, ...hud.nodes, ...playNodes, pause.el);
     el.append(screen);
 
     // Keep the canvas sharp and the right size.

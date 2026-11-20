@@ -198,7 +198,7 @@ export function haul() {
 }
 
 export function pause() {
-  if (S.status !== 'running' || S.ended) return { ok: false };
+  if (S.status !== 'running' || S.ended || S.choosing) return { ok: false }; // the picker already holds the clock
   call(S.loop, 'pause');
   S.status = 'paused';
   writeCheckpoint();
