@@ -23,14 +23,14 @@ export function makeRecord(layer, opts) {
       // ribbon unfurls from the centre, holds, then folds away
       const open = seg(t, 120, 420, ease.out), close = seg(t, 1250, 300, ease.in), k = open * (1 - close);
       if (k > 0.001) {
-        const rw = w * 0.74 * k, rh = 34, ry = cy + 30;
-        ctx.save(); ctx.globalAlpha = 0.95;
+        const rw = w * 0.7 * k, rh = 28, ry = 88 + 26; // sits right under the HUD top zone, clear of the columns
+        ctx.save(); ctx.globalAlpha = 0.9;
         const g = ctx.createLinearGradient(cx - rw / 2, 0, cx + rw / 2, 0); g.addColorStop(0, '#b8862a'); g.addColorStop(0.5, TOKENS.gold); g.addColorStop(1, '#b8862a');
         ctx.fillStyle = g; ctx.fillRect(cx - rw / 2, ry - rh / 2, rw, rh);
         // notched ends
         ctx.fillStyle = '#8a6420'; ctx.beginPath(); ctx.moveTo(cx - rw / 2, ry - rh / 2); ctx.lineTo(cx - rw / 2 - 12 * k, ry); ctx.lineTo(cx - rw / 2, ry + rh / 2); ctx.closePath(); ctx.fill();
         ctx.beginPath(); ctx.moveTo(cx + rw / 2, ry - rh / 2); ctx.lineTo(cx + rw / 2 + 12 * k, ry); ctx.lineTo(cx + rw / 2, ry + rh / 2); ctx.closePath(); ctx.fill();
-        if (k > 0.85) { ctx.fillStyle = '#1b1410'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '700 15px system-ui,sans-serif'; ctx.fillText('NEW RECORD  ' + depth + ' m', cx, ry + 1); }
+        if (k > 0.85) { ctx.fillStyle = '#1b1410'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '700 13px system-ui,sans-serif'; ctx.fillText('NEW RECORD  ' + depth + ' m', cx, ry + 1); }
         // glint sweeping across the ribbon
         const gl = seg(t, 520, 500); if (gl > 0 && gl < 1) { const gx = cx - rw / 2 + rw * gl; ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(gx - 6, ry - rh / 2, 12, rh); }
         ctx.restore();

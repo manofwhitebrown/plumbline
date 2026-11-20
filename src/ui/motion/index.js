@@ -69,6 +69,7 @@ export const wiring = wireDirector({
     achievement: (id) => nameOf(() => api.achievements.list(), id),
     codex: (id) => nameOf(() => api.codex.list(), id),
     targets: () => ({ gold: centerOf('[data-tut="gold"], .pill.gold'), shards: centerOf('[data-tut="shards"], .pill.shards'), coreDust: centerOf('[data-tut="coredust"], .pill.coredust') }),
+    bannerTop: () => (shell.currentId() === 'drop' ? 96 : 12), // never cover the Drop HUD
     ownedParts: () => api.ownedParts(),
     partIcon: (id) => api.partIcon(id, 96),
     dailyState: () => api.daily.state(),

@@ -28,10 +28,10 @@ export function makeDropStart(layer, opts) {
       ctx.strokeStyle = rgba(TOKENS.goldSoft, 0.35 * push); ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, my, w * 0.3, w * 0.09, 0, 0, 6.2832); ctx.stroke();
       // 2. rope pays out over the edge
       const pay = seg(p, 0.1, 0.3);
-      if (pay > 0) { ctx.strokeStyle = rgba(TOKENS.goldSoft, 0.8); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(cx, 0); ctx.quadraticCurveTo(cx + 6, my * pay * 0.5, cx, my + (h * 0.7) * pay); ctx.stroke(); fire('rope'); }
+      if (pay > 0) { ctx.strokeStyle = rgba(TOKENS.goldSoft, 0.8 * (1 - 0.8 * seg(p, 0.72, 0.12))); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(cx, 0); ctx.quadraticCurveTo(cx + 6, my * pay * 0.5, cx, my + (h * 0.7) * pay); ctx.stroke(); fire('rope'); }
       // 3. bucket slides over the edge and falls (ease-in), fading into the dark
       const fall = seg(p, 0.3, 0.45, ease.in), slide = seg(p, 0.3, 0.15);
-      if (fall > 0 || slide > 0) { const by = my - 30 + fall * h * 0.8; ctx.globalAlpha = 1 - 0.85 * fall; bucketGlyph(ctx, cx - (1 - slide) * 40, by, 26, 1 - fall); ctx.globalAlpha = 1; fire('fall'); }
+      if (fall > 0 || slide > 0) { const by = my - 30 + fall * h * 0.8; ctx.globalAlpha = 1 - 0.85 * fall; bucketGlyph(ctx, cx - (1 - slide) * 40, by, 38, 1 - fall); ctx.globalAlpha = 1; fire('fall'); }
       if (quick) { glow(ctx, cx, my, w * 0.6, TOKENS.gold, 0.25 * seg(p, 0.75, 0.25)); return; }
       // 4. 3-2-1 beat, rig lamps light part by part
       const beat = (p - 0.6) / 0.4; // 0..1 across the last 600 ms

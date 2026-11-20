@@ -16,7 +16,10 @@
 - tests/motion-core.test.js: easing maths, runner, director queue priority, skipping, reduce paths, no double plays.
 
 - dev/motion-lab.html + dev/motion-lab.js: a button for every built moment (drop start full and quick, haul, snap, six biome cards, record, milestone, biome and milestone together, new run), real bus wiring, screen-transition demo, speed 0.25x to 2x, Reduce motion toggle, HUD-zone overlay, skip button, frame-time readout (average, 95th percentile, worst, frames over 20 ms) and a 300-particle stress button. Open with `npm run dev`, then /dev/motion-lab.html. The log shows every onGo, so a double call is visible.
-- NOT YET DONE: the frame-time record with 300 particles and the watch-at-slow-speed pass. There is no browser in my environment, so nobody has watched these moments yet. Please run the lab and read the Frame time panel after the stress button.
+- WATCHED (headless Chromium via npm, desktop CPU, software rendering): contact sheets of every moment were reviewed frame by frame at exact times (lab has `?manual=1` plus `window.__step(ms)` for deterministic captures). Fixes found and made: overlay canvas was not sized at exactly 360 x 640 (shapes stretched and cropped), the snap tint never desaturated (it is now a host sibling with a saturation blend, created only when needed), the record ribbon covered the lanes (now under the HUD zone), the achievement banner covered the Drop HUD (now under it), the daily chest lid and fly-to timing, the rope staying through the 3-2-1, the haul dead tail (800 ms now).
+- MEASURED: 300 particles on screen for 6 s: average 16.7 ms, 95th percentile 16.7 ms, worst 16.8 ms, 0 of 364 frames over 20 ms. Particle update and draw cost 0.29 ms per frame. This is a desktop headless browser, not a phone: please repeat the stress button on a real mid-range phone.
+- OPEN: one frame of about 900 ms was seen about 1.1 s after pressing a moment in headless Chromium (being investigated; may be a headless artefact).
+- (earlier note) NOT YET DONE: the frame-time record with 300 particles and the watch-at-slow-speed pass. There is no browser in my environment, so nobody has watched these moments yet. Please run the lab and read the Frame time panel after the stress button.
 
 ## Added in the last pass
 - src/ui/motion/micro.js: button release spring (the press-in itself is polish.css), number glow pulse on counters (not on the Drop HUD), tab indicator that slides, list stagger-in (max 8, 40 ms apart), sheets and modals spring in (MutationObserver on `.scrim`). All by delegation or observation: no screen edits.
@@ -28,7 +31,7 @@
 - tests/motion-rewards.test.js.
 
 ## Known gaps and honest limits
-- NOT WATCHED: no browser was available to me, so I have not seen any moment run, have no frame-time numbers (60 fps with 300 particles is unverified), and have not done the normal and slow-speed watch pass. Do that in dev/motion-lab.html, then fix anything abrupt, floaty, cluttered or slow.
+- Watch pass: done in a headless desktop browser only (see above). Still needs a real phone for feel and frame times.
 - Sounds: only existing audio.ui sounds (tap, open, close, claim) and buzzes are used. There is no pitch parameter, so the gold "ticking pitch" is a cue with a pitch hint that currently plays a plain tap. A real rising tick, a thud and a whoosh need a request to the audio owner.
 - Targets for flying items (gold, shards, Core Dust counters) use `[data-tut="gold"]`, `.pill.gold` and similar selectors. If those do not exist the items fly to the top corners.
 - Sheets and modals spring in, but there is no exit animation (the components remove the scrim at once).

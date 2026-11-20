@@ -12,7 +12,12 @@ const frame = $('frame');
 const lab = { reduce: false, speed: 1 };
 const log = (m) => { const el = $('log'); const d = document.createElement('div'); d.textContent = (performance.now() / 1000).toFixed(2) + 's  ' + m; el.append(d); while (el.childNodes.length > 120) el.removeChild(el.firstChild); el.scrollTop = el.scrollHeight; };
 
-const stage = createStage({ isReduced: () => lab.reduce, cue: (kind, k) => log('cue ' + kind + ':' + k) });
+// ?manual=1: time only moves when window.__step(ms) is called (used for exact frame captures in a headless browser).
+const manual = new URLSearchParams(location.search).has('manual');
+let vt = 0, cbs = [];
+const clock = manual ? { raf: (f) => { cbs.push(f); return cbs.length; }, caf: () => { cbs = []; }, now: () => vt } : {};
+window.__step = (ms) => { let left = ms; while (left > 0) { const d = Math.min(16, left); vt += d; left -= d; const run = cbs; cbs = []; run.forEach((f) => f(vt)); } };
+const stage = createStage({ ...clock, isReduced: () => lab.reduce, cue: (kind, k) => log('cue ' + kind + ':' + k) });
 const handlers = {};
 const bus = { on: (n, f) => { (handlers[n] = handlers[n] || []).push(f); return () => {}; }, emit: (n, p) => (handlers[n] || []).forEach((f) => f(p)) };
 let daily = { streak: 1, canClaim: true }, owned = ['hook'];

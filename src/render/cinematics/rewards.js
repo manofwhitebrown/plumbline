@@ -15,7 +15,7 @@ export function makeDailyChest(layer, opts) {
   const o = opts || {}; const cue = typeof o.cue === 'function' ? o.cue : () => {};
   const r = layer.pool.rnd; let opened = false;
   const N = 14, items = [];
-  for (let i = 0; i < N; i++) items.push({ a: -1.2 - r() * 0.8 + (i % 2 ? 0.5 : -0.5), s: 70 + r() * 70, kind: i % 3 === 0 ? 'shard' : 'gold', delay: 520 + i * 40 });
+  for (let i = 0; i < N; i++) items.push({ a: -1.2 - r() * 0.8 + (i % 2 ? 0.5 : -0.5), s: 70 + r() * 70, kind: i % 3 === 0 ? 'shard' : 'gold', delay: 450 + i * 35 });
   return {
     id: 'dailyChest', durationMs: DAILY_MS,
     update(t) {
@@ -24,19 +24,20 @@ export function makeDailyChest(layer, opts) {
       const goldT = pt(o.targets && o.targets.gold, w, h, 0.25, 38), shardT = pt(o.targets && o.targets.shards, w, h, 0.75, 38);
       const rise = seg(t, 0, 260, ease.settle), open = seg(t, 300, 260, ease.out), fade = 1 - seg(t, 1500, 300);
       ctx.fillStyle = 'rgba(2,1,8,' + (0.45 * rise * fade) + ')'; ctx.fillRect(0, 0, w, h);
-      ctx.save(); ctx.globalAlpha = fade; ctx.translate(cx, cy + (1 - rise) * 24);
-      glow(ctx, 0, -20, 150, TOKENS.gold, 0.35 * open);
+      ctx.save(); ctx.globalAlpha = fade; ctx.translate(cx, cy + (1 - rise) * 24); ctx.scale(1.5, 1.5);
+      glow(ctx, 0, -20, 150, TOKENS.gold, 0.4 * open);
       ctx.fillStyle = '#5a3b1d'; ctx.fillRect(-36, -4, 72, 40);
-      ctx.fillStyle = '#8a6420'; ctx.fillRect(-36, 10, 72, 5);
-      ctx.save(); ctx.translate(-36, -4); ctx.rotate(-open * 1.25); ctx.fillStyle = '#6f4a22'; ctx.fillRect(0, -16, 72, 16); ctx.restore();
+      ctx.fillStyle = '#8a6420'; ctx.fillRect(-36, 10, 72, 5); ctx.fillRect(-4, 6, 8, 12);
+      // the lid is hinged at the back edge and swings up and back
+      ctx.save(); ctx.translate(-36, -4); ctx.rotate(-open * 0.95); ctx.fillStyle = '#7a5226'; ctx.fillRect(0, -14, 72, 14); ctx.fillStyle = '#8a6420'; ctx.fillRect(0, -5, 72, 3); ctx.restore();
       ctx.restore();
       if (open > 0.4 && !opened) { opened = true; cue('open'); }
       for (const it of items) {
-        const k = (t - it.delay) / 1100; if (k <= 0) continue;
+        const k = (t - it.delay) / 1250; if (k <= 0) continue;
         const kk = Math.min(1, k), burst = ease.out(Math.min(1, kk * 2.2)), home = ease.in(Math.max(0, (kk - 0.4) / 0.6));
         const bx = cx + Math.cos(it.a) * it.s * burst, by = cy - 20 + Math.sin(it.a) * it.s * burst, tg = it.kind === 'shard' ? shardT : goldT;
         const x = bx + (tg.x - bx) * home, y = by + (tg.y - by) * home;
-        ctx.globalAlpha = (1 - 0.7 * home) * fade; ctx.fillStyle = it.kind === 'shard' ? TOKENS.shard : TOKENS.gold;
+        ctx.globalAlpha = 1 - 0.85 * ease.in(Math.max(0, (kk - 0.85) / 0.15)); ctx.fillStyle = it.kind === 'shard' ? TOKENS.shard : TOKENS.gold;
         if (it.kind === 'shard') { ctx.beginPath(); ctx.moveTo(x, y - 6); ctx.lineTo(x + 4, y); ctx.lineTo(x, y + 6); ctx.lineTo(x - 4, y); ctx.closePath(); ctx.fill(); } else { ctx.beginPath(); ctx.arc(x, y, 5, 0, 6.2832); ctx.fill(); }
       }
       ctx.globalAlpha = 1;
@@ -90,7 +91,7 @@ export function makeAchievement(host, opts) {
   const o = opts || {}; const doc = o.doc || (typeof document !== 'undefined' ? document : null);
   let n = null, glint = null;
   if (doc && host) {
-    n = el(doc, 'div', 'position:absolute;left:50%;top:calc(env(safe-area-inset-top, 0px) + 12px);margin-left:-150px;width:300px;pointer-events:none;z-index:95;opacity:0;padding:10px 14px;border-radius:12px;background:linear-gradient(180deg,#2a2210,#1b1410);border:1px solid rgba(246,196,83,.6);box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 24px rgba(246,196,83,.25);overflow:hidden;will-change:transform,opacity');
+    n = el(doc, 'div', 'position:absolute;left:50%;top:calc(env(safe-area-inset-top, 0px) + ' + (Number.isFinite(o.top) ? o.top : 12) + 'px);margin-left:-150px;width:300px;pointer-events:none;z-index:95;opacity:0;padding:10px 14px;border-radius:12px;background:linear-gradient(180deg,#2a2210,#1b1410);border:1px solid rgba(246,196,83,.6);box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 24px rgba(246,196,83,.25);overflow:hidden;will-change:transform,opacity');
     n.setAttribute('aria-hidden', 'true'); n.className = 'cine-ach';
     n.append(el(doc, 'div', 'font:600 11px/1.2 var(--font-body, inherit);letter-spacing:.14em;text-transform:uppercase;color:#f6c453', 'Achievement unlocked'), el(doc, 'div', 'font:700 16px/1.3 var(--font-display, inherit);color:#eef2ff;margin-top:2px', String(o.title || 'Achievement')));
     glint = el(doc, 'div', 'position:absolute;top:0;bottom:0;left:0;width:30%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.35),rgba(255,255,255,0));opacity:0;will-change:transform,opacity');

@@ -44,7 +44,7 @@ export function wireDirector(opts) {
   });
   on('achievement:unlocked', (p) => {
     const id = p && p.id; if (id == null) return;
-    reward('achievement:' + id, ({ host }) => makeAchievement(host, { title: safe(info.achievement, id) || 'New achievement' }));
+    reward('achievement:' + id, ({ host }) => makeAchievement(host, { title: safe(info.achievement, id) || 'New achievement', top: safe(info.bannerTop) || 12 }));
   });
   on('codex:new', (p) => {
     const id = p && p.id; if (id == null) return;

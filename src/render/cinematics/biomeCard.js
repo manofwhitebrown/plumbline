@@ -22,7 +22,7 @@ export function makeBiomeCard(host, opts) {
     wrap.style.cssText = 'position:absolute;left:0;right:0;top:96px;text-align:center;pointer-events:none;z-index:41;opacity:0;will-change:opacity,transform';
     const box = doc.createElement('div'); box.style.cssText = 'position:relative;display:inline-block;overflow:hidden;padding:2px 18px';
     const title = doc.createElement('div'); title.textContent = name;
-    title.style.cssText = 'font:700 26px/1.1 var(--font-display, inherit);letter-spacing:.24em;text-indent:.24em;color:' + (GLOW[id] || '#ffe3a1') + ';text-shadow:0 0 18px rgba(0,0,0,.6),0 2px 10px rgba(0,0,0,.5);will-change:transform';
+    title.style.cssText = 'font:700 30px/1.1 var(--font-display, inherit);letter-spacing:.24em;text-indent:.24em;color:' + (GLOW[id] || '#ffe3a1') + ';text-shadow:0 0 18px rgba(0,0,0,.6),0 2px 10px rgba(0,0,0,.5);will-change:transform';
     const sweep = doc.createElement('div');
     sweep.style.cssText = 'position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(90deg,rgba(255,227,161,0),rgba(255,227,161,.55),rgba(255,227,161,0));mix-blend-mode:screen;opacity:0;will-change:transform,opacity';
     box.append(title, sweep);

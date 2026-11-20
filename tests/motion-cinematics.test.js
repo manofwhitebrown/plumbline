@@ -60,3 +60,15 @@ test('a skipped moment leaves the layer clean (no particles, no tint)', () => {
   const L = createNullLayer(360, 640, seeded()); const r = createRunner(makeSnapDrama(L, {})); r.start(); r.tick(300); r.skip();
   assert.equal(L.pool.live, 0); assert.equal(L.tint, 0);
 });
+
+test('overlay layer: the canvas pixel size always matches the host, even at exactly the default 360 x 640', async () => {
+  const { createFxLayer } = await import('../src/render/cinematics/fxLayer.js');
+  for (const [w, h] of [[360, 640], [412, 915], [320, 568]]) {
+    const canvas = { width: 300, height: 150, style: {}, getContext: () => ({}) };
+    const mk = (tag) => (tag === 'canvas' ? canvas : { style: {}, setAttribute() {}, append() {}, remove() {} });
+    const doc = { createElement: mk };
+    const host = { appendChild() {}, getBoundingClientRect: () => ({ width: w, height: h }) };
+    const L = createFxLayer(host, { doc });
+    assert.equal(L.w, w); assert.equal(L.h, h); assert.equal(canvas.width, Math.round(w * L.dpr)); assert.equal(canvas.height, Math.round(h * L.dpr));
+  }
+});
