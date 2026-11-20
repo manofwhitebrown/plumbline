@@ -33,6 +33,7 @@ function bad(x) { return typeof x === 'number' && (!Number.isFinite(x) || x < 0)
 export function playBot(style = '70', opts = {}) {
   const hours = Number.isFinite(opts.hours) ? opts.hours : 6;
   PLAY = opts.play === true ? {} : undefined;
+  const boonStats = opts.boonStats || (opts.play === true ? newBoonStats() : null); // [ECONOMY-1] pick rates are always counted when the play layer is on
   const maxDrops = Number.isFinite(opts.maxDrops) ? opts.maxDrops : 4000;
   const frac = STYLES[style];
   const problems = [];
@@ -103,9 +104,9 @@ export function playBot(style = '70', opts = {}) {
     const mods = meta.getMods();
     const bestBefore = meta.stats.get ? (meta.stats.get().bestDepth || 0) : 0;
     let res;
-    try { res = simulateRun({ rig, mods, seed: seed++, policy, play: opts.play === true ? {} : undefined, withEvents: !!opts.boonStats }); } catch (e) { fail('engine threw: ' + (e && e.message)); break; }
+    try { res = simulateRun({ rig, mods, seed: seed++, policy, play: opts.play === true ? {} : undefined, withEvents: !!boonStats }); } catch (e) { fail('engine threw: ' + (e && e.message)); break; }
     drops++;
-    if (opts.boonStats && res.events) tallyBoons(opts.boonStats, res.events);
+    if (boonStats && res.events) tallyBoons(boonStats, res.events);
     wait(res.beats * ENGINE.baseBeatMs / 1000 + DROP_PAUSE_S);
     for (const k of ['gold', 'kept', 'depth', 'strain']) if (bad(res[k])) fail(`bad run number: ${k} = ${res[k]} (drop ${drops})`);
     const pay = computePayout({ outcome: res.outcome, gold: res.gold, goldKept: res.kept, depth: res.depth, bestBefore, partsInRig: rig.cells.flat().filter(Boolean) });
@@ -158,21 +159,25 @@ export function playBot(style = '70', opts = {}) {
     }
   }
 
-  return { style, hours: simS / 3600, drops, timeline: tl, problems, owned, usage, impacts, rigs: rigsBuilt.length, goldEarned: earnedTotal, bestDepth: meta.stats.get().bestDepth };
+  return { style, hours: simS / 3600, drops, timeline: tl, problems, owned, usage, impacts, rigs: rigsBuilt.length, boonStats, goldEarned: earnedTotal, bestDepth: meta.stats.get().bestDepth };
 }
 
 
 // ---- Part dominance -------------------------------------------------------------------------
 export const MUST_HAVE_LOSS = 0.7; // a part is "must-have" if banning it loses more than 70% of the best rig's Gold
-const IMPACT_SEEDS = 12;
+const IMPACT_SEEDS = 24; // [ECONOMY-1] more seeds, and a trimmed mean below: one lucky 1000 m drop used to decide the whole answer
 
 function rigGold(rig, mods) {
-  let total = 0;
+  const gold = [];
   const policy = ({ run }) => (run.state.strain >= 0.85 * run.state.maxStrain ? 'haul' : 'continue');
   for (let i = 0; i < IMPACT_SEEDS; i++) {
-    try { total += simulateRun({ rig, mods: { ...mods, cheat: null }, seed: 7000 + i, policy, play: PLAY }).kept; } catch (e) { /* counted as 0 */ }
+    let g = 0;
+    try { g = simulateRun({ rig, mods: { ...mods, cheat: null }, seed: 7000 + i, policy, play: PLAY }).kept; } catch (e) { /* counted as 0 */ }
+    gold.push(g);
   }
-  return total / IMPACT_SEEDS;
+  gold.sort((a, b) => a - b);
+  const keep = gold.slice(0, Math.ceil(gold.length * 0.75)); // trimmed mean: the richest quarter (rare-boon jackpots) is left out
+  return keep.reduce((a, b) => a + b, 0) / keep.length;
 }
 
 // For every part type in the rig: the share of Gold lost when it is banned (0 = no loss, 1 = everything).
@@ -208,6 +213,13 @@ export function printResult(r) {
   console.log('  parts owned       : ' + Object.keys(r.owned).join(', '));
   const imp = Object.entries(r.impacts || {}).sort((a, b) => b[1] - a[1]);
   if (imp.length) console.log('  biggest part loss : ' + imp.slice(0, 4).map(([k, v]) => k + ' ' + Math.round(100 * v) + '%').join(', ') + ' (when banned)');
+  const bs = r.boonStats;
+  if (bs && bs.picks > 0) {
+    const rows = Object.keys(bs.picked).map((id) => ({ id, share: bs.picked[id] / bs.picks, rate: bs.picked[id] / Math.max(1, bs.offered[id] || 0) })).sort((a, b) => b.share - a.share);
+    console.log(`  boons             : ${bs.picks} picks of ${bs.offers} offers; top by share of picks: ` + rows.slice(0, 5).map((x) => `${x.id} ${Math.round(100 * x.share)}% (of offers ${Math.round(100 * x.rate)}%)`).join(', '));
+    const hi = rows.slice().sort((a, b) => b.rate - a.rate)[0];
+    if (hi) console.log(`  boon top rate     : ${hi.id} picked in ${Math.round(100 * hi.rate)}% of the offers that showed it`);
+  }
   if (r.problems.length) for (const p of r.problems) console.log('  FAIL ' + p);
   else console.log('  PASS');
 }

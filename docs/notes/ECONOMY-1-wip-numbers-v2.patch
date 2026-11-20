@@ -1,0 +1,161 @@
+diff --git a/src/data/abilities.js b/src/data/abilities.js
+index 4394845..7a38ec9 100644
+--- a/src/data/abilities.js
++++ b/src/data/abilities.js
+@@ -3,10 +3,10 @@
+ export const ABILITIES = Object.freeze({
+   brace: Object.freeze({
+     id: 'brace', name: 'Brace', key: '1', desc: 'Eases the rope and slows the descent for a moment.',
+-    strainPct: -0.12,          // takes 12% of the max off the strain
++    strainPct: -0.06,          // takes 6% of the max off the strain
+     effectSteps: 4,            // about 3 s of slow descent
+     slowMult: 0.6,             // metres per step while braced
+-    cooldownSteps: 31,         // about 25 s
++    cooldownSteps: 40,         // about 32 s
+     charges: 1,
+     scaresWeevil: true,
+   }),
+diff --git a/src/data/biomes.js b/src/data/biomes.js
+index 4ee6302..2f0c8f6 100644
+--- a/src/data/biomes.js
++++ b/src/data/biomes.js
+@@ -35,7 +35,7 @@ const BASE = [
+     mix: { empty: 22, gem: 36, ore: 20, hazard: 22 },
+     hazardWeights: { bat: 2, root: 3 },
+     hazardStrain: { bat: 4, root: 6 },
+-    relicChance: 0.02,
++    relicChance: 0.03,
+     ambience: 'amber_warm',
+     palette: { top: '#4a3213', bottom: '#1a1006', accent: '#ffb454' },
+   },
+@@ -46,7 +46,7 @@ const BASE = [
+     mix: { empty: 20, gem: 34, ore: 18, hazard: 28 },
+     hazardWeights: { root: 2, steam: 3 },
+     hazardStrain: { root: 6, steam: 5 },
+-    relicChance: 0.04,
++    relicChance: 0.06,
+     ambience: 'magma_deep',
+     palette: { top: '#4a1a14', bottom: '#14070a', accent: '#ff7a45' },
+   },
+@@ -57,7 +57,7 @@ const BASE = [
+     mix: { empty: 18, gem: 34, ore: 16, hazard: 32 },
+     hazardWeights: { steam: 2, void: 3 },
+     hazardStrain: { steam: 5, void: 4 },
+-    relicChance: 0.06,
++    relicChance: 0.09,
+     ambience: 'void_hush',
+     palette: { top: '#1a0f33', bottom: '#05030d', accent: '#b583ff' },
+   },
+@@ -68,7 +68,7 @@ const BASE = [
+     mix: { empty: 15, gem: 32, ore: 14, hazard: 39 },
+     hazardWeights: { rock: 1, bat: 1, root: 1, steam: 1, void: 1 },
+     hazardStrain: { rock: 3, bat: 4, root: 6, steam: 5, void: 4 },
+-    relicChance: 0.08,
++    relicChance: 0.12,
+     ambience: 'abyss_endless',
+     palette: { top: '#120a24', bottom: '#020106', accent: '#e6d2ff' },
+   },
+diff --git a/src/data/crew.js b/src/data/crew.js
+index bf0f317..1ea98a4 100644
+--- a/src/data/crew.js
++++ b/src/data/crew.js
+@@ -3,16 +3,16 @@ export const CREW_GROWTH = 1.15;                    // each owned crew member ma
+ export const CREW_MILESTONES = [10, 25, 50, 100, 200, 300]; // each one doubles that crew's output
+ 
+ export const CREW = [
+-  { id: 'winch',   name: 'Winch Hand',    desc: 'Turns the winch and hauls up loose gold.',   baseCost: 50,       baseGps: 1,     unlockDepth: 0 },
+-  { id: 'smithy',  name: 'Smithy',        desc: 'Melts rough ore into clean gold bars.',      baseCost: 500,      baseGps: 8,     unlockDepth: 50 },
+-  { id: 'cart',    name: 'Cart Line',     desc: 'Carts gold from the well mouth to town.',    baseCost: 6000,     baseGps: 50,    unlockDepth: 150 },
+-  { id: 'lamp',    name: 'Lamp Hall',     desc: 'Lamps in the dark show where gems hide.',    baseCost: 70000,    baseGps: 300,   unlockDepth: 250 },
+-  { id: 'assay',   name: 'Assay Office',  desc: 'Finds the true worth of every gem.',         baseCost: 1000000,  baseGps: 2000,  unlockDepth: 400 },
+-  { id: 'foundry', name: 'Deep Foundry',  desc: 'A great furnace that never goes cold.',      baseCost: 15000000, baseGps: 14000, unlockDepth: 600 },
++  { id: 'winch',   name: 'Winch Hand',    desc: 'Turns the winch and hauls up loose gold.',   baseCost: 50,       baseGps: 0.25,     unlockDepth: 0 },
++  { id: 'smithy',  name: 'Smithy',        desc: 'Melts rough ore into clean gold bars.',      baseCost: 500,      baseGps: 1,     unlockDepth: 50 },
++  { id: 'cart',    name: 'Cart Line',     desc: 'Carts gold from the well mouth to town.',    baseCost: 6000,     baseGps: 4,    unlockDepth: 150 },
++  { id: 'lamp',    name: 'Lamp Hall',     desc: 'Lamps in the dark show where gems hide.',    baseCost: 70000,    baseGps: 16,   unlockDepth: 250 },
++  { id: 'assay',   name: 'Assay Office',  desc: 'Finds the true worth of every gem.',         baseCost: 1000000,  baseGps: 70,  unlockDepth: 400 },
++  { id: 'foundry', name: 'Deep Foundry',  desc: 'A great furnace that never goes cold.',      baseCost: 15000000, baseGps: 350, unlockDepth: 600 },
+ ];
+ 
+ // A manager triples one crew's output. Bought once with Gold.
+-export const MANAGER = { costMult: 150, minOwned: 10, outputMult: 3 };
++export const MANAGER = { costMult: 150, minOwned: 10, outputMult: 2 };
+ 
+ // Away income
+ export const OFFLINE = {
+diff --git a/src/data/engine.js b/src/data/engine.js
+index 8047a61..c62fca8 100644
+--- a/src/data/engine.js
++++ b/src/data/engine.js
+@@ -9,9 +9,9 @@ export const ENGINE = Object.freeze({
+   maxSpeed: 20,
+   // Strain per beat = strainBase + strainPerMeter * depth (then times mods.strainMult)
+   strainBase: 0.35,
+-  strainPerMeter: 0.0016,
++  strainPerMeter: 0.0067,
+   // Gold maths
+-  depthBonusDiv: 200,       // depthBonus(d) = 1 + d / 200
++  depthBonusDiv: 400,       // depthBonus(d) = 1 + d / 200
+   comboStep: 0.1,           // each combo step adds +10%
+   comboCap: 10,             // ... up to 10 steps (so x2 at most)
+   // Milestones and limits
+diff --git a/src/data/parts.js b/src/data/parts.js
+index 4a462b4..28243df 100644
+--- a/src/data/parts.js
++++ b/src/data/parts.js
+@@ -31,7 +31,7 @@ export const PART_DATA = {
+   vacuum: {
+     name: 'Vacuum', family: 'collector', tags: ['grab', 'greedy', 'strain'],
+     desc: 'Grabs everything except dangers in its column. Adds a little Strain.',
+-    cost: 9800, unlock: { type: 'gold', value: 9000 }, tune: { strain: 1 },
++    cost: 9800, unlock: { type: 'gold', value: 9000 }, tune: { strain: 0.4 },
+   },
+   // ---------- Processors ----------
+   polisher: {
+@@ -78,7 +78,7 @@ export const PART_DATA = {
+   oilcan: {
+     name: 'Oil Can', family: 'defense', tags: ['strain', 'steady'],
+     desc: 'Lowers Strain a little every step.',
+-    cost: 170, unlock: { type: 'depth', value: 70 }, tune: { strain: 0.5 },
++    cost: 170, unlock: { type: 'depth', value: 70 }, tune: { strain: 0.2 },
+   },
+   spikeguard: {
+     name: 'Spike Guard', family: 'defense', tags: ['danger', 'ore'],
+@@ -88,7 +88,7 @@ export const PART_DATA = {
+   cooler: {
+     name: 'Cooler', family: 'defense', tags: ['strain', 'gem'],
+     desc: 'Lowers Strain by 2 when a gem is grabbed in its column.',
+-    cost: 1300, unlock: { type: 'depth', value: 140 }, tune: { strain: 2 },
++    cost: 1300, unlock: { type: 'depth', value: 140 }, tune: { strain: 0.7 },
+   },
+   shield: {
+     name: 'Shield', family: 'defense', tags: ['block', 'area'],
+@@ -104,12 +104,12 @@ export const PART_DATA = {
+   anchor: {
+     name: 'Anchor', family: 'engine', tags: ['slow', 'strain', 'steady'],
+     desc: 'Dive slower (0.3 m less a step) and lower Strain.',
+-    cost: 600, unlock: { type: 'depth', value: 110 }, tune: { speed: 0.3, strain: 0.25 },
++    cost: 600, unlock: { type: 'depth', value: 110 }, tune: { speed: 0.3, strain: 0.15 },
+   },
+   drill: {
+     name: 'Drill', family: 'engine', tags: ['fast', 'strain', 'greedy'],
+-    desc: 'Dive faster (+1 m a step) but adds Strain.',
+-    cost: 7200, unlock: { type: 'depth', value: 260 }, tune: { speed: 1, strain: 0.5 },
++    desc: 'Dive faster (+0.8 m a step) but adds Strain.',
++    cost: 7200, unlock: { type: 'depth', value: 260 }, tune: { speed: 0.8, strain: 0.5 },
+   },
+   metronome: {
+     name: 'Metronome', family: 'engine', tags: ['timing', 'double'],
+diff --git a/src/data/upgrades.js b/src/data/upgrades.js
+index 900b77a..5c52ab4 100644
+--- a/src/data/upgrades.js
++++ b/src/data/upgrades.js
+@@ -2,7 +2,7 @@
+ // currency: 'gold' | 'shards' | 'core'.  Cost of the next level = base * growth^level (rounded up).
+ // effect: what one level gives. gate: needs this much best Depth before it shows as buyable.
+ export const UPGRADES = [
+-  { id: 'rope',     name: 'Stronger Rope',   desc: 'More room for Strain before the rope Snaps.',     currency: 'gold',   max: 20, base: 100,   growth: 2.1, per: 45,   unit: 'max Strain',      gate: 0 },
++  { id: 'rope',     name: 'Stronger Rope',   desc: 'More room for Strain before the rope Snaps.',     currency: 'gold',   max: 20, base: 100,   growth: 1.75, per: 48,   unit: 'max Strain',      gate: 0 },
+   { id: 'grease',   name: 'Better Grease',   desc: 'Strain builds up more slowly as you go down.',    currency: 'gold',   max: 8,  base: 150,   growth: 2.3, per: 4,    unit: '% less Strain',   gate: 0 },
+   { id: 'mender',   name: 'Rope Mender',     desc: 'Keep more Gold when the rope Snaps.',             currency: 'gold',   max: 6,  base: 200,   growth: 2.5, per: 5,    unit: '% kept on Snap',  gate: 50 },
+   { id: 'bucket',   name: 'Bigger Bucket',   desc: 'Adds room for more Parts. First a column, then a row.', currency: 'gold', max: 2, base: 800, growth: 40, per: 1,   unit: 'size step',       gate: 50 },

@@ -32,3 +32,28 @@ STATUS: NOT DONE (in progress)
 | haul at 100% | 8.6 min | 19 min | 30 min | 58 min | 3.7e7 |
 
   Far too fast with boons on. The cause is the deep-drop Gold tail plus stacked rare boons, not the Crew. Next: cut the tail (legendary boons, Gold caps), then re-measure.
+
+## Session 3 (cut short on purpose: pushed what is safe, notes on the rest)
+Pushed: `tools/bot.js` now counts boon pick rates whenever the play layer is on and prints them (share of all picks and rate per offer). The part-ban check ("must-have part") uses 24 seeds and a trimmed mean (richest quarter left out): before, one lucky 1000 m drop made 8 to 10 parts look mandatory and the answer changed with every small number change.
+
+NOTE: another ECONOMY-1 session pushed crew tier cuts (smithy 4 ... foundry 2000) while this patch was made against the older crew numbers, so the crew hunk of the v2 patch may not apply: apply it with `git apply --reject` and keep the newer crew numbers.
+
+NOT applied (it breaks 21 old tests that pin the old numbers): `docs/notes/ECONOMY-1-wip-numbers-v2.patch`. It is the old WIP patch plus these changes: strainPerMeter 0.0067 (was 0.0016; WIP 0.005), rope +48 per level at growth 1.75, relic chance 0.03/0.06/0.09/0.12 in Amber/Magma/Void/Abyss, Vacuum strain 0.4, Drill speed 0.8. Apply with `git apply`.
+
+Bot results with the patch (play layer on, 3.5 h, haul at X% of Strain; times are noisy by about 20 minutes because rare boons make a heavy tail):
+| style | 250 m | 500 m | first Collapse | 1000 m |
+| 70 | 1.54 h | 2.17 h | 2.17 h | not in 3.5 h |
+| 85 (at strain 0.0062) | 34 min | 1.52 h | 1.77 h (too early) | not in 3.5 h |
+| 100 (at strain 0.0062) | 46 min | 85 min | 2.22 h | 2.61 h |
+| 50 | never past 100 m (careful play stalls) |
+Part checks passed at all three styles with the trimmed mean (no must-have part, jackpot used). Boon share of picks: highest 7% (second_wind); per-offer rates are noisy for rare boons (small samples). Gold per hour is 1M to 20M, which the number formatter fits in 8 characters.
+
+## Left to do
+1. Style 85 collapses too early (1.77 h, target 2 to 3 h): the last try was strainPerMeter 0.0067; it was not measured (stopped).
+2. Style 50 never reaches 250 m: decide whether a timid player must keep progressing.
+3. 1000 m is only reached by style 100 (2.6 h); style 85 and 70 do not reach it in 3.5 h. Decide if that is fine or loosen late strain.
+4. Apply the v2 patch and update the 21 tests that pin old numbers (gold example 145, first drop 45-90 s, rope ladder clamp, never-haul Collapse window, crew milestones and manager, upgrades, away income, Vacuum, Oil Can and Cooler, Drill and Anchor), with the test owners' agreement.
+5. Run `node tools/balance-report.js` once the numbers are applied and paste its table here (not run this session).
+6. Re-check numbers: all displayed numbers must stay 8 characters or fewer (tests/engine-hud-extremes covers the formatter).
+
+STATUS: NOT DONE (bot tooling pushed; numbers parked in a patch, tests not updated)
