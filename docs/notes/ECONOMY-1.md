@@ -57,3 +57,4 @@ Part checks passed at all three styles with the trimmed mean (no must-have part,
 6. Re-check numbers: all displayed numbers must stay 8 characters or fewer (tests/engine-hud-extremes covers the formatter).
 
 STATUS: NOT DONE (bot tooling pushed; numbers parked in a patch, tests not updated)
+- Pushed: rare boons cut (Golden Age 20%, Unbreakable 18%/8%, Phoenix Rope one snap, Time Tinker, Star Chain, Iron Rope), boon caps (gold 0.8, second 1, ward 2, maxStrain 0.25), rope cost growth 2.2, deep-biome gold factors 1.5/1.8/2/2.4.

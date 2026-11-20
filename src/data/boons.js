@@ -66,8 +66,8 @@ export const SYNERGIES = Object.freeze({
 
 // Nothing can stack past these.
 export const CAPS = Object.freeze({
-  gold: 1.5, gem: 1.5, ore: 2, big: 1, strain: 0.4, hazard: 0.5, luck: 0.6, speed: 1, combo: 0.1, comboGrace: 40,
-  second: 2, ward: 4, hazGold: 8, cd: 0.6, braceCharges: 2, surgeCharges: 2, maxStrain: 0.5, keep: 0.25,
+  gold: 0.8, gem: 1, ore: 2, big: 1, strain: 0.3, hazard: 0.4, luck: 0.6, speed: 1, combo: 0.1, comboGrace: 40,
+  second: 1, ward: 2, hazGold: 8, cd: 0.6, braceCharges: 2, surgeCharges: 2, maxStrain: 0.25, keep: 0.25,
   relic: 0.2, chainGold: 0.4, famGold: 0.8, coolPerGem: 0.006,
 });
 
@@ -106,18 +106,18 @@ export const BOONS = Object.freeze([
   b('chain_surge', 'Chain Surge', 'rare', ['chain'], 'Each link in a chain adds 8% gold.', { chainGold: 0.08 }),
   b('twin_brace', 'Twin Brace', 'rare', ['guard'], 'One more Brace charge.', { braceCharges: 1 }),
   b('overcharge', 'Overcharge', 'rare', ['speed'], 'One more Surge charge. Skills come back 10% sooner.', { surgeCharges: 1, cd: 0.1 }),
-  b('iron_rope', 'Iron Rope', 'rare', ['guard'], 'The rope can take 20% more strain.', { maxStrain: 0.2 }),
+  b('iron_rope', 'Iron Rope', 'rare', ['guard'], 'The rope can take 12% more strain.', { maxStrain: 0.12 }),
   b('vein_sense', 'Vein Sense', 'rare', ['luck'], 'More relics and better gems.', { relic: 0.08, luck: 0.1 }),
   b('collectors_pride', "Collector's Pride", 'rare', ['collector'], 'Collectors pay 25% more.', { famGold: { collector: 0.25 } }),
   b('miser', 'Miser', 'rare', ['value'], 'Gems are worth 40% more.', { gem: 0.4 }),
   b('danger_hunter', 'Danger Hunter', 'rare', ['risk'], 'Dangers cost 15% less and pay a little gold.', { hazard: 0.15, hazGold: 2 }),
   // ---- legendary ----
-  b('golden_age', 'Golden Age', 'legendary', ['value', 'risk'], 'All gold is worth 35% more. The rope pulls a bit harder.', { gold: 0.35, strain: -0.05 }),
-  b('unbreakable', 'Unbreakable', 'legendary', ['guard'], '30% less strain and a stronger rope.', { strain: 0.3, maxStrain: 0.15 }),
-  b('star_chain', 'Star Chain', 'legendary', ['chain', 'collector'], 'Chains pay 12% more per link. Your Combo climbs faster.', { chainGold: 0.12, combo: 0.04 }),
+  b('golden_age', 'Golden Age', 'legendary', ['value', 'risk'], 'All gold is worth 20% more. The rope pulls a bit harder.', { gold: 0.2, strain: -0.05 }),
+  b('unbreakable', 'Unbreakable', 'legendary', ['guard'], '18% less strain and a stronger rope.', { strain: 0.18, maxStrain: 0.08 }),
+  b('star_chain', 'Star Chain', 'legendary', ['chain', 'collector'], 'Chains pay 8% more per link. Your Combo climbs faster.', { chainGold: 0.08, combo: 0.03 }),
   b('sky_of_gems', 'Sky of Gems', 'legendary', ['luck'], 'Much better gems, and big ones pay 40% more.', { luck: 0.3, big: 0.4 }),
-  b('phoenix_rope', 'Phoenix Rope', 'legendary', ['guard'], 'Survive two snaps. Each drops the rope to 10% strain.', { second: 2 }),
-  b('time_tinker', 'Time Tinker', 'legendary', ['speed'], 'Skills come back 35% sooner and gain a charge each.', { cd: 0.35, braceCharges: 1, surgeCharges: 1 }),
+  b('phoenix_rope', 'Phoenix Rope', 'legendary', ['guard'], 'Survive one snap. The rope drops to 5% strain and you get a free Brace.', { second: 1, braceCharges: 1 }),
+  b('time_tinker', 'Time Tinker', 'legendary', ['speed'], 'Skills come back 25% sooner and Surge gains a charge.', { cd: 0.25, surgeCharges: 1 }),
 ]);
 
 const BY_ID = Object.freeze(Object.fromEntries(BOONS.map((x) => [x.id, x])));

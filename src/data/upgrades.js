@@ -2,7 +2,7 @@
 // currency: 'gold' | 'shards' | 'core'.  Cost of the next level = base * growth^level (rounded up).
 // effect: what one level gives. gate: needs this much best Depth before it shows as buyable.
 export const UPGRADES = [
-  { id: 'rope',     name: 'Stronger Rope',   desc: 'More room for Strain before the rope Snaps.',     currency: 'gold',   max: 20, base: 100,   growth: 2.1, per: 45,   unit: 'max Strain',      gate: 0 },
+  { id: 'rope',     name: 'Stronger Rope',   desc: 'More room for Strain before the rope Snaps.',     currency: 'gold',   max: 20, base: 100,   growth: 2.2, per: 45,   unit: 'max Strain',      gate: 0 },
   { id: 'grease',   name: 'Better Grease',   desc: 'Strain builds up more slowly as you go down.',    currency: 'gold',   max: 8,  base: 150,   growth: 2.3, per: 4,    unit: '% less Strain',   gate: 0 },
   { id: 'mender',   name: 'Rope Mender',     desc: 'Keep more Gold when the rope Snaps.',             currency: 'gold',   max: 6,  base: 200,   growth: 2.5, per: 5,    unit: '% kept on Snap',  gate: 50 },
   { id: 'bucket',   name: 'Bigger Bucket',   desc: 'Adds room for more Parts. First a column, then a row.', currency: 'gold', max: 2, base: 800, growth: 40, per: 1,   unit: 'size step',       gate: 50 },
