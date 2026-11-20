@@ -19,3 +19,4 @@ I own: src/ui/screens/{crew,workshop,codex,rewards,guide,settings,results}*.js a
 
 ## Tools (outside the repo)
 Headless Chromium from the npm package @sparticuz/chromium + puppeteer-core in a folder outside the repo. Screenshots are slow (about 20 s each).
+- Push 3: Codex materials (leather rows, metal tabs, fresh glow, tab fade). The one red test (engine-balance speed) was only my browser using the CPU; green alone.
