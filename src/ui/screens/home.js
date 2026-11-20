@@ -7,7 +7,7 @@ import { button } from '../components/button.js';
 import { api } from '../api.js';
 import { bus, fmt, fmtDepth } from '../soft.js';
 import { startDrop, bestDepth } from '../flow.js';
-import { surfaceScene } from './homeScene.js';
+import { canvasScene } from './homeScene.js';
 import { openCollapse } from '../modalsCollapse.js';
 import { maybeWelcomeBack } from '../modalsWelcome.js';
 
@@ -23,7 +23,8 @@ registerScreen('home', {
   mount(el) {
     scope = createScope();
     const best = bestDepth();
-    const scene = surfaceScene(best, crewCount());
+    const sceneHost = canvasScene(best, crewCount(), scope);
+    const scene = sceneHost.el;
     const bar = topbar({ settings: () => go('settings') }, scope);
     const dropBtn = button({ label: 'Drop', sub: 'Best ' + fmtDepth(best), kind: 'primary', big: true, onPress: () => startDrop(), aria: 'Drop. Best ' + fmtDepth(best) }, scope);
     dropBtn.setAttribute('data-tut', 'home-drop');
@@ -52,7 +53,7 @@ registerScreen('home', {
       try { ps = api.meta.crew.perSecond(); } catch (e) { /* 0 */ }
       income.textContent = ps > 0 ? 'Crew earns ' + fmt(ps) + ' Gold per second' : 'Buy Crew to earn Gold while you rest';
     }
-    scope.sub(bus, 'meta:changed', refresh);
+    scope.sub(bus, 'meta:changed', () => { refresh(); sceneHost.setCrew(crewCount()); });
     refresh();
 
     const screen = h('section', { class: 'screen no-pad screen-home' },

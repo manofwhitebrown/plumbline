@@ -1,5 +1,7 @@
 // The living surface scene: night sky, well shaft, winch, rope, flickering lantern, crew silhouettes.
 import { h } from '../dom.js';
+import { createHomeScene } from '../../render/homeScene.js';
+import { getSettings, onSettings } from '../settings.js';
 
 export function surfaceScene(best, crew) {
   const n = Math.max(0, Math.min(8, Math.floor(crew) || 0));
@@ -31,4 +33,27 @@ export function surfaceScene(best, crew) {
   scene.innerHTML = markup; // our own drawing string only
   if (best > 0) scene.append(h('div', { class: 'best-flag' }, h('span', { class: 'sub', text: 'Best' }), h('span', { class: 'num', text: Math.floor(best) + ' m' })));
   return scene;
+}
+
+function pickQuality(q) {
+  if (q === 'low' || q === 'high') return q;
+  try { return typeof navigator !== 'undefined' && navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 3 ? 'low' : 'high'; } catch (e) { return 'high'; }
+}
+// Canvas Home scene: returns { el, setCrew }. Falls back to the old drawing if a canvas is not available.
+export function canvasScene(best, crew, scope) {
+  let s = null;
+  try { const st = getSettings(); s = createHomeScene({ crew, quality: pickQuality(st.quality), reduceMotion: !!st.reduceMotion }); } catch (e) { s = null; }
+  if (!s || !s.canvas || !s.canvas.getContext) return { el: surfaceScene(best, crew), setCrew() {} };
+  const el = h('div', { class: 'scene' });
+  s.canvas.setAttribute('role', 'img'); s.canvas.setAttribute('aria-label', 'The village well at dusk');
+  s.canvas.style.display = 'block'; el.append(s.canvas);
+  if (best > 0) el.append(h('div', { class: 'best-flag' }, h('span', { class: 'sub', text: 'Best' }), h('span', { class: 'num', text: Math.floor(best) + ' m' })));
+  const fit = () => { const r = el.getBoundingClientRect ? el.getBoundingClientRect() : null; const w = (r && r.width) || el.clientWidth, hh = (r && r.height) || el.clientHeight; if (w > 40 && hh > 40) { s.resize(w, hh, window.devicePixelRatio || 1); s.start(); } };
+  if (typeof ResizeObserver === 'function') { const ro = new ResizeObserver(fit); ro.observe(el); scope.add(() => ro.disconnect()); }
+  scope.on(window, 'resize', fit);
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(fit);
+  scope.on(document, 'visibilitychange', () => { if (document.hidden) s.stop(); else s.start(); });
+  scope.add(onSettings((st) => { try { s.setReduceMotion(!!st.reduceMotion); s.setQuality(pickQuality(st.quality)); if (!st.reduceMotion) s.start(); } catch (e) { /* ignore */ } }));
+  scope.add(() => s.destroy());
+  return { el, setCrew: (n) => s.setCrew(n) };
 }
