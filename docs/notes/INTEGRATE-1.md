@@ -16,3 +16,7 @@
 - More dead code (unused exports list from the scan), parts sheet check, 1440x900 sheet.
 - Not measured on a phone.
 - Push 2: all 12 requests answered in RENDER_ARBITRATION.md and deleted.
+- Push 6: render-lab sheets checked (tools/render-sheet.js, 360x640 six biomes + 26 parts, and 1440x900): rope, bucket, parts, hazards, gems and effects share one palette and lighting in every biome; no mismatch found, no colour changes needed. Home crates stand in front of the crew at 8 crew (tested earlier).
+- Not done: a full unused-export / dead-code sweep beyond what was removed in push 1; nothing measured on a real phone.
+
+STATUS: DONE (requests closed, double drawing removed, sheets checked; dead-code sweep is partial)
