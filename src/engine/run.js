@@ -6,6 +6,7 @@ import { seedToInt, newItem, biomeFor } from './spawn.js';
 import { Ctx } from './ctx.js';
 import { clampNum, fin, warnOnce } from './safe.js';
 import { applyTwist } from './twists.js';
+import { createPlay } from './play/index.js'; // [HOOK-1]
 
 const L = ENGINE.limits;
 
@@ -60,7 +61,7 @@ function newStats() {
     chains: 0, maxCombo: 0, peakStrain: 0, fires: {} };
 }
 
-export function createRun({ rig, mods, seed, deps, safeUntilDepth } = {}) {
+export function createRun({ rig, mods, seed, deps, safeUntilDepth, play } = {}) {
   const d = { ...getProviders(), ...(deps || {}) };
   let m0 = sanitizeMods(mods);
   if (typeof m0.twist === 'string' && m0.twist) {          // the daily twist (Mods overlay)
@@ -108,6 +109,10 @@ export function createRun({ rig, mods, seed, deps, safeUntilDepth } = {}) {
   run.ctx = new Ctx(run);
   run.lastMilestone = Math.floor(run.state.depth / ENGINE.milestoneEvery);
   run.state.biomeId = (biomeFor(run, run.state.depth).id) || 'clay';
+  run.play = null;
+  if (play && run.runtime) { // [HOOK-1] the active-play layer is opt-in and needs the real parts
+    try { createPlay(run, play); } catch (e) { run.play = null; warnOnce('play-init', 'play layer failed to start: ' + (e && e.message)); }
+  }
   return run;
 }
 

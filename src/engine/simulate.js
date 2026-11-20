@@ -3,15 +3,21 @@ import { ENGINE } from '../data/engine.js';
 import { createRun, riskInfo, haul } from './run.js';
 import { runBeat } from './beat.js';
 import { ev } from './events.js';
+import { autoChoose, autoSkills } from './play/api.js'; // [HOOK-1]
 
 // policy({ run, riskInfo }) -> 'continue' | 'haul'. Default: never haul.
-export function simulateRun({ rig, mods, seed, policy, deps, withEvents = false, maxBeats } = {}) {
-  const run = createRun({ rig, mods, seed, deps });
+// play: pass an options object to switch the play layer on (boons, skills, encounters, guardians). Offers are auto-picked,
+// and skills are pressed by a simple helper unless `skills: false`.
+export function simulateRun({ rig, mods, seed, policy, deps, withEvents = false, maxBeats, play, skills } = {}) {
+  const run = createRun({ rig, mods, seed, deps, play });
   const log = withEvents ? [ev.runStart(run.seed)] : null;
   const arg = { run, riskInfo: { beatsToSnap: 999, goldAtRisk: 0, keepIfSnap: 0 } };
   const cap = Math.min(ENGINE.maxBeats, maxBeats > 0 ? maxBeats : ENGINE.maxBeats);
   const st = run.state;
-  while (st.status === 'running') {
+  let guard = 0;
+  while ((st.status === 'running' || st.status === 'choosing') && guard++ < ENGINE.maxBeats * 4) {
+    if (st.status === 'choosing') { const e = autoChoose(run); if (log) log.push(...e); if (st.status === 'choosing') st.status = 'running'; continue; }
+    if (run.play && skills !== false) { const e = autoSkills(run); if (log && e.length) log.push(...e); }
     if (st.beat >= cap) { const h = haul(run); if (log) log.push(...h); break; }
     if (typeof policy === 'function') {
       riskInfo(run, arg.riskInfo);

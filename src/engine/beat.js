@@ -17,12 +17,17 @@ import { snapPayout } from './gold.js';
 import { clamp, fin, warnOnce } from './safe.js';
 import { beginBeat, processLane, finishBeat } from './parts/runtime.js';
 import { itemGold, depthBonus } from './gold.js';
+import { playBegin, playSpeed, playGoldFactor, playRelicItem, playHazard, playSecondWind, playNoJump, playEnd } from './play/index.js'; // [HOOK-1]
+import { onGuardianGrab } from './play/guardians.js';
+import { onMarkGrabbed } from './play/encounters.js';
 
 // Run one beat. Events are pushed into `out` (an array) or skipped when `out` is null.
 export function runBeat(run, out) {
   const st = run.state, cheat = run.mods.cheat;
   if (st.status !== 'running') return;
   run.out = out;
+  const P = run.play || null; // [HOOK-1] play layer (boons, skills, encounters, guardians); null = old behaviour
+  const pout = out || (P ? P.scratch : null);
   st.beat++;
 
   // 0. real parts tick first (they may change speed this beat)
@@ -32,16 +37,18 @@ export function runBeat(run, out) {
     if (!e || typeof e.t !== 'string') return;
     const stt = run.state.stats;
     if (e.t === 'FIRE') { run.firedThisBeat++; stt.fires[e.partId] = (stt.fires[e.partId] || 0) + 1; }
-    else if (e.t === 'CHAIN') stt.chains++;
+    else if (e.t === 'CHAIN') { stt.chains++; if (P) P.chainsBeat++; }
     if (out) out.push(e);
   } : null;
   run.firedThisBeat = 0; run.collectsThisBeat = 0; run.strainAdjust = 0; run.hazardStrain = 0;
   run.extraUsed = 0; run.triggerDepth = 0;
   if (rt) fx = beginBeat(run, emit, run.rng);
+  if (P) playBegin(run, pout);
 
   // 1. speed and depth
   let speed = (ENGINE.baseSpeed + run.mods.speedBonus + run.speedPending + (fx ? fin(fx.speedAdd, 0, 'speedAdd') : 0)) * (cheat ? cheat.speedMult : 1);
   run.speedPending = 0;
+  if (P) speed = playSpeed(run, speed);
   speed = clamp(fin(speed, ENGINE.baseSpeed, 'speed'), ENGINE.minSpeed, ENGINE.maxSpeed);
   st.speed = speed;
   st.depth = fin(st.depth + speed, st.depth, 'depth');
@@ -70,7 +77,7 @@ export function runBeat(run, out) {
       processLane(run, lane, item, emit, run.rng);
     }
     finishBeat(run, emit, run.rng);
-    settleRuntime(run, fx, out);
+    settleRuntime(run, fx, out, P ? pout : null);
   } else {
     for (let lane = 0; lane < run.cols; lane++) {
       const item = run.row[lane];
@@ -92,14 +99,15 @@ export function runBeat(run, out) {
       ctx.leave();
     }
   }
-  if (run.collectsThisBeat === 0) st.combo = 0;
+  if (run.collectsThisBeat > 0) { if (P) P.noGrab = 0; } else if (!P || ++P.noGrab > P.fx.comboGrace) st.combo = 0;
 
   // 6. strain
   const before = st.strain;
   if (!(cheat && cheat.freezeStrain)) {
-    const d = beatStrainDelta(st.depth, run.mods, fin(def.strainFactor, 1, 'strainFactor'), run.hazardStrain, run.mods.flatStrain, run.strainAdjust);
+    const d = beatStrainDelta(st.depth, P ? P.sm : run.mods, fin(def.strainFactor, 1, 'strainFactor'), run.hazardStrain, run.mods.flatStrain, run.strainAdjust);
     st.strain = Math.max(0, fin(st.strain + d, st.strain, 'strain'));
   }
+  if (P) playNoJump(run, before);
   const noSnap = cheat && cheat.noSnap;
   if (noSnap && st.strain > st.maxStrain) st.strain = st.maxStrain;
   if (run.safeUntil > 0 && st.depth < run.safeUntil && st.strain >= st.maxStrain) st.strain = Math.max(0, st.maxStrain - 0.5);
@@ -111,25 +119,26 @@ export function runBeat(run, out) {
   if (out) out.push(ev.strain(st.strain, st.maxStrain, delta));
 
   // 7. snap
-  if (!noSnap && isSnap(st.strain, st.maxStrain)) {
+  if (!noSnap && isSnap(st.strain, st.maxStrain) && !(P && playSecondWind(run, pout))) {
     const pay = snapPayout(st.gold, run.mods.keepOnSnap);
     st.status = 'snapped';
     st.kept = pay.goldKept;
     if (out) out.push(ev.snap(pay.goldLost, pay.goldKept));
   }
+  if (P) playEnd(run, pout);
   run.out = null;
 }
 
 // Pay and report what the real parts did this beat (collected, missed, dangers, bonus, strain).
-function settleRuntime(run, fx, out) {
-  const st = run.state, s = st.stats;
+function settleRuntime(run, fx, out, pout) {
+  const st = run.state, s = st.stats, P = pout ? run.play : null;
   const n = Math.min(fx.nCollected, 64);
   for (let i = 0; i < n; i++) {
     const rec = fx.collected[i];
     const item = rec && rec.item;
     if (!item || (item.kind !== 'gem' && item.kind !== 'ore' && item.kind !== 'relic')) continue;
     st.combo++;
-    const gold = itemGold(item.value, st.combo, run.goldMult, st.depth, 1);
+    const gold = itemGold(item.value, st.combo, run.goldMult, st.depth, P ? playGoldFactor(run, rec, item) : 1);
     st.gold += gold;
     run.collectsThisBeat++;
     run.lastCollectValue = gold;
@@ -137,6 +146,12 @@ function settleRuntime(run, fx, out) {
     if (item.kind === 'gem') s.gems++; else if (item.kind === 'ore') s.ore++; else s.relics++;
     if (st.combo > s.maxCombo) s.maxCombo = st.combo;
     if (out) out.push(ev.collect(rec.lane, item, gold, st.combo, rec.r, rec.c));
+    if (P) { // [HOOK-1]
+      if (item.kind === 'relic') playRelicItem(run, pout);
+      if (item.mark) onMarkGrabbed(run, pout);
+      onGuardianGrab(run, rec, P.chainsBeat, pout);
+      if (item.kind === 'gem' && P.fx.coolPerGem > 0) run.strainAdjust -= P.fx.coolPerGem * st.maxStrain;
+    }
   }
   for (let i = 0; i < fx.nMissed; i++) {
     const rec = fx.missed[i];
@@ -151,7 +166,8 @@ function settleRuntime(run, fx, out) {
       s.hazardsAbsorbed++;
       if (out) out.push(ev.hazard(rec.lane, name, { r: rec.absR, c: rec.absC }, 0));
     } else {
-      const delta = rec.item.value > 0 ? rec.item.value : 0;
+      let delta = rec.item.value > 0 ? rec.item.value : 0;
+      if (P) delta = playHazard(run, rec, delta, pout);
       run.hazardStrain += delta;
       s.hazardsHit++;
       if (out) out.push(ev.hazard(rec.lane, name, null, delta));

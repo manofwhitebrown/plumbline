@@ -75,7 +75,7 @@ function schedule(run, def, out) {
   const hv = def.hazardPct * st.maxStrain;
   for (let s = 0; s < def.steps; s++) {
     const pr = newPlanRow(cols, true);
-    pr.noClear = true;
+    pr.noClear = true; P.noClear[startBeat + s] = true;
     for (const l of rows[s]) pr.cells[l] = { k: 'hazard', tier: 1, hazard: def.hazard, value: hv };
     if (s % R.weakEvery === 1) {
       const free = cov.filter((l) => rows[s].indexOf(l) < 0);

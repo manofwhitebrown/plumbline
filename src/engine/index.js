@@ -25,4 +25,5 @@ export function beatMs() {
   return ENGINE.baseBeatMs;
 }
 
+export { chooseBoon, useSkill, skillCheck, playView, autoChoose, autoSkills } from './play/api.js'; // [HOOK-1]
 export { createRun, stepBeat, haul, riskInfo, simulateRun, replayText, validateEvent, setProviders };

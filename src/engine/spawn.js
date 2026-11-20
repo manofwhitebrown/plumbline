@@ -4,6 +4,7 @@
 import { makeRng } from '../core/rng.js';
 import { ENGINE } from '../data/engine.js';
 import { fin } from './safe.js';
+import { applyPlan } from './play/plan.js'; // [HOOK-1]
 
 // Turn any seed (number, text, nothing) into a 32-bit whole number.
 export function seedToInt(seed) {
@@ -101,6 +102,7 @@ export function spawnRow(run, beat, depth, def, row) {
     dst.kind = it.kind; dst.tier = it.tier; dst.value = it.value; dst.hazard = it.hazard; dst.collected = false;
     it.kind = 'empty'; it.value = 0; it.hazard = '';
   }
+  if (run.play) { for (let lane = 0; lane < run.cols; lane++) { row[lane].weak = false; row[lane].mark = false; } applyPlan(run, beat, row); } // [HOOK-1] encounter and guardian rows
   return row;
 }
 
