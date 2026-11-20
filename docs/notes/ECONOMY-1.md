@@ -18,4 +18,5 @@
 2. Re-tune, then update the old tests that pin old numbers (crew manager x3, rope clamp, first drop time).
 3. Tables for styles 50, 70, 85, 100 and boon pick rates.
 
+- Pushed: boon caps cut (strain cap 0.4, hazard 0.5, coolPerGem 0.006, Cool Head 0.0015). Next: tests pin Cooler/Oil Can/Brace/Manager/rope numbers (test 518, 218, crew, upgrades), so those stay as they are unless the test owners agree.
 STATUS: NOT DONE (in progress)

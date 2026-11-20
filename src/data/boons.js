@@ -66,9 +66,9 @@ export const SYNERGIES = Object.freeze({
 
 // Nothing can stack past these.
 export const CAPS = Object.freeze({
-  gold: 1.5, gem: 1.5, ore: 2, big: 1, strain: 0.55, hazard: 0.6, luck: 0.6, speed: 1, combo: 0.1, comboGrace: 40,
+  gold: 1.5, gem: 1.5, ore: 2, big: 1, strain: 0.4, hazard: 0.5, luck: 0.6, speed: 1, combo: 0.1, comboGrace: 40,
   second: 2, ward: 4, hazGold: 8, cd: 0.6, braceCharges: 2, surgeCharges: 2, maxStrain: 0.5, keep: 0.25,
-  relic: 0.2, chainGold: 0.4, famGold: 0.8, coolPerGem: 0.02,
+  relic: 0.2, chainGold: 0.4, famGold: 0.8, coolPerGem: 0.006,
 });
 
 const b = (id, name, rarity, tags, desc, fx) => Object.freeze({ id, name, rarity, tags: Object.freeze(tags), desc, fx: Object.freeze(fx) });
@@ -81,7 +81,7 @@ export const BOONS = Object.freeze([
   b('thick_hide', 'Thick Hide', 'common', ['guard'], 'Dangers cost 25% less strain.', { hazard: 0.25 }),
   b('lucky_lamp', 'Lucky Lamp', 'common', ['luck'], 'Better gems rise more often.', { luck: 0.12 }),
   b('coin_purse', 'Coin Purse', 'common', ['value'], 'All gold is worth 10% more.', { gold: 0.1 }),
-  b('cool_head', 'Cool Head', 'common', ['guard'], 'Each gem you grab eases the rope a little.', { coolPerGem: 0.004 }),
+  b('cool_head', 'Cool Head', 'common', ['guard'], 'Each gem you grab eases the rope a little.', { coolPerGem: 0.0015 }),
   b('quick_hands', 'Quick Hands', 'common', ['speed'], 'Skills come back 20% sooner.', { cd: 0.2 }),
   b('good_grease', 'Good Grease', 'common', ['guard'], 'Less strain and a little more gold.', { strain: 0.08, gold: 0.05 }),
   b('tough_rope', 'Tough Rope', 'common', ['guard'], 'The rope can take 10% more strain.', { maxStrain: 0.1 }),
