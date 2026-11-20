@@ -48,7 +48,7 @@ export function createRenderer(canvas, opts = {}) {
     items.setLow(q.name === 'low'); // [GFX-1]
   }
   function applyMotion() {
-    sc.reduceMotion = reduce; camera.reduceMotion = reduce; rope.reduceMotion = reduce; well.setReduceMotion(reduce); vignette.setReduceMotion(reduce); items.setReduceMotion(reduce);
+    sc.reduceMotion = reduce; camera.reduceMotion = reduce; rope.reduceMotion = reduce; well.setReduceMotion(reduce); vignette.setReduceMotion(reduce); items.setReduceMotion(reduce); bucket.reduceMotion = reduce;
     if (reduce) { sc.timeScale = 1; sc.slowT = 0; }
     polish.setReduceMotion(reduce);
     applyQuality();

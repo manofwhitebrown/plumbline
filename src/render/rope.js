@@ -2,13 +2,13 @@
 import { ropeTint } from './palette.js';
 import { hash01 } from './rand.js';
 import { clamp01, easeOut } from './safe.js';
+import { buildRopeTile, drawRopeStrip, ROPE_W } from './art/ropeArt.js'; // [GFX-1] twisted rope look
 
 const N = 22;
-const DASH = [3, 5];
-const NO_DASH = [];
 
 export function createRope() {
   const xs = new Float32Array(N + 1), ys = new Float32Array(N + 1);
+  let tile = null, tileTried = false;
   const r = { jolt: 0, snapT: -1, reduceMotion: false, endX: 0, endY: 0 };
   return Object.assign(r, {
     doJolt(a) { r.jolt = Math.min(1.5, r.jolt + (+a || 0)); },
@@ -35,25 +35,31 @@ export function createRope() {
         xs[i] = x; ys[i] = y0 + (ey - y0) * u;
       }
       const tint = ropeTint(s);
+      if (!tile && !tileTried) { tileTried = true; tile = buildRopeTile(); }
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       ctx.beginPath(); ctx.moveTo(xs[0], ys[0]); for (let i = 1; i <= N; i++) ctx.lineTo(xs[i], ys[i]);
-      ctx.lineWidth = 9; ctx.strokeStyle = 'rgba(20,12,6,0.85)'; ctx.stroke();
-      ctx.lineWidth = 6.5; ctx.strokeStyle = tint; ctx.stroke();
-      // twist: dashes that crawl with depth
-      ctx.setLineDash(DASH); ctx.lineDashOffset = -(scroll % 8);
-      ctx.lineWidth = 6.5; ctx.strokeStyle = 'rgba(30,16,6,0.4)'; ctx.stroke();
-      ctx.setLineDash(NO_DASH);
-      ctx.beginPath(); ctx.moveTo(xs[0] - 1.6, ys[0]); for (let i = 1; i <= N; i++) ctx.lineTo(xs[i] - 1.6, ys[i]);
-      ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(255,240,200,0.45)'; ctx.stroke();
-      // loose fibres above 70% strain
+      ctx.lineWidth = ROPE_W + 3; ctx.strokeStyle = 'rgba(20,12,6,0.85)'; ctx.stroke(); // dark outline (also hides tiny gaps)
+      if (tile) drawRopeStrip(ctx, tile, xs, ys, N, scroll); // three strands wound around each other, crawling down with depth
+      else { ctx.lineWidth = ROPE_W - 2.5; ctx.strokeStyle = tint; ctx.stroke(); }
+      // strain tint: gold at rest, amber, then red
+      ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = 0.2 + 0.6 * s; ctx.lineWidth = ROPE_W - 2; ctx.strokeStyle = tint; ctx.stroke(); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      // loose fibres above 70% strain; red-hot and glowing above 90%
       if (s > 0.7 || snapped) {
-        const n = snapped ? 14 : Math.round(((s - 0.7) / 0.3) * 12) + 1;
+        const hot = s > 0.9 || snapped, n = snapped ? 16 : Math.round(((s - 0.7) / 0.3) * 14) + 2;
         ctx.beginPath();
         for (let k = 0; k < n; k++) {
-          const i = 1 + Math.floor(hash01(k * 7 + 3) * (N - 2)), side = hash01(k * 13 + 1) > 0.5 ? 1 : -1, len = 3 + hash01(k * 5 + 9) * 5;
-          ctx.moveTo(xs[i], ys[i]); ctx.lineTo(xs[i] + side * len, ys[i] + len * 0.5 + Math.sin(t / 200 + k) * 1.2);
+          const i = 1 + Math.floor(hash01(k * 7 + 3) * (N - 2)), side = hash01(k * 13 + 1) > 0.5 ? 1 : -1, len = 3 + hash01(k * 5 + 9) * 6;
+          const wob = r.reduceMotion ? 0 : Math.sin(t / 200 + k) * 1.4;
+          ctx.moveTo(xs[i], ys[i]); ctx.quadraticCurveTo(xs[i] + side * len * 0.5, ys[i] + len * 0.1, xs[i] + side * len, ys[i] + len * 0.55 + wob);
         }
-        ctx.lineWidth = 1; ctx.strokeStyle = s > 0.9 || snapped ? '#ffb0a8' : '#f0d59a'; ctx.stroke();
+        ctx.lineWidth = 1; ctx.strokeStyle = hot ? '#ffb0a8' : '#f0d59a'; ctx.stroke();
+        if (hot) { // red-hot fibres glow: a second, additive, softer pass
+          const pulse = r.reduceMotion ? 0.7 : 0.6 + 0.3 * Math.sin(t / 160);
+          ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = 2.6; ctx.strokeStyle = 'rgba(255,70,40,' + (0.35 * pulse).toFixed(2) + ')'; ctx.stroke();
+          ctx.lineWidth = 7; ctx.beginPath(); for (let i = 2; i < N; i += 4) { ctx.moveTo(xs[i], ys[i]); ctx.lineTo(xs[i] + 0.01, ys[i]); }
+          ctx.strokeStyle = 'rgba(255,90,40,' + (0.16 * pulse).toFixed(2) + ')'; ctx.stroke();
+          ctx.globalCompositeOperation = 'source-over';
+        }
       }
     },
   });

@@ -20,6 +20,10 @@
 - Looked at at 22/44/96/200 px and side by side with the gems at 24 px: hazards have a thick red-orange rim and angular or organic silhouettes, gems are polished and unrimmed, so they cannot be confused. Fixed two problems found by looking: the root's rim was hidden under its own body, and the steam was a glowing white ball (now real puffs).
 - Tests: `tests/render-art-hazards.test.js` (7 tests).
 
+- Step 5 BUCKET AND ROPE: `art/ropeArt.js` (a 3-strand twist tile stamped along the rope path, scrolls down with depth, chunked so long segments still work), `rope.js` keeps its whole API and motion (sway, whip, snap) and only its look changed: dark outline, twisted strands, strain tint by multiply (gold to red), frayed fibres above 70% and red-hot glowing fibres above 90% (steady glow with Reduce motion). `art/bucketArt.js` (curved wooden staves with grain from stretched fbm, brass hoops with bevel and rivets, brass rim, semi-transparent rig plate so grain shows, brass-and-glass lantern sprite). `bucket.js` uses them; the lantern sways and its flame flickers, still with Reduce motion (`bucket.reduceMotion`, set from `index.js`).
+- Step 6 PART ICONS: `art/iconStyle.js` (dark bevelled tile, inner bevel, family accent ring and pip, 3-tone metal, light copy nudged up-left for a rim light, drop shadow scaled to icon size, additive glow when firing). `partIcon.js` keeps `draw`, `getSprite`, `toDataURL`. Families now follow the brief: collector gold, processor teal, defense steel blue, engine copper, special violet. Checked all 26 at 96 and 24 px in idle and firing.
+- Tests: `tests/render-art-bucket-icons.test.js` (8 tests). Lab: `art/bucketLab.js`.
+
 ## In progress
 - Nothing half-done.
 
@@ -27,8 +31,8 @@
 2. (done, except embers / haze / spores, see Measurements)
 3. (done)
 4. (done)
-5. Bucket and twisted rope (keep `rope.js` API).
-6. 26 part icons in `partIcon.js` (keep `draw` and `toDataURL`).
+5. (done)
+6. (done)
 7. Light and atmosphere in `polish/`.
 8. Particle sprites and layered effects.
 9. Home scene and splash colours.
