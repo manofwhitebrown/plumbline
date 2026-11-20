@@ -1,5 +1,6 @@
 // Slice `run`: best depth, per-biome bests, total drops, longest haul, plus the crash checkpoint.
 import { deps, call } from './deps.js';
+import { nextSnapStreak } from '../engine/play/mercy.js'; // [HOOK-1] snaps in a row
 import { cleanGhost } from './chase.js'; // [HOOK-1] wave 2: ghost of the best drop
 
 const SLICE = 'run';
@@ -40,6 +41,7 @@ export function clean(old) {
     totalKept: num(o.totalKept), checkpoint: cleanCheckpoint(o.checkpoint),
     lastPaidSeed: Number.isFinite(Number(o.lastPaidSeed)) ? Number(o.lastPaidSeed) : null,
     ghost: cleanGhost(o.ghost), // [HOOK-1] Gold by depth of the best drop
+    snapStreak: Math.min(99, Math.max(0, Math.floor(num(o.snapStreak)))), // [HOOK-1] snaps in a row (mercy)
   };
 }
 
@@ -58,6 +60,7 @@ function slice() {
 function dirty() { call(deps.save, 'markDirty', SLICE); }
 
 export function bestDepth() { return slice().bestDepth; }
+export function getSnapStreak() { return slice().snapStreak || 0; } // [HOOK-1]
 export function getGhost() { return cleanGhost(slice().ghost); } // [HOOK-1]
 
 export function get() {
@@ -70,6 +73,7 @@ export function recordDrop({ outcome, depth, kept, biomeId, cheated, ghost } = {
   const s = slice();
   const bestBefore = s.bestDepth;
   if (cheated) return { bestBefore, newRecord: false };
+  s.snapStreak = nextSnapStreak(s.snapStreak, outcome); // [HOOK-1]
   const d = num(depth);
   const newRecord = d > bestBefore;
   if (newRecord) { s.bestDepth = d; if (Array.isArray(ghost)) s.ghost = cleanGhost(ghost); } // [HOOK-1]
@@ -97,5 +101,5 @@ export function markPaid(seed) { const s = slice(); s.lastPaidSeed = Number.isFi
 // For tests: forget that the slice was registered.
 export function _forget() { registered = false; }
 
-export const records = { bestDepth, getGhost, get, recordDrop, saveCheckpoint, peekCheckpoint, clearCheckpoint, lastPaidSeed, markPaid };
+export const records = { bestDepth, getGhost, getSnapStreak, get, recordDrop, saveCheckpoint, peekCheckpoint, clearCheckpoint, lastPaidSeed, markPaid };
 export default records;

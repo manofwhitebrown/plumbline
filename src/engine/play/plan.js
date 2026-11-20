@@ -1,6 +1,7 @@
 // Row plans: encounters and guardians write what a future row will hold. spawnRow reads the plan, so peekNext matches.
 import { TIER_VALUE } from '../../data/loot.js';
 import { biomeFor } from '../spawn.js';
+import { FAIRNESS } from '../../data/play.js';
 
 export function money(tier, def, factor = 1) {
   const t = Math.min(6, Math.max(1, Math.floor(tier)));
@@ -61,4 +62,37 @@ export function applyPlan(run, beat, row) {
       if (it && it.kind === 'hazard') { it.kind = 'empty'; it.value = 0; it.hazard = ''; }
     }
   }
+  limitStreak(run, beat, row, !!pr);
+}
+
+// Fairness: early on, the same column never gets a third danger in a row.
+// Real rows write the counts (P.hz). A peek only reads a copy (P.hzPeek), so looking ahead never changes the drop.
+export function limitStreak(run, beat, row, planned) {
+  const P = run.play, max = FAIRNESS.maxDangerStreak;
+  if (!P || !(max > 0)) return;
+  const real = row !== run.peekRow;
+  const n = row.length;
+  let cnt;
+  if (real) {
+    if (P.hz && P.hzBeat === beat && P.hzPrev) P.hz = P.hzPrev.slice();      // the same step built again (after a pick): redo from before it
+    else if (!P.hz || P.hzBeat !== beat - 1) P.hz = new Array(n).fill(0);    // first row, or a gap: start clean
+    P.hzPrev = P.hz.slice();
+    cnt = P.hz;
+  } else {
+    if (!P.hz || beat <= P.hzBeat) return;
+    if (!P.hzPeek || P.hzPeekBeat !== beat - 1) {
+      if (beat - 1 !== P.hzBeat) { P.hzPeek = null; return; } // not the very next row: cannot know the counts
+      P.hzPeek = P.hz.slice();
+    }
+    cnt = P.hzPeek;
+  }
+  const active = run.state.depth < FAIRNESS.streakUntilDepth;
+  for (let lane = 0; lane < n; lane++) {
+    const it = row[lane];
+    if (it.kind === 'hazard') {
+      if (active && !planned && cnt[lane] >= max) { it.kind = 'empty'; it.value = 0; it.hazard = ''; it.drifts = false; cnt[lane] = 0; }
+      else cnt[lane]++;
+    } else cnt[lane] = 0;
+  }
+  if (real) { P.hzBeat = beat; P.hzPeek = null; } else P.hzPeekBeat = beat;
 }
