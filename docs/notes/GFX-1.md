@@ -23,6 +23,16 @@
 - `wallTexture(biomeId, layer)` added to `src/render/art/index.js` (file `art/wallTexture.js`), as DEPTH-1 asked (`docs/requests/DEPTH-1-to-GFX-1-wallTexture.md`): 160 x 192 canvas, tiles top to bottom (checked by stacking), crisp stone with biome details, lit from the left, no vignette, cached per biome, built lazily, null without a canvas (the depth layer then keeps its own texture). About 10-20 ms per biome when warm in Node. `disposeWallTextures()` frees them. Tests: `tests/render-art-walltexture.test.js`.
 - COORDINATION NOTE: while doing steps 5 and 6 I found that a second GFX-1 session had already pushed the twisted rope tiles and hero lantern (b0fa6b1) and the 26 hero icons (c9517e9), and MODEL-1 owns the baked barrel in `bucket.js`. I dropped my duplicate versions rather than overwrite them. They are kept, unmerged and unused, on the branch `gfx-1-alt-rope-icons-bucket` (rope strip tile + strain multiply tint, wooden stave bucket body with brass hoops, icon tile style). Please run only one GFX-1 session, or split the steps between sessions.
 
+- Step 7 LIGHT AND ATMOSPHERE. Checked each item against what already exists, and only added what was missing (RENDER_ARBITRATION rule 3: do not draw the same thing twice):
+  - Lantern light on the walls, darker away from the bucket, with flicker: already done by DEPTH-1 (`depth/walls.js` lantern lobes, shade mask) and AI-2 (`polish/lighting.js` lantern glow, bucket glow). Not duplicated.
+  - Coloured light from gems: DEPTH-1 tier-coloured pulses on collect, AI-2 bloom where gems arrive. Not duplicated.
+  - Light shafts from the top, fading with depth: AI-2 `lighting.drawCone`. Not duplicated.
+  - Far wall duller and darker (depth-of-field feel): my far wall layer (`wallBase.js`, desaturated, darker, side falloff) and DEPTH-1's dark far wall.
+  - Subtle vignette: `vignette.js` (unchanged). Fog that thickens with depth: `well.js` and `depth/walls.js`.
+  - NEW: per-biome colour grade, `polish/grade.js` (soft-light tint, 12-16% strength, cross-fades with the 15 m biome blend, drawn in `drawBack` so gems, hazards and the bucket keep their true colours; off on low quality). 2-line hook in `polish/index.js`. Tests: `tests/polish-grade.test.js`.
+  - Low-quality walls now sample every 4 px instead of 8 (8 px looked blocky).
+  - Gameplay objects stay higher in contrast than the background: the grade never touches them.
+
 ## In progress
 - Nothing half-done.
 
@@ -32,7 +42,7 @@
 4. (done)
 5. Bucket and twisted rope (keep `rope.js` API).
 6. 26 part icons in `partIcon.js` (keep `draw` and `toDataURL`).
-7. Light and atmosphere in `polish/`.
+7. (done, see above; embers / heat haze / spores from step 2 are still open)
 8. Particle sprites and layered effects.
 9. Home scene and splash colours.
 10. Per-layer cost registration in `quality.js`.

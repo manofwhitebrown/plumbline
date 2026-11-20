@@ -9,6 +9,7 @@ import { createBlend } from './blend.js';
 import { createLighting } from './lighting.js';
 import { createAmbience, AMBIENCE_CAP } from './ambience.js';
 import { createWallDetail } from './wallDetail.js';
+import { createGrade } from './grade.js'; // [GFX-1] per-biome colour grade
 import { clamp, clamp01, fin, POLISH_CAP } from './util.js';
 
 const PX_PER_M = 44; // same as render/well.js
@@ -19,7 +20,7 @@ export function createPolish(opts) {
   const factory = typeof o.makeCanvas === 'function' ? o.makeCanvas : null;
   const getFactory = () => factory;
   const cues = createCues({ reduceMotion: reduce });
-  const blend = createBlend(), light = createLighting(getFactory), amb = createAmbience(), walls = createWallDetail(getFactory);
+  const blend = createBlend(), light = createLighting(getFactory), amb = createAmbience(), walls = createWallDetail(getFactory), grade = createGrade();
   const view = { strain: 0, maxStrain: 1, combo: 0, status: 'running' };
   const flags = { cone: true, bloom: true, flicker: true, cues };
 
@@ -68,6 +69,7 @@ export function createPolish(opts) {
           walls.draw(ctx, s.biomeId, s.depth * PX_PER_M, 0.55, reduce ? 1 : 0.85);
           amb.drawShimmer(ctx, s, reduce ? 0 : s.time, w, h);
           amb.draw(ctx, s, s.time);
+          grade.draw(ctx, s, w, h); // [GFX-1] background only; items stay in true colours
         }
         ctx.restore();
       });

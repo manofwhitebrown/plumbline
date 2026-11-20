@@ -70,7 +70,7 @@ export function sampleStone(id, u, v, seed, P, out) {
 // layer: 'far' (darker, softer, desaturated, falls off toward the sides) or 'near' (crisp, lit).
 // Draws into g over the box 0,0,w,h. Returns false if no canvas could be made.
 export function paintStoneBody(g, w, h, id, layer, quality, stepOverride = 0) {
-  const near = layer === 'near', f = stepOverride > 0 ? stepOverride : quality === 'low' ? 8 : near ? (w * h <= 48000 ? 1 : 2) : 2;
+  const near = layer === 'near', f = stepOverride > 0 ? stepOverride : quality === 'low' ? 4 : near ? (w * h <= 48000 ? 1 : 2) : 2;
   const lw = Math.max(2, Math.ceil(w / f)), lh = Math.max(2, Math.round(h / f));
   const small = makeCanvas(lw, lh), sg = small && small.getContext('2d');
   if (!sg || !sg.createImageData) return false;
