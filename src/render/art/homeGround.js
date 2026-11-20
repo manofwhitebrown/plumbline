@@ -13,6 +13,17 @@ function crate(g, x, y, s) {
   g.fillStyle = '#6a4426'; g.fillRect(x - 11 * s, y - 17 * s, 22 * s, 17 * s); g.fillStyle = '#8c5e34'; g.fillRect(x - 11 * s, y - 17 * s, 22 * s, 3 * s);
   g.strokeStyle = '#2f1d11'; g.lineWidth = 1.2; g.strokeRect(x - 11 * s, y - 17 * s, 22 * s, 17 * s); g.beginPath(); g.moveTo(x - 11 * s, y - 17 * s); g.lineTo(x + 11 * s, y); g.moveTo(x + 11 * s, y - 17 * s); g.lineTo(x - 11 * s, y); g.stroke();
 }
+
+// [INTEGRATE-1] Where the crates and barrels stand. They used to sit at the screen edges on the crew's row, so with 8 crew the outer
+// people (drawn live, on top of this cached layer) hid them. Now they stand on the ground just IN FRONT of the crew's feet
+// (lower on screen than crewY), so nobody covers them at any crew count. Pure, tested against crewSlots(8).
+export function propSpots(L) {
+  const u = L.u, y = L.crewY + 30 * u;
+  return [
+    { kind: 'barrel', x: L.w * 0.09, y, s: 0.85 * u }, { kind: 'crate', x: L.w * 0.09 + 24 * u, y: y + 3 * u, s: 0.8 * u },
+    { kind: 'crate', x: L.w * 0.91, y: y + 3 * u, s: 0.8 * u }, { kind: 'barrel', x: L.w * 0.91 - 22 * u, y, s: 0.75 * u },
+  ];
+}
 export function paintGround(g, L, w) {
   const h = L.h, ox = (w - L.w) / 2, gy = L.horizon + 40, rnd = makePrng(91), cx = L.wellCx + ox, u = L.u;
   const gr = g.createLinearGradient(0, gy, 0, h); gr.addColorStop(0, '#3a3a2c'); gr.addColorStop(0.15, '#2a2420'); gr.addColorStop(1, '#0c0812');
@@ -29,5 +40,5 @@ export function paintGround(g, L, w) {
     for (let b = -1; b <= 1; b++) { g.moveTo(x, y); g.quadraticCurveTo(x + b * 1.5 * sc, y - hh * 0.6, x + b * 3.2 * sc, y - hh); }
     g.stroke();
   }
-  barrel(g, L.w * 0.06 + ox, L.wellCy - 20 * u, 0.85 * u); crate(g, L.w * 0.06 + ox + 22 * u, L.wellCy - 14 * u, 0.8 * u); crate(g, L.w * 0.95 + ox, L.wellCy - 24 * u, 0.8 * u); barrel(g, L.w * 0.95 + ox - 20 * u, L.wellCy - 18 * u, 0.75 * u);
+  for (const q of propSpots(L)) (q.kind === 'barrel' ? barrel : crate)(g, q.x + ox, q.y, q.s); // [INTEGRATE-1] spots live in propSpots()
 }

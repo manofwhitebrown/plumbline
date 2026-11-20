@@ -1,4 +1,4 @@
-// Draws rings, chain threads, haul streaks, milestone line and screen flash.
+// Draws rings, chain threads, haul streaks and screen flash. ([INTEGRATE-1] the milestone line is the cinematic's.)
 import { tileCx, tileCy } from './layout.js';
 import { easeOut } from './safe.js';
 
@@ -29,12 +29,6 @@ export function drawFx(ctx, sc, bucketOffY) {
   for (let i = 0; i < ss.length; i++) {
     const s = ss[i]; if (!s.alive) continue;
     ctx.globalAlpha = Math.min(1, s.life / 200) * 0.8; ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + s.len); ctx.stroke();
-  }
-  // milestone: a golden glint line crossing the screen
-  if (sc.milestoneT >= 0) {
-    const k = sc.milestoneT / 900, x = -80 + (L.w + 160) * k, y = L.h * 0.62;
-    ctx.globalAlpha = Math.sin(Math.min(1, k) * Math.PI) * 0.7;
-    ctx.fillStyle = '#ffe3a1'; ctx.fillRect(x - 60, y, 120, 1.5); ctx.globalAlpha *= 0.35; ctx.fillRect(x - 120, y, 240, 1);
   }
   ctx.globalAlpha = 1;
 }

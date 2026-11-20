@@ -118,7 +118,6 @@ export function createRenderer(canvas, opts = {}) {
     sc.alpha = a;
     if (sc.haulT >= 0) { sc.haulT += dt; sc.depthBase -= dt * 0.03 * Math.min(1, sc.haulT / 200); }
     sc.depthVis = sc.depthBase + (sc.snapped || sc.hauled ? 0 : sc.speed * a);
-    if (sc.milestoneT >= 0) { sc.milestoneT += dt; if (sc.milestoneT > 900) sc.milestoneT = -1; }
     if (sc.flashA > 0) sc.flashA = Math.max(0, sc.flashA - dt / 260);
     camera.update(sdt); well.update(sdt); rope.update(sdt); bucket.update(sdt, H); vignette.update(sdt);
     updateItems(sdt); fx.runDue();
@@ -141,9 +140,10 @@ export function createRenderer(canvas, opts = {}) {
     if (colX > 0) { ctx.translate(colX, 0); ctx.beginPath(); ctx.rect(0, 0, CW, H); ctx.clip(); } // wide window: centred column
     ctx.save();
     camera.apply(ctx, CW, H);
-    well.draw(ctx, sc.depthVis * PX_PER_M, sc.depthVis, t, sc.strain01);
+    const covered = depthLayer.covering; // [INTEGRATE-1] depth walls are opaque once faded in: do not paint the flat well under them
+    if (!covered) well.draw(ctx, sc.depthVis * PX_PER_M, sc.depthVis, t, sc.strain01);
     depthLayer.drawWalls(ctx, pst); // [DEPTH-1] covers the flat well when active
-    polish.drawBack(ctx, pst);
+    polish.drawBack(ctx, pst, covered); // [INTEGRATE-1] covered = depth owns the biome blend and wall detail
     drawItems(ctx, false, t);
     const oy = bucket.offY;
     rope.draw(ctx, L.cx, -20, L.cx, Math.max(0, L.attachY + oy * 0.0 + (sc.hauled ? Math.min(0, oy) : 0)), sc.strain01, t, sc.depthVis * PX_PER_M);

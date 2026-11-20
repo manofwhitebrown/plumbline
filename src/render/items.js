@@ -56,7 +56,10 @@ export function createItems() {
       } else if (kind === 'hazard') {
         const hz = hazard === 'bat' || hazard === 'root' || hazard === 'void' || hazard === 'steam' ? hazard : 'rock';
         const still = reduce; // Reduce motion: no flapping, swaying, spinning or pulsing
-        ctx.globalAlpha = fade * (still ? 0.8 : 0.7 + 0.3 * Math.sin(t / 110 + seed)); // red warning glow, about 1.4 pulses a second
+        // [INTEGRATE-1] the baked rock and the baked void orb already carry their own rim light, so the red warning glow under them is
+        // halved (two full red halos made them blobs and put red under a violet orb). Bats, roots and steam have no rim: full glow.
+        const rim = (hz === 'rock' && models.getSprite('hazard:rock', 0)) || (hz === 'void' && models.getSprite('hazard:void', 0)) ? 0.5 : 1;
+        ctx.globalAlpha = fade * rim * (still ? 0.8 : 0.7 + 0.3 * Math.sin(t / 110 + seed)); // red warning glow, about 1.4 pulses a second
         art(ctx, 'warn', x - s * 0.75, y - s * 0.75, s * 1.5, s * 1.5, 0);
         ctx.globalAlpha = fade;
         if (hz === 'bat') {

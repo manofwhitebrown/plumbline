@@ -72,11 +72,11 @@ export function createEffects(fx) {
       vignette.setStrain(sc.strain01);
     },
     BIOME(ev) { sc.biomeId = ev.id || sc.biomeId; well.setBiome(ev.id, false); camera.pulse(0.012); },
-    MILESTONE() { sc.milestoneT = 0; },
+    MILESTONE() { /* [INTEGRATE-1] the 50 m marker is the milestone cinematic's; nothing is drawn in the world */ },
     SNAP() {
       if (sc.snapped) return; sc.snapped = true; rope.snap(); bucket.dip(28); bucket.startFall();
       if (!sc.reduceMotion) { sc.slowT = 600; sc.timeScale = 0.3; }
-      camera.shake(6); flash('#ffffff', 0.55, sc.time);
+      camera.shake(6); flash(TOKENS.text, 0.4, sc.time); // [INTEGRATE-1] palette white, softer (art direction: never pure white, nothing strobes)
       const L = sc.L; particles.burst(L.cx, L.attachY, 26, '#e0c890', 200, 1, 700, 3, 260); particles.burst(L.cx, L.attachY, 14, '#d9b26a', 160, 5, 900, 4, 120);
       if (rich()) { particles.emit(8, L.cx, L.attachY, 0, 0, 520, 120, '#ffe3a1'); particles.burst(L.cx, L.attachY, 8, '#a89878', 70, 1, 800, 4, -30); } // shockwave and dust
     },
@@ -87,13 +87,11 @@ export function createEffects(fx) {
       if (rich()) for (let i = 0; i < 10; i++) particles.emit(6, L.cx + (rand() - 0.5) * L.bucketW, L.top + rand() * L.bucketH, (rand() - 0.5) * 40, -90 - rand() * 120, 700 + rand() * 300, 3 + rand() * 2, TOKENS.gold, -40, 1); // coin glints
     },
     RECORD() {
-      const L = sc.L; ring(L.cx, L.top + L.bucketH / 2, Math.max(L.w, L.h) * 0.7, TOKENS.gold, 900, true);
+      const L = sc.L; // [INTEGRATE-1] the shockwave ring, ribbon and glow belong to the record cinematic (cinematics/records.js); only world sparks stay here
       for (let i = 0; i < 34; i++) { const a = rand() * 6.2832, s = 120 + rand() * 260; particles.emit(2, L.cx, L.top + 40, Math.cos(a) * s, Math.sin(a) * s - 120, 1100, 2.5 + rand() * 2, rand() > 0.5 ? TOKENS.gold : TOKENS.goldSoft, 260, 1.2); }
-      if (rich() && !sc.reduceMotion) { // confetti shards fall from the top, plus a second ring
+      if (rich() && !sc.reduceMotion) { // confetti shards fall from the top
         for (let i = 0; i < 24; i++) particles.emit(7, L.cx + (rand() - 0.5) * L.w * 0.8, L.top, (rand() - 0.5) * 160, -40 - rand() * 140, 1400 + rand() * 500, 4 + rand() * 3, CONFETTI[i % CONFETTI.length], 260, 1.2);
-        particles.emit(8, L.cx, L.top + L.bucketH / 2, 0, 0, 800, Math.max(L.w, L.h) * 0.9, TOKENS.goldSoft);
       }
-      flash(TOKENS.goldSoft, 0.25, sc.time);
     },
   };
 

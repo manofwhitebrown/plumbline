@@ -16,7 +16,7 @@ const PX_PER_M = 44; // same as render/well.js
 
 export function createPolish(opts) {
   const o = opts || {};
-  let reduce = !!o.reduceMotion, low = o.quality === 'low', dead = false, w = 360, h = 640, dpr = 1, bad = 0;
+  let reduce = !!o.reduceMotion, low = o.quality === 'low', dead = false, coveredLast = false, w = 360, h = 640, dpr = 1, bad = 0;
   const factory = typeof o.makeCanvas === 'function' ? o.makeCanvas : null;
   const getFactory = () => factory;
   const cues = createCues({ reduceMotion: reduce });
@@ -55,18 +55,21 @@ export function createPolish(opts) {
         cues.update(dt, view);
         const id = typeof st.biomeId === 'string' ? st.biomeId : 'clay';
         amb.update(dt, { biomeId: id, depth: fin(st.depth), speed: fin(st.speed, 1) }, !low && !reduce, 1);
-        if (!low) walls.ensure(id); // one strip per biome, built once, one per frame at most
+        if (!low && !coveredLast) walls.ensure(id); // one strip per biome, built once, one per frame at most
       });
     },
-    drawBack(ctx, state) {
+    // covered (optional, [INTEGRATE-1]): the depth layer is drawing the walls. It does its own spatial biome blend and wall detail,
+    // so the full-screen blend gradient and the flat wall strips would be a second copy on top of it (the gradient hid the stone near edges).
+    drawBack(ctx, state, covered) {
+      coveredLast = !!covered;
       if (dead || !ctx) return;
       safe(() => {
         const st = clean(state), s = { biomeId: typeof st.biomeId === 'string' ? st.biomeId : 'clay', depth: fin(st.depth), time: fin(st.time) };
         ctx.save();
-        blend.draw(ctx, s, w, h);
+        if (!covered) blend.draw(ctx, s, w, h);
         light.drawCone(ctx, s, flags);
         if (!low) {
-          walls.draw(ctx, s.biomeId, s.depth * PX_PER_M, 0.55, reduce ? 1 : 0.85);
+          if (!covered) walls.draw(ctx, s.biomeId, s.depth * PX_PER_M, 0.55, reduce ? 1 : 0.85);
           amb.drawShimmer(ctx, s, reduce ? 0 : s.time, w, h);
           amb.draw(ctx, s, s.time);
           grade.draw(ctx, s, w, h); // [GFX-1] background only; items stay in true colours

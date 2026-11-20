@@ -63,6 +63,8 @@ export function createDepth(opts) {
   }
 
   const api = {
+    // [INTEGRATE-1] true when last frame's walls were drawn and faded fully in: the flat well below is then invisible, so the renderer skips it.
+    get covering() { return drawnThisFrame && fade >= 1 && !flat(); },
     get active() { return !flat() && walls.ready && assets.ready(forced >= 0 ? forced : biomeIndexAt(depthNow)); },
     resize(w, h, d) {
       if (dead) return;

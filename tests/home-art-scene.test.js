@@ -46,3 +46,15 @@ test('scene: no throw without a canvas, draws pixels with one, cache cap and des
     hi.destroy(); lo.destroy(); still.destroy(); assert.equal(hi.memoryBytes(), 0);
   } finally { setCanvasFactory(null); globalThis.document = prevDoc; if (prevDoc === undefined) delete globalThis.document; }
 });
+
+test('[INTEGRATE-1] crates and barrels are never behind crew, at any crew count and size', async () => {
+  const { propSpots } = await import('../src/render/art/homeGround.js');
+  for (const [w, h] of [[320, 568], [360, 640], [430, 932], [768, 1024], [1440, 900]]) {
+    const L = homeLayout(w, h), crew = crewSlots(8, L);
+    for (const q of propSpots(L)) {
+      assert.ok(q.x > 0 && q.x < w && q.y < h, 'prop on screen');
+      const top = q.y - 18 * q.s; // top of the prop; crew feet are at c.y
+      for (const c of crew) { const overlapX = Math.abs(c.x - q.x) < 14 * c.s + 11 * q.s; assert.ok(!(overlapX && top < c.y + 2), `prop at ${Math.round(q.x)} hidden by crew at ${Math.round(c.x)} (${w}x${h})`); }
+    }
+  }
+});

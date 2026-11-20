@@ -58,6 +58,6 @@ test('layered effects: only on high quality, switchable off, never more than 3 f
   ({ em, fx } = mk()); fx.state.low = true; fx.handlers.RECORD(); assert.equal(em.filter((a) => a[0] === 7 || a[0] === 8).length, 0, 'low quality');
   ({ em, fx } = mk()); fx.handlers.RECORD(); assert.equal(em.filter((a) => a[0] === 7).length, 24); const { sc } = mk();
   // flash limiter: 3 flashes inside one second at most
-  const m = mk(); let before = 0; for (let i = 0; i < 6; i++) { m.sc.time = 9000 + i * 100; m.sc.flashA = 0; m.fx.handlers.RECORD(); if (m.sc.flashA > 0) before++; }
+  const m = mk(); let before = 0; for (let i = 0; i < 6; i++) { m.sc.time = 9000 + i * 100; m.sc.flashA = 0; m.sc.snapped = false; m.fx.handlers.SNAP({}); if (m.sc.flashA > 0) before++; } // [INTEGRATE-1] RECORD no longer flashes (the cinematic owns it); SNAP does
   assert.equal(before, 3);
 });

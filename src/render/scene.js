@@ -11,7 +11,6 @@ export function createScene() {
     flashA: 0, flashColor: '#fff', flashTimes: [0, 0, 0], reduceMotion: false,
     strain01: 0, status: 'idle', biomeId: 'clay', combo: 0, gold: 0,
     rig: { cols: 4, rows: 3, cells: [] },
-    milestoneT: -1,
     // rising things (gems, ore, hazards, relics)
     items: createPool(48, () => ({ kind: 'gem', tier: 1, hazard: null, lane: 0, spawn: 0, state: 0, out: 0, gold: 0, combo: 0, r: 0, c: 0, ar: -1, ac: -1, sd: 0, t: 0, x: 0, y: 0, sx: 0, sy: 0, seed: 0, fade: 1 })),
     // things to do when an item arrives (part flashes, chain threads)
@@ -22,7 +21,7 @@ export function createScene() {
     reset() {
       sc.items.clear(); sc.due.clear(); sc.threads.clear(); sc.rings.clear(); sc.streaks.clear();
       sc.beatCount = 0; sc.beatPos = 0; sc.alpha = 0; sc.depthBase = 0; sc.speed = 1; sc.depthVis = 0;
-      sc.haulT = -1; sc.snapped = false; sc.hauled = false; sc.flashA = 0; sc.slowT = 0; sc.timeScale = 1; sc.milestoneT = -1; sc.strain01 = 0;
+      sc.haulT = -1; sc.snapped = false; sc.hauled = false; sc.flashA = 0; sc.slowT = 0; sc.timeScale = 1; sc.strain01 = 0;
     },
   };
   return sc;
