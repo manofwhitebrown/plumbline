@@ -13,6 +13,7 @@ import { createParticles } from './particles.js';
 import { createFloaters } from './floaters.js';
 import { createVignette } from './vignette.js';
 import { createQuality } from './quality.js';
+import { createFxSprites } from './art/fxSprites.js'; // [GFX-1] pre-rendered effect sprites
 import { createEffects } from './effects.js';
 import { drawFx, drawFlash } from './drawFx.js';
 import { clearSprites } from './partIcon.js';
@@ -32,8 +33,10 @@ export function createRenderer(canvas, opts = {}) {
   const sc = createScene(), camera = createCamera(), well = createWell(), rope = createRope(), bucket = createBucket();
   const items = createItems(), particles = createParticles(), floaters = createFloaters(), vignette = createVignette();
   let dead = false, hidden = false, sized = false, W = 360, H = 640, CW = 360, colX = 0, dpr = 1, reduce = !!o.reduceMotion, frameMs = 16;
+  const lay = { trim: false }; // [GFX-1] quality steps that were switched off before dropping to 'low'
   const quality = createQuality(o.quality === 'low' ? 'low' : 'high', applyQuality);
   const fx = createEffects({ sc, particles, floaters, camera, rope, bucket, well, vignette });
+  const fxSprites = createFxSprites(); particles.setSprites(fxSprites); // [GFX-1]
   const tmp = { x: 0, y: 0 };
   // [AI-2] polish hook: extra light, ambience and wall detail. Keep these calls when editing (see docs/manager/POLISH_SPLIT.md).
   const polish = createPolish({ reduceMotion: reduce, quality: o.quality === 'low' ? 'low' : 'high' });
@@ -47,12 +50,14 @@ export function createRenderer(canvas, opts = {}) {
 
   function applyQuality() {
     const q = quality.settings;
-    particles.setCap(reduce ? Math.round(q.maxParticles * 0.4) : q.maxParticles);
+    const baseCap = reduce ? Math.round(q.maxParticles * 0.4) : q.maxParticles;
+    particles.setCap(lay.trim ? Math.round(baseCap * 0.6) : baseCap); // [GFX-1] lay.trim = quality step 2
     polish.setQuality(q.name); depthLayer.setQuality(q.name); // [DEPTH-1]
     models.setEnabled(q.name !== 'low'); // [MODEL-1] baked 3D art only on high quality
     well.setLow(q.name === 'low');
     items.setLow(q.name === 'low'); // [GFX-1]
     rope.low = q.name === 'low'; bucket.low = rope.low; // [GFX-1] flat rope and still lantern on low quality
+    fx.state.low = q.name === 'low'; try { fxSprites.rebuild(dpr, q.name === 'low'); } catch (e) { /* flat particles stay */ } // [GFX-1]
   }
   function applyMotion() {
     sc.reduceMotion = reduce; camera.reduceMotion = reduce; rope.reduceMotion = reduce; bucket.reduceMotion = reduce; well.setReduceMotion(reduce); vignette.setReduceMotion(reduce); items.setReduceMotion(reduce);
@@ -64,7 +69,11 @@ export function createRenderer(canvas, opts = {}) {
     CW = Math.min(W, MAX_COL); colX = Math.floor((W - CW) / 2);
     computeLayout(sc.L, CW, H, dpr, sc.rig.cols, sc.rig.rows);
     items.rebuild(sc.L.itemSize, dpr); bucket.rebuild(sc.L); well.resize(CW, H, dpr, quality.level === 'low'); vignette.build(CW, H, dpr); polish.resize(CW, H, dpr); depthLayer.resize(CW, H, dpr); // [DEPTH-1]
+    try { fxSprites.rebuild(dpr, quality.level === 'low'); } catch (e) { /* flat particles stay */ } // [GFX-1]
   }
+  // [GFX-1] Cheapest-to-lose layers go first when frames run slow; the player's 'high' brings them back.
+  quality.registerLayer('fx-extras', { importance: 1, cost: 3, off() { fx.state.extras = false; }, on() { fx.state.extras = true; } });
+  quality.registerLayer('particle-trim', { importance: 2, cost: 5, off() { lay.trim = true; applyQuality(); }, on() { lay.trim = false; applyQuality(); } });
   applyMotion();
   computeLayout(sc.L, CW, H, dpr, 4, 3);
 
@@ -205,6 +214,7 @@ export function createRenderer(canvas, opts = {}) {
       try { destroyRopeTiles(); destroyLantern(); } catch (e) { /* ignore */ } // [GFX-1]
       try { polish.destroy(); } catch (e) { /* ignore */ }
       try { items.destroy(); } catch (e) { /* ignore */ } // [GFX-1] frees the sprite atlas
+      try { fxSprites.destroy(); } catch (e) { /* ignore */ } // [GFX-1]
       try { depthLayer.destroy(); } catch (e) { /* ignore */ } // [DEPTH-1]
       ctx = null;
     },

@@ -12,10 +12,13 @@ const FIRE_RING = 'rgba(255,227,161,0.9)';
 export function createEffects(fx) {
   const { sc, particles, floaters, camera, rope, bucket, well, vignette } = fx;
   let spawnBeat = 0;
+  const st = { low: false, extras: true }; // [GFX-1] extras = the extra layered effects; quality.js can switch them off
+  const GLINT = '#fff6dc', CONFETTI = ['#f6c453', '#46e3a3', '#ff4d5e', '#b583ff', '#7fd6ff'];
+  const rich = () => st.extras && !st.low; // layered effects only on high quality
 
   function flash(color, a, nowMs) { // limit flashes to 3 per second when reduce motion is on
     const f = sc.flashTimes;
-    if (sc.reduceMotion) { let n = 0; for (let i = 0; i < 3; i++) if (nowMs - f[i] < 1000) n++; if (n >= 3) return; }
+    { let n = 0; for (let i = 0; i < 3; i++) if (nowMs - f[i] < 1000) n++; if (n >= 3) return; } // never more than 3 flashes a second
     f[0] = f[1]; f[1] = f[2]; f[2] = nowMs;
     sc.flashColor = color; sc.flashA = Math.max(sc.flashA, sc.reduceMotion ? a * 0.4 : a);
   }
@@ -75,15 +78,21 @@ export function createEffects(fx) {
       if (!sc.reduceMotion) { sc.slowT = 600; sc.timeScale = 0.3; }
       camera.shake(6); flash('#ffffff', 0.55, sc.time);
       const L = sc.L; particles.burst(L.cx, L.attachY, 26, '#e0c890', 200, 1, 700, 3, 260); particles.burst(L.cx, L.attachY, 14, '#d9b26a', 160, 5, 900, 4, 120);
+      if (rich()) { particles.emit(8, L.cx, L.attachY, 0, 0, 520, 120, '#ffe3a1'); particles.burst(L.cx, L.attachY, 8, '#a89878', 70, 1, 800, 4, -30); } // shockwave and dust
     },
     HAUL() {
       if (sc.hauled) return; sc.hauled = true; sc.haulT = 0; bucket.startLift();
       const L = sc.L; for (let i = 0; i < 22; i++) { const s = sc.streaks.acquire(); s.x = L.cx + (rand() - 0.5) * L.bucketW; s.y = L.top + rand() * L.bucketH; s.len = 16 + rand() * 26; s.v = 500 + rand() * 600; s.life = 500 + rand() * 300; }
       particles.burst(L.cx, L.top + L.bucketH / 2, 18, TOKENS.gold, 140, 2, 700, 2.4, -120);
+      if (rich()) for (let i = 0; i < 10; i++) particles.emit(6, L.cx + (rand() - 0.5) * L.bucketW, L.top + rand() * L.bucketH, (rand() - 0.5) * 40, -90 - rand() * 120, 700 + rand() * 300, 3 + rand() * 2, TOKENS.gold, -40, 1); // coin glints
     },
     RECORD() {
       const L = sc.L; ring(L.cx, L.top + L.bucketH / 2, Math.max(L.w, L.h) * 0.7, TOKENS.gold, 900, true);
       for (let i = 0; i < 34; i++) { const a = rand() * 6.2832, s = 120 + rand() * 260; particles.emit(2, L.cx, L.top + 40, Math.cos(a) * s, Math.sin(a) * s - 120, 1100, 2.5 + rand() * 2, rand() > 0.5 ? TOKENS.gold : TOKENS.goldSoft, 260, 1.2); }
+      if (rich() && !sc.reduceMotion) { // confetti shards fall from the top, plus a second ring
+        for (let i = 0; i < 24; i++) particles.emit(7, L.cx + (rand() - 0.5) * L.w * 0.8, L.top, (rand() - 0.5) * 160, -40 - rand() * 140, 1400 + rand() * 500, 4 + rand() * 3, CONFETTI[i % CONFETTI.length], 260, 1.2);
+        particles.emit(8, L.cx, L.top + L.bucketH / 2, 0, 0, 800, Math.max(L.w, L.h) * 0.9, TOKENS.goldSoft);
+      }
       flash(TOKENS.goldSoft, 0.25, sc.time);
     },
   };
@@ -118,11 +127,12 @@ export function createEffects(fx) {
   function land(o) { // collect reached its tile
     const L = sc.L, tx = tileCx(L, o.c), ty = tileCy(L, o.r) + bucket.offY, tc = tierColors(o.tier);
     particles.burst(tx, ty, 9, tc.base, 120, 0, 420, 2.4, 200); particles.burst(tx, ty, 2, '#fff', 60, 2, 500, 2, 0);
+    if (rich()) { particles.emit(8, tx, ty, 0, 0, 340, L.tile * 1.1, tc.base); particles.emit(2, tx, ty - L.tile * 0.15, 0, -26, 420, 2.2, GLINT); }
     text(o, tx, ty - L.tile * 0.4); camera.nudge(0, 1.2);
   }
 
   return {
-    handlers, arrive, land,
+    handlers, arrive, land, state: st,
     handle(ev) { if (ev && typeof ev.t === 'string') { const h = handlers[ev.t]; if (h) h(ev); } },
     runDue() { // part flashes and chain threads
       const d = sc.due.items, L = sc.L;

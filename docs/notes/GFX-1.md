@@ -33,27 +33,21 @@
   - Low-quality walls now sample every 4 px instead of 8 (8 px looked blocky).
   - Gameplay objects stay higher in contrast than the background: the grade never touches them.
 
+- Step 8 PARTICLE AND EFFECT SPRITES: `art/fxSprites.js` pre-renders 7 soft sprites (spark, ember, dust, glint 4-point star, coin glint, shockwave ring, confetti shard) per colour on first use, cached (cap 72 entries high, 28 low, white fallback when full). `particles.js` draws kinds 0-3 and 6-8 with one `drawImage` each when sprites exist, flat shapes otherwise (no canvas). New kinds: 6 coin glint, 7 confetti, 8 ring. Layered effects in `effects.js`: COLLECT (tier-coloured ring + glint), SNAP (shockwave + dust), HAUL (10 coin glints), RECORD (24 confetti + second ring). All only on high quality and when `fx.state.extras` is on; confetti also off under Reduce motion. The flash limiter now applies always: never more than 3 flashes per second. Particle cap stays 300 (polish cap unchanged, under 120).
+- Step 9 HOME AND SPLASH ART: `art/homeArt.js` (layout, crew slots, fireflies, painters) and `homeScene.js` (`createHomeScene`). Two cached layers, colours match the splash (ink #070a12, gold, brass). Crew 0-8 never leave the screen and adding crew never moves existing ones. Low: pixel ratio 1, 4 fireflies, no drift. Reduce motion: one still frame, no loop. Not wired into the Home screen (UI-owned): see `docs/requests/GFX-1-to-UI-homeScene.md`. The splash in index.html was not touched.
+- Step 10 QUALITY AND SAFETY: `quality.js` has `registerLayer(name, {importance, cost, off, on})` and `layerState()`. When frames stay slow for 2 s it switches off ONE layer per window (least important first, costliest first among equals) and only goes to 'low' when none is left. `set('high')` brings every layer back; a throwing layer cannot break the loop. Registered in `index.js`: `fx-extras` (importance 1) and `particle-trim` (cap x 0.6, importance 2). Without layers the behaviour is unchanged. Texture code is seeded, returns null/false without a canvas, and every new module has `destroy()`.
+- Tests: `tests/render-gfx-fx.test.js` (colour parsing, 7 sprite kinds, cache cap and memory, determinism, no canvas, particle sprite path and 300 cap, layered effects on/off/low, flash limiter) and `tests/render-gfx-home-quality.test.js` (layout, crew, fireflies, no canvas, memory, quality layers and old behaviour). Full `npm run check`: 864 tests, 0 failures.
+
+## Measurements (Node, @napi-rs/canvas; a phone will be slower, so treat as relative)
+- fx sprites: 3 ms, 19 sprites, 684 KB at dpr 2 (cap about 5 MB at dpr 3).
+- Home scene: 7.6 ms build, 6.2 MB at 430x932 dpr 2, 0.2 ms per frame.
+- Not measured: real phone frame times with 300 particles (no device here).
+
 ## In progress
 - Nothing half-done.
 
-## Next (in order)
-2. (done, except embers / haze / spores, see Measurements)
-3. (done)
-4. (done)
-5. Bucket and twisted rope (keep `rope.js` API).
-6. 26 part icons in `partIcon.js` (keep `draw` and `toDataURL`).
-7. (done, see above; embers / heat haze / spores from step 2 are still open)
-8. Particle sprites and layered effects.
-9. Home scene and splash colours.
-10. Per-layer cost registration in `quality.js`.
+## Next
+- Home screen owner: switch to `createHomeScene` (request file above).
+- Embers, heat haze and spores for the magma/abyss walls (step 2 leftovers) could now use the ember sprite.
 
-## Measurements (headless Node + @napi-rs/canvas, not a phone; expect about 2-3x slower on a mid Android)
-- Wall generation per biome, all 4 layers: 27-75 ms (clay 41, quartz 75, amber 47, magma 34, void 27, abyss 29). Only the current biome is built at start, one layer per frame. All 6: about 250 ms.
-- Wall texture memory at DPR 2: about 1.1 MB per biome, about 6.5 MB for all six.
-- `well.draw` steady state: 0.1-0.5 ms per frame in Node (all layers, high quality).
-- Visual checks done by rendering PNGs headless (all 6 biomes at 360x640, DPR 2; seams checked by stacking tiles). Not yet seen on a real device or at 430x932 / 1440x900 / DPR 1 and 3.
-- Items atlas with hazards: build 14-26 ms (104 sprites), 5 MB at DPR 2 for a 44 px item (2 MB on low); (before hazards it was 4 MB); a gem draw costs about 5 us. Typical item size is about 6% of screen width (22-45 px). Texture memory so far: walls 6.5 MB + items 4 MB = about 10.5 MB of the 24 MB budget.
-- A halo bug found by looking at renders: the soft glow behind gems did not fade to zero at the sprite edge (faint square). Fixed by limiting the glow radius to half the sprite.
-- Still to do for step 2: rising embers, heat haze bands, drifting spores (they belong with the ambience work in step 7, in `polish/ambience.js`).
-
-STATUS: IN PROGRESS
+STATUS: DONE

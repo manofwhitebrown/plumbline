@@ -3,13 +3,17 @@ import { createPool } from './pool.js';
 import { rand } from './rand.js';
 
 export const MAX_PARTICLES = 300;
-// kinds: 0 spark, 1 dust, 2 glint (star), 3 ember, 4 steam, 5 fibre
+// kinds: 0 spark, 1 dust, 2 glint (star), 3 ember, 4 steam, 5 fibre, 6 coin glint, 7 confetti, 8 shockwave ring
+// Kinds 0-3 and 6-8 use pre-rendered sprites (art/fxSprites.js) when they exist; otherwise the flat shapes below.
+const SPRITE = ['spark', 'dust', 'glint', 'ember', null, null, 'coin', 'confetti', 'ring'];
 export function createParticles() {
   const pool = createPool(MAX_PARTICLES, () => ({ x: 0, y: 0, vx: 0, vy: 0, g: 0, drag: 0, life: 0, max: 1, size: 2, kind: 0, color: '#fff', spin: 0, rot: 0 }));
   let cap = MAX_PARTICLES;
+  let sprites = null;
   const api = {
     pool,
     get count() { return pool.live; },
+    setSprites(sp) { sprites = sp && sp.draw ? sp : null; },
     setCap(n) { cap = Math.max(0, Math.min(MAX_PARTICLES, n | 0)); },
     clear() { pool.clear(); },
     emit(kind, x, y, vx, vy, life, size, color, g = 0, drag = 0) {
@@ -44,9 +48,16 @@ export function createParticles() {
         const p = items[i];
         if (!p.alive) continue;
         const k = p.life / p.max; // 1 -> 0
-        ctx.globalAlpha = k > 0.5 ? 1 : k * 2;
+        ctx.globalAlpha = p.kind === 8 ? k : (k > 0.5 ? 1 : k * 2);
+        const sk = SPRITE[p.kind];
+        if (sk && sprites) { // sprite path: one drawImage
+          const px = p.kind === 8 ? p.size * (0.3 + (1 - k) * 1.5) : p.kind === 2 ? p.size * (0.6 + k) * 4 : p.kind === 1 ? p.size * (1.6 - k * 0.6) * 3 : p.size * 4;
+          if (sprites.draw(ctx, sk, p.color, p.x, p.y, px, p.kind === 7 ? p.rot : 0)) continue;
+        }
         ctx.fillStyle = p.color;
-        if (p.kind === 2) { // glint: little 4-point star
+        if (p.kind === 8) { ctx.globalAlpha *= 0.8; ctx.strokeStyle = p.color; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.3 + (1 - k) * 0.75), 0, 6.2832); ctx.stroke(); }
+        else if (p.kind === 7) { ctx.fillRect(p.x - p.size, p.y - p.size * 0.5, p.size * 2, p.size); }
+        else if (p.kind === 6 || p.kind === 2) { // glint: little 4-point star
           const s = p.size * (0.6 + k);
           ctx.beginPath();
           ctx.moveTo(p.x, p.y - s * 2); ctx.lineTo(p.x + s * 0.4, p.y - s * 0.4); ctx.lineTo(p.x + s * 2, p.y);
