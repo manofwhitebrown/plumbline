@@ -213,7 +213,8 @@ if (twistList.includes('rotate')) {
     const page = await openPage(w, h, 'none', '');
     await dismissModal(page);
     for (const s of screens.filter((x) => !['welcome', 'drop', 'results'].includes(x))) {
-      await page.evaluate((id) => window.game.ctx.ui.shell.go(id), s); await wait(500);
+      await page.evaluate((id) => window.game.ctx.ui.shell.go(id), s); await wait(1100);
+      await page.evaluate(() => { if (!document.getElementById('l1-freeze')) { const st = document.createElement('style'); st.id = 'l1-freeze'; st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important}'; document.head.appendChild(st); } });
       const before = await page.evaluate(() => document.querySelector('.screen')?.dataset?.screen || document.querySelector('.tabbar [aria-current="page"]')?.textContent || document.title);
       const before2 = await page.evaluate(() => window.game.ctx.ui.shell.current ? 1 : 0).catch(() => 0);
       await page.setViewport({ width: h, height: w, deviceScaleFactor: 2, isMobile: true, hasTouch: true }); await wait(600);

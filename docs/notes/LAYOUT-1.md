@@ -13,3 +13,4 @@ STATUS: IN PROGRESS
 ## Next
 - Write `docs/layout/LAYOUT-1.md` pass/fail table, `tests/integration-layout-*.test.js` for the fixes.
 - Push 3: empty fixture 108/108 PASS, busy fixture 108/108 PASS (12 sizes, no twist). Runner now checks the Achievement banner (fits, clears notch) and waits for it to vanish before measuring.
+- Push 4: extreme fixture, Drop/Results/Welcome 36/36 at 12 sizes; Large text 44/44, notch 44/44, Reduce motion 44/44 (320x568, 360x640, 390x844, 1440x900); zoom 125/150 on 1440x900 and 1024x768 44/44; rotate 24/24. No real layout bug found so far; every early failure was an audit false alarm (see runner comments).
