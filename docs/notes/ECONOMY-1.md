@@ -20,3 +20,4 @@
 
 - Pushed: boon caps cut (strain cap 0.4, hazard 0.5, coolPerGem 0.006, Cool Head 0.0015). Next: tests pin Cooler/Oil Can/Brace/Manager/rope numbers (test 518, 218, crew, upgrades), so those stay as they are unless the test owners agree.
 STATUS: NOT DONE (in progress)
+- Pushed: biome gold factors flattened (1, 1.3, 1.7, 2.2, 2.8, 3.4). Tested alone: engine numbers (strainPerMeter, depthBonusDiv) break tests 145 and 255 (pinned Gold example and first drop 45-90 s), so not applied.

@@ -19,7 +19,7 @@ const BASE = [
   },
   {
     // Cold blue. Tier 1 to 3. Bats appear and zig-zag between lanes.
-    id: 'quartz', name: 'Quartz', from: 100, to: 250, goldFactor: 1.5,
+    id: 'quartz', name: 'Quartz', from: 100, to: 250, goldFactor: 1.3,
     tierWeights: [50, 35, 15, 0, 0, 0],
     mix: { empty: 25, gem: 38, ore: 20, hazard: 17 },
     hazardWeights: { rock: 3, bat: 2 },
@@ -30,7 +30,7 @@ const BASE = [
   },
   {
     // Honey orange. Tier 2 to 4. Roots cost more strain. First relics.
-    id: 'amber', name: 'Amber', from: 250, to: 450, goldFactor: 2.2,
+    id: 'amber', name: 'Amber', from: 250, to: 450, goldFactor: 1.7,
     tierWeights: [0, 40, 40, 20, 0, 0],
     mix: { empty: 22, gem: 36, ore: 20, hazard: 22 },
     hazardWeights: { bat: 2, root: 3 },
@@ -41,7 +41,7 @@ const BASE = [
   },
   {
     // Deep red. Tier 3 to 5. Steam hits several lanes at once. Richer relics.
-    id: 'magma', name: 'Magma', from: 450, to: 700, goldFactor: 3.2,
+    id: 'magma', name: 'Magma', from: 450, to: 700, goldFactor: 2.2,
     tierWeights: [0, 0, 45, 35, 20, 0],
     mix: { empty: 20, gem: 34, ore: 18, hazard: 28 },
     hazardWeights: { root: 2, steam: 3 },
@@ -52,7 +52,7 @@ const BASE = [
   },
   {
     // Violet black. Tier 4 to 6 (prism gems). Void hazards drain the combo.
-    id: 'void', name: 'Void', from: 700, to: 1000, goldFactor: 4.5,
+    id: 'void', name: 'Void', from: 700, to: 1000, goldFactor: 2.8,
     tierWeights: [0, 0, 0, 40, 35, 25],
     mix: { empty: 18, gem: 34, ore: 16, hazard: 32 },
     hazardWeights: { steam: 2, void: 3 },
@@ -63,7 +63,7 @@ const BASE = [
   },
   {
     // Endless. Every extra 100 m pushes the odds up and the rope strain faster.
-    id: 'abyss', name: 'Abyss', from: 1000, to: Infinity, goldFactor: 6,
+    id: 'abyss', name: 'Abyss', from: 1000, to: Infinity, goldFactor: 3.4,
     tierWeights: [0, 0, 0, 20, 35, 45],
     mix: { empty: 15, gem: 32, ore: 14, hazard: 39 },
     hazardWeights: { rock: 1, bat: 1, root: 1, steam: 1, void: 1 },
