@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plumbline audio lab</title>
+<style>
+  body { margin: 0; background: #070a12; color: #eef2ff; font: 13px system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 2; padding: 8px 12px; background: #0d1220; border-bottom: 1px solid #2a3555; }
+  .row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin: 4px 0; }
+  button, select { background: #1d2740; color: #eef2ff; border: 1px solid #2a3555; border-radius: 6px; padding: 6px 12px; font: inherit; }
+  button:active { background: #2c3b66; }
+  button.on { background: #f6c453; color: #1a1300; }
+  main { padding: 12px; }
+  h2 { margin: 14px 0 6px; font-size: 14px; color: #f6c453; }
+  .grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  label { display: flex; gap: 6px; align-items: center; }
+  input[type=range] { width: 150px; }
+  .meter { width: 160px; height: 10px; background: #141b2e; border: 1px solid #2a3555; border-radius: 5px; overflow: hidden; }
+  .meter > i { display: block; height: 100%; width: 0; background: #5be37d; transition: width 0.06s; }
+  .meter.hot > i { background: #ff6b5b; }
+  small { color: #8d97b8; }
+  #msg { color: #f6c453; }
+</style></head>
+<body>
+<header>
+  <div class="row">
+    <b>Audio lab</b>
+    <button id="start">Start audio (tap once)</button>
+    <button id="music" disabled>Music: off</button>
+    <label>Night mode <input type="checkbox" id="night"></label>
+    <label>Quality <select id="quality"><option>high</option><option>low</option></select></label>
+    <span id="msg"></span>
+  </div>
+  <div class="row">
+    <label>SFX <input type="range" id="vsfx" min="0" max="100" value="80"></label>
+    <label>Music <input type="range" id="vmusic" min="0" max="100" value="50"></label>
+    <label>Voices <b id="voices">0</b> <small id="voicesDetail"></small></label>
+    <label>CPU-ish <span class="meter" id="cpuM"><i id="cpu"></i></span> <b id="cpuT">0%</b></label>
+    <label>Level <span class="meter" id="lvlM"><i id="lvl"></i></span> <b id="lvlT">-inf</b></label>
+  </div>
+  <div class="row">
+    <label>Biome <select id="biome"><option>clay</option><option>quartz</option><option>amber</option><option>magma</option><option>void</option><option>abyss</option></select></label>
+    <label>Combo <input type="range" id="combo" min="0" max="15" value="0"> <b id="comboV">0</b></label>
+    <label>Strain <input type="range" id="strain" min="0" max="100" value="0"> <b id="strainV">0%</b></label>
+    <label>Depth <input type="range" id="depth" min="0" max="1000" value="0"> <b id="depthV">0 m</b></label>
+    <label>Screen <select id="screen"><option value="home">home (menu music)</option><option value="drop">drop (biome music)</option><option value="results">results (quiet)</option></select></label>
+  </div>
+</header>
+<main>
+  <h2>Game events (use the combo, strain, depth and biome sliders above)</h2>
+  <div class="grid" id="events"></div>
+  <h2>Interface sounds</h2>
+  <div class="grid" id="ui"></div>
+  <h2>Single voices (for sound design)</h2>
+  <div class="grid" id="voicesGrid"></div>
+  <h2>Listening checklist</h2>
+  <small>See docs/notes/AUDIO-2.md. Try: set Screen to drop, raise Strain slowly from 50 to 100, raise Combo, change Biome, then press Snap and Haul.</small>
+</main>
+<script type="module" src="./audio-lab.js"></script>
+</body></html>
