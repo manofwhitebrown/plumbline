@@ -2,6 +2,7 @@
 // so old callers see no change. Everything here is seeded (one stream: `P.rng`) and counted in steps, so replays stay exact.
 import { makeRng } from '../../core/rng.js';
 import { PLAY_DEFAULTS, FAIRNESS } from '../../data/play.js';
+import { BOONS } from '../../data/boons.js';
 import { OFFER } from '../../data/boons.js';
 import { ABILITIES } from '../../data/abilities.js';
 import { GUARDIAN_RULES } from '../../data/bosses.js';
@@ -29,7 +30,9 @@ export function nextOfferAfter(depth) {
 }
 
 export function createPlay(run, input) {
-  const opts = Object.assign({}, PLAY_DEFAULTS, input && typeof input === 'object' ? input : {});
+  const cheatPlay = run.mods && run.mods.cheat && typeof run.mods.cheat.play === 'object' ? run.mods.cheat.play : null; // owner cheats (docs/CHEATS.md)
+  const opts = Object.assign({}, PLAY_DEFAULTS, input && typeof input === 'object' ? input : {}, cheatPlay || {});
+  if (cheatPlay && cheatPlay.allSkills) opts.abilities = ['brace', 'surge', 'flare'];
   const st = run.state;
   const P = {
     opts, rng: makeRng(mixSeed(run.seed, 0x504c4159)), aff: affinityMap(run.rig), boons: [], fx: emptyFx(),
@@ -46,6 +49,7 @@ export function createPlay(run, input) {
   initGuardians(P, opts, run);
   P.nextOfferDepth = typeof opts.firstOfferDepth === 'number' ? opts.firstOfferDepth : nextOfferAfter(st.depth);
   if (opts.snapLuck > 0) P.snapLuckUntil = st.depth + FAIRNESS.snapLuckMetres;
+  if (cheatPlay && cheatPlay.giveBoons === 'all') for (const b of BOONS) { if (P.boons.indexOf(b.id) < 0) P.boons.push(b.id); }
   recompute(run, true);
   return P;
 }

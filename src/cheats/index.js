@@ -7,10 +7,10 @@ import { s, markCheated, changed } from '../meta/state.js';
 import { now } from '../meta/time.js';
 import { createGate } from './gate.js';
 import { ALL_MONEY_GROUPS } from './catalog-money.js';
-import { RUN, TIME, PROGRESS } from './catalog-game.js';
+import { RUN, PLAY, TIME, PROGRESS } from './catalog-game.js';
 import { TOOLS } from './catalog-tools.js';
 
-const CATALOG = [...ALL_MONEY_GROUPS, ...RUN, ...TIME, ...PROGRESS, ...TOOLS];
+const CATALOG = [...ALL_MONEY_GROUPS, ...RUN, ...PLAY, ...TIME, ...PROGRESS, ...TOOLS];
 const GROUP_ORDER = ['Money', 'Parts and Rig', 'Upgrades', 'Run helpers', 'Time', 'Progress', 'Tools'];
 const CONFIRM_WINDOW_MS = 8000;
 

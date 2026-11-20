@@ -111,8 +111,8 @@ export function tickGuardian(run, out) {
   }
   if (G.forced) {
     const f = GUARDIANS.find((g) => g.id === G.forced);
-    G.forced = '';
-    if (f && st.beat >= 2) { schedule(run, f, out); return; }
+    if (!f) G.forced = '';
+    else if (st.beat >= 2) { G.forced = ''; schedule(run, f, out); return; }
   }
   const reach = st.depth + R.warnSteps * Math.max(1, st.speed);
   if (st.depth > G.mark + 0.001 && !G.active) { G.mark = nextMark(st.depth + 1); return; } // passed (e.g. a deep start)

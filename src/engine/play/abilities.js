@@ -14,12 +14,14 @@ export function initAbilities(P, opts) {
 export function unlock(P, id) {
   const def = ABILITIES[id];
   if (!def || P.abil[id]) return false;
-  P.abil[id] = { id, charges: def.charges, max: def.charges, cd: 0, total: 0 };
+  const n = P.opts && P.opts.freeSkills ? 99 : def.charges;
+  P.abil[id] = { id, charges: n, max: n, cd: 0, total: 0 };
   return true;
 }
 
 function cdSteps(P, def) {
   const cut = Math.min(MAX_COOLDOWN_CUT, P.fx.cd || 0);
+  if (P.opts && P.opts.freeSkills) return 1;
   return Math.max(6, Math.round(def.cooldownSteps * (1 - cut)));
 }
 

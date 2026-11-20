@@ -8,6 +8,8 @@ import * as codex from '../meta/codex.js';
 import * as achievements from '../meta/achievements.js';
 import { fmtTime } from '../core/format.js';
 import { fmt } from '../core/format.js';
+import { ENCOUNTERS, ENCOUNTER_IDS } from '../data/events.js'; // [HOOK-1]
+import { GUARDIANS } from '../data/bosses.js';
 
 const cm = () => (s().cheated && s().cheatMods) || {};
 
@@ -39,6 +41,28 @@ export const RUN = [
   { id: 'biome_off', group: 'Run helpers', label: 'Unlock the Biome', run: () => { setCheatMods({ forceBiome: null }); return 'Biome follows Depth again'; } },
   { id: 'gold_x10', group: 'Run helpers', label: 'Gold x10 inside Drops', isOn: () => cm().goldMult === 10,
     run: () => { const on = cm().goldMult !== 10; setCheatMods({ goldMult: on ? 10 : 1 }); return on ? 'Gold x10 inside Drops' : 'Gold inside Drops is normal'; } },
+];
+
+// [HOOK-1] Play layer cheats: boons, skills, encounters and guardians. They go into mods.cheat.play.
+const pc = () => (cm().play && typeof cm().play === 'object' ? cm().play : {});
+const setPlay = (patch) => setCheatMods({ play: { ...pc(), ...patch } });
+const playToggle = (id, label, key, onText, offText) => ({
+  id, group: 'Play layer', label, toggle: true, isOn: () => !!pc()[key],
+  run: () => { const on = !pc()[key]; setPlay({ [key]: on ? true : undefined }); return on ? onText : offText; },
+});
+export const PLAY = [
+  { id: 'play_all_boons', group: 'Play layer', label: 'Start Drops with every boon', toggle: true, isOn: () => pc().giveBoons === 'all',
+    run: () => { const on = pc().giveBoons !== 'all'; setPlay({ giveBoons: on ? 'all' : undefined }); return on ? 'Every Drop starts with all boons' : 'Drops start with no boons'; } },
+  { id: 'play_offer_10', group: 'Play layer', label: 'First boon pick at 10 m', isOn: () => pc().firstOfferDepth === 10,
+    run: () => { setPlay({ firstOfferDepth: 10 }); return 'The first boon pick comes at 10 m'; } },
+  playToggle('play_free_skills', 'Skills: no cooldown, many charges', 'freeSkills', 'Skills are always ready', 'Skills cool down again'),
+  playToggle('play_all_skills', 'Unlock Flare as well', 'allSkills', 'Brace, Surge and Flare are ready', 'Only the usual skills are ready'),
+  ...ENCOUNTER_IDS.map((id) => ({ id: `play_enc_${id}`, group: 'Play layer', label: `Next Drop: ${ENCOUNTERS[id].name} first`, isOn: () => pc().forceEncounter === id,
+    run: () => { setPlay({ forceEncounter: id }); return `The next surprise is ${ENCOUNTERS[id].name}`; } })),
+  ...GUARDIANS.map((g) => ({ id: `play_guard_${g.id}`, group: 'Play layer', label: `Next Drop: meet ${g.name}`, isOn: () => pc().forceGuardian === g.id,
+    run: () => { setPlay({ forceGuardian: g.id }); return `${g.name} comes early`; } })),
+  { id: 'play_off', group: 'Play layer', label: 'Clear all play cheats',
+    run: () => { setCheatMods({ play: null }); return 'Play cheats are off'; } },
 ];
 
 const skip = (hours) => ({

@@ -40,6 +40,17 @@ These go into the Drop through `mods.cheat`. They stay on until you change them.
 - **Lock Biome** to Clay, Quartz, Amber, Magma, Void or Abyss (or unlock it).
 - **Gold x10 inside Drops** (press again to turn off).
 
+## Play layer (boons, skills, surprises, guardians)
+
+These go into the Drop through `mods.cheat.play`. They mark the save as **Cheats used**, like the other run helpers.
+
+- **Start Drops with every boon** (press again to turn off).
+- **First boon pick at 10 m**.
+- **Skills: no cooldown, many charges** and **Unlock Flare as well**.
+- **Next Drop: (a surprise) first**: one entry for each surprise (Gem Vein, Cave-in, Treasure Alcove, Echo Chamber, Rope Weevil, Merchant Lantern). It starts about 45 steps in, once per Drop.
+- **Next Drop: meet (a guardian)**: Stone Warden, Amber Weaver, Magma Maw or Void Eye. It comes after the first few steps, once per Drop.
+- **Clear all play cheats**.
+
 ## Time
 
 - **Skip 1 h / 8 h / 24 h away**: acts like you were away. Open the Welcome back box to collect (the 8-hour cap still applies).

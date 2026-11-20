@@ -7,6 +7,7 @@ import { Ctx } from './ctx.js';
 import { clampNum, fin, warnOnce } from './safe.js';
 import { applyTwist } from './twists.js';
 import { createPlay } from './play/index.js'; // [HOOK-1]
+import { cleanPlayCheat } from './play/cheats.js'; // [HOOK-1]
 
 const L = ENGINE.limits;
 
@@ -30,7 +31,9 @@ export function sanitizeMods(m) {
 // Cheats only exist when mods.cheat is an object. Otherwise this returns null.
 function sanitizeCheat(c) {
   if (!c || typeof c !== 'object') return null;
+  const play = cleanPlayCheat(c.play); // [HOOK-1]
   return {
+    ...(play ? { play } : {}),
     noSnap: c.noSnap === true,
     freezeStrain: c.freezeStrain === true,
     speedMult: clampNum(c.speedMult, L.speedMult[0], L.speedMult[1], 1, 'cheat.speedMult'),
