@@ -1,6 +1,7 @@
 /* Results screen. Rows fade in one by one. Motion uses transform and opacity only. */
-.screen-results { background: radial-gradient(ellipse at 50% 0%, var(--ink-600), var(--ink-800) 60%); overflow: hidden; }
-.screen-results.snapped { background: radial-gradient(ellipse at 50% 0%, #3a1a22, var(--ink-800) 60%); }
+/* The rewards backdrop (golden light, coins) sits under a dark veil so the numbers stay easy to read. */
+.screen-results { background: linear-gradient(180deg, rgba(7, 10, 18, .45), rgba(7, 10, 18, .8) 70%), radial-gradient(ellipse at 50% 0%, rgba(246, 196, 83, .2), transparent 62%), var(--res-bd, none) center / cover no-repeat, var(--ink-800); overflow: hidden; }
+.screen-results.snapped { background: linear-gradient(180deg, rgba(58, 26, 34, .6), rgba(7, 10, 18, .88) 70%), radial-gradient(ellipse at 50% 0%, rgba(255, 77, 94, .14), transparent 60%), var(--res-bd, none) center / cover no-repeat, var(--ink-800); }
 .res-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
   padding: var(--space-6) var(--space-4) var(--space-3); text-align: center; }
 .rv { opacity: 0; transform: translateY(10px); }
@@ -52,3 +53,54 @@
 .res-row { display: flex; gap: var(--space-2); }
 .res-row .btn { flex: 1 1 0; min-width: 0; }
 .res-tweak { text-decoration: underline; }
+
+/* ---- SCREENS-1: reward feel ---- */
+/* Record banner: a gold ribbon with a second line. The motion layer scales .res-record, so keep the class. */
+.res-record { flex-direction: column; gap: 2px; padding: 8px 22px; border-radius: 14px; letter-spacing: .08em; max-width: 100%;
+  border: 1px solid rgba(255, 244, 205, .7); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 0 26px rgba(246, 196, 83, .55), 0 6px 14px -6px rgba(0, 0, 0, .8); }
+.res-record-top { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-3); font-weight: 800; }
+.res-record-top .icon { width: 20px; height: 20px; display: inline-flex; flex: none; }
+.res-record-top .icon svg { width: 100%; height: 100%; }
+.res-record-sub { font-size: var(--fs-2); font-weight: 600; letter-spacing: .02em; color: rgba(7, 10, 18, .85); overflow-wrap: anywhere; }
+
+/* Gold: bigger number, a glow when the count-up lands. */
+.res-gold .num { font-size: var(--fs-6); font-weight: 800; line-height: 1.05; color: var(--gold-soft); text-shadow: 0 0 18px rgba(246, 196, 83, .35); }
+.res-gold.landed .num { animation: resLand 520ms var(--ease); }
+@keyframes resLand { 0% { text-shadow: 0 0 0 rgba(246, 196, 83, 0); } 40% { text-shadow: 0 0 30px rgba(246, 196, 83, .95); } 100% { text-shadow: 0 0 18px rgba(246, 196, 83, .35); } }
+#app[data-reduce="1"] .res-gold.landed .num { animation: none; }
+
+/* Relics found: one card each, rarity colour on the left edge. */
+.res-relics { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.res-relic { display: flex; align-items: center; gap: var(--space-3); min-height: 56px; padding: 8px 12px; border-radius: var(--radius-card); border: 1px solid var(--line); border-left: 4px solid var(--rar, var(--gold));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rar, #f6c453) 22%, transparent), transparent 70%), var(--ink-700); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 0 18px -6px var(--rar, #f6c453); }
+.res-relic-gem { flex: none; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--rar, var(--gold)); background: rgba(7, 10, 18, .6); border: 1px solid var(--rar, var(--gold)); }
+.res-relic-gem .icon { width: 22px; height: 22px; display: inline-flex; }
+.res-relic-gem .icon svg { width: 100%; height: 100%; }
+.res-relic-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.res-relic-kicker { font-size: var(--fs-1); color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.res-relic-name { font-size: var(--fs-3); font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-relic-rar { flex: none; font-size: var(--fs-1); font-weight: 700; padding: 2px 8px; border-radius: var(--radius-pill); color: var(--ink-900); background: var(--rar, var(--gold)); }
+.res-relic-more { font-size: var(--fs-2); color: var(--muted); text-align: center; }
+
+/* Chase lines as pills (replace the plain text lines). */
+.res-chase { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; max-width: 360px; }
+.res-pill { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; padding: 6px 14px; border-radius: 18px; border: 1px solid var(--line); background: var(--ink-700); font-size: var(--fs-2); text-align: left; overflow-wrap: anywhere; }
+.res-pill-icon { flex: none; width: 18px; height: 18px; display: inline-flex; }
+.res-pill-icon svg { width: 100%; height: 100%; }
+.res-pill.gold { color: var(--gold-soft); border-color: var(--brass-line, var(--gold)); font-weight: 700; box-shadow: inset 0 1px 0 var(--brass-hi, rgba(255, 255, 255, .1)), 0 0 14px -4px rgba(246, 196, 83, .55); }
+.res-pill.shard { color: var(--shard); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 14px -4px rgba(127, 214, 255, .45); }
+
+/* Groups sit on the metal panel material the theme gives to .card. */
+.res-best, .res-parts { width: 100%; max-width: 360px; padding: 10px 12px; border-radius: var(--radius-card); border: 1px solid var(--brass-line, var(--line)); background: linear-gradient(180deg, rgba(255, 232, 180, .06), transparent 40%), var(--ink-700); }
+.res-summary { width: 100%; padding: 10px 12px; border-radius: var(--radius-card); border: 1px solid var(--brass-line, var(--line)); }
+/* A little room under the last row so the fade above the buttons never hides text. */
+.res-body { padding-bottom: var(--space-6); }
+
+/* Short phones: tighter rows so more shows above the buttons. */
+@media (max-height: 700px) {
+  .res-body { gap: 8px; padding-top: var(--space-4); }
+  .res-relic { min-height: 48px; padding: 6px 10px; }
+  .res-relic-gem { width: 32px; height: 32px; }
+  .res-gold { min-height: 44px; }
+  .res-gold .num, .res-depth-num { font-size: 32px; }
+}

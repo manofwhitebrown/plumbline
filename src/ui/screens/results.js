@@ -5,7 +5,7 @@ import { registerScreen } from '../shell.js';
 import { h, svg, createScope } from '../dom.js';
 import { iconHtml } from '../icons.js';
 import { api } from '../api.js';
-import { fmt, audioCall } from '../soft.js';
+import { fmt, fmtDepth, audioCall } from '../soft.js';
 import { buzz } from '../../platform/haptics.js';
 import { button } from '../components/button.js';
 import { counter } from '../components/counter.js';
@@ -13,8 +13,10 @@ import { gemChip } from '../components/gemChip.js';
 import { popIn } from '../components/celebrate.js';
 import { startDrop, goTab } from '../flow.js';
 import { getSettings } from '../settings.js';
-import { normalizeResult, titleText, depthText, snapText, comboText, revealPlan } from '../logic/resultsPlan.js';
+import { normalizeResult, titleText, snapText, comboText, revealPlan } from '../logic/resultsPlan.js';
 import { createReveal } from './resultsReveal.js';
+import { recordBanner, relicBanner, chaseBlock, withPreviewExtras } from './resultsBanners.js'; // [SCREENS-1]
+import { backdropUrl } from '../theme/textures.js';
 
 let scope = null;
 
@@ -34,9 +36,12 @@ function partName(id) {
 registerScreen('results', {
   mount(el, params) {
     scope = createScope();
-    const r = normalizeResult(pickPayload(params));
+    const r = normalizeResult(withPreviewExtras(pickPayload(params), typeof location !== 'undefined' ? location.search : ''));
     const reduce = !!getSettings().reduceMotion;
+    const raw = withPreviewExtras(pickPayload(params), typeof location !== 'undefined' ? location.search : '');
+    const relics = relicBanner(raw); // [SCREENS-1] null when no relic was found
     const plan = revealPlan(r, reduce);
+    if (relics) { plan.push({ id: 'relic', at: reduce ? 0 : 1800 }); plan.sort((a, b) => a.at - b.at); }
     const has = (id) => plan.some((s) => s.id === id);
     const rows = {};
     const body = h('div', { class: 'res-body' });
@@ -44,17 +49,20 @@ registerScreen('results', {
 
     add('title', h('h1', { class: 'res-title' + (r.snapped ? ' snapped' : ''), text: titleText(r) }));
 
-    const depthRow = h('div', { class: 'res-depth' },
-      h('span', { class: 'res-lbl', text: 'Depth' }), h('span', { class: 'num res-depth-num', text: depthText(r) }));
+    const depthNum = counter(0, { cls: 'res-depth-num', format: (v) => fmtDepth(v) }, scope); // [SCREENS-1] counts up
+    const depthRow = h('div', { class: 'res-depth' }, h('span', { class: 'res-lbl', text: 'Depth' }), depthNum);
     add('depth', depthRow);
-    if (has('record')) add('record', h('div', { class: 'res-record', role: 'status' }, svg(iconHtml('star')), h('span', { text: 'NEW RECORD' })));
+    if (has('record')) add('record', recordBanner(r));
 
     const goldNum = counter(0, { cls: 'big-num', format: (v) => fmt(v) }, scope);
     goldNum.setAttribute('data-tut', 'results-gold');
     add('gold', h('div', { class: 'res-gold', 'aria-label': 'Gold' }, svg(iconHtml('gold'), 'res-icon'), goldNum));
     add('snap', h('div', { class: 'res-snap' + (r.snapped ? ' snapped' : ''), text: snapText(r) }));
 
-    if (has('shards')) add('shards', h('div', { class: 'res-shards' }, svg(iconHtml('shard'), 'res-icon sm'), h('span', { class: 'num', text: '+' + fmt(r.shards) + ' Shards' })));
+    const shardNum = counter(0, { format: (v) => '+' + fmt(Math.floor(v)) + ' Shards' }, scope); // [SCREENS-1] counts up
+    if (has('shards')) add('shards', h('div', { class: 'res-shards' }, svg(iconHtml('shard'), 'res-icon sm'), shardNum));
+
+    if (relics) add('relic', relics); // [SCREENS-1] right under the Shards: the exciting part
 
     if (has('goals')) {
       const list = h('ul', { class: 'res-goals', 'aria-label': 'Goals' });
@@ -86,7 +94,8 @@ registerScreen('results', {
     }
 
     add('summary', h('p', { class: 'res-summary sub', text: r.summaryText }));
-    if (has('chase')) add('chase', h('div', { class: 'res-chase', role: 'status' }, h('div', { class: 'res-near', text: r.chase.near }), h('div', { class: 'res-tip', text: r.chase.tip }))); // [HOOK-1] wave 2: near-miss line and one tip
+    const chase = has('chase') ? chaseBlock(r.chase) : null; // [HOOK-1] wave 2 near-miss line and tip, shown as pills [SCREENS-1]
+    if (chase) add('chase', chase);
 
     // Buttons stay hidden until the end, so an early tap skips the reveal instead of pressing one.
     const again = button({ label: 'Drop again', kind: 'primary', big: true, onPress: () => { startDrop(); } }, scope);
@@ -99,12 +108,19 @@ registerScreen('results', {
     rows.buttons = actions;
 
     const screen = h('section', { class: 'screen no-pad screen-results' + (r.snapped ? ' snapped' : '') }, body, actions);
+    try { const bd = backdropUrl('rewards'); if (bd) screen.style.setProperty('--res-bd', 'url("' + bd + '")'); } catch (e) { /* plain gradient stays */ } // [SCREENS-1]
     el.append(screen);
 
     audioCall('setScreen', 'results');
 
     const reveal = createReveal(plan, rows, {
-      gold: (s) => goldNum.set(r.gold, s.skipped || reduce ? 0 : s.dur),
+      depth: (s) => depthNum.set(r.depth, s.skipped || reduce ? 0 : 700),
+      shards: (s) => shardNum.set(r.shards, s.skipped || reduce ? 0 : 600),
+      gold: (s) => {
+        goldNum.set(r.gold, s.skipped || reduce ? 0 : s.dur);
+        if (r.snapped || !(r.gold > 0)) return;
+        scope.timeout(() => rows.gold.classList.add('landed'), s.skipped || reduce ? 0 : s.dur + 80); // a soft glow when it lands
+      },
       record: () => { popIn(rows.record); buzz('record'); },
     }, scope);
     // A tap anywhere skips. (The buttons are hidden until the end, so this cannot press one.)
