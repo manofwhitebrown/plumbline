@@ -135,7 +135,9 @@ registerScreen('rig', {
     scope.add(() => loadBtns.forEach((b) => b.remove()));
     function paintLoadouts() {
       const names = getSettings().loadoutNames;
-      loadBtns.forEach((b, i) => { setText(b, names[i]); b.setAttribute('aria-label', names[i] + '. Tap to load, press and hold to save.'); });
+      let act = -1;
+      try { const a = api.rigs.loadouts.active && api.rigs.loadouts.active(); if (Number.isInteger(a)) act = a; } catch (e) { /* none selected */ }
+      loadBtns.forEach((b, i) => { b.classList.toggle('on', i === act); b.setAttribute('aria-pressed', i === act ? 'true' : 'false'); setText(b, names[i]); b.setAttribute('aria-label', names[i] + '. Tap to load, press and hold to save.'); });
     }
     function saveLoadout(i) {
       const input = h('input', { class: 'input', type: 'text', maxlength: 14, value: getSettings().loadoutNames[i], 'aria-label': 'Loadout name' });

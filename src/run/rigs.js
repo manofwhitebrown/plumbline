@@ -236,6 +236,13 @@ export const loadouts = {
     changed();
     return { ok: true, dropped, rig: getRig() };
   },
+  // Which saved slot (0 to 2) holds exactly the Rig on the grid now, or -1.
+  active() {
+    const s = sync();
+    if (!s.cells.some((row) => row.some(Boolean))) return -1;
+    const now = JSON.stringify(s.cells);
+    return s.loadouts.findIndex((l) => l && JSON.stringify(fitCells(l.cells, s.cols, s.rows)) === now);
+  },
   list() {
     const s = sync();
     return s.loadouts.map((l, i) => (l ? { slot: i, name: l.name, parts: l.cells.flat().filter(Boolean).length } : null));

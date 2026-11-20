@@ -66,3 +66,7 @@
   .partcard { min-height: 96px; }
 }
 .power .num { font-size: var(--fs-4); }
+
+/* The Loadout that matches the Rig on the grid glows so you know which one is selected */
+.loadouts .chip.on { background: var(--gold); color: var(--ink-900); box-shadow: 0 0 0 2px #ffe3a1, 0 0 14px rgba(246, 196, 83, .75); font-weight: 800; }
+.loadouts .chip:not(.on) { opacity: .8; }
