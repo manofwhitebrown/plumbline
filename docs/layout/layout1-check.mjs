@@ -164,6 +164,9 @@ async function runScreen(page, s, w, h, tw) {
     await wait(1100); // the screen change animation must be finished before we measure
     await dismissModal(page);
   }
+  // Stop pulses and slides while measuring: a button that pulses looks a few pixels bigger and falsely closes a gap.
+  await page.evaluate(() => { if (!document.getElementById('l1-freeze')) { const st = document.createElement('style'); st.id = 'l1-freeze'; st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important}'; document.head.appendChild(st); } });
+  await wait(150);
   problems = (await page.evaluate(`(${auditSrc})()`)).filter((p) => !p.startsWith('note:'));
   problems.push(...await page.evaluate(`(${extra.toString()})(${JSON.stringify(s)})`));
   await page.screenshot({ path: `${SHOTS}/${tag}.png` });
