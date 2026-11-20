@@ -11,17 +11,28 @@ import { computePayout } from '../src/run/payout.js';
 import { suggest } from '../src/tutorial/suggest.js';
 import { allParts, allCombos } from '../src/engine/parts/index.js';
 
-export const STYLES = { 70: 0.7, 85: 0.85, never: null };
+export const STYLES = { 50: 0.5, 70: 0.7, 85: 0.85, 100: null, never: null }; // number = haul at that % of Strain; 100 and never = never haul
 const START = 1_700_000_000_000;
+let PLAY;                       // undefined = old behaviour. The real game uses {} (boons on): pass opts.play = true or --play=on. Becomes the default once the numbers are retuned.
 const DROP_PAUSE_S = 3;          // time the player spends on the results and rig screens
 const STUCK_S = 20 * 60;         // 20 simulated minutes without any way forward
 const DEPTH_MARKS = [100, 250, 500, 1000];
+
+// Counts every boon card offered and every boon picked, so pick rates can be checked.
+export function tallyBoons(stats, events) {
+  for (const e of events) {
+    if (e.t === 'BOON_OFFER' && e.kind === 'boon') { stats.offers++; for (const o of e.options) stats.offered[o.id] = (stats.offered[o.id] || 0) + 1; }
+    else if (e.t === 'BOON_PICK' && e.via === 'pick') { stats.picks++; stats.picked[e.id] = (stats.picked[e.id] || 0) + 1; }
+  }
+}
+export const newBoonStats = () => ({ offers: 0, picks: 0, offered: {}, picked: {} });
 
 function bad(x) { return typeof x === 'number' && (!Number.isFinite(x) || x < 0); }
 
 // Plays one style. Returns { style, problems, timeline, ... }. Never throws.
 export function playBot(style = '70', opts = {}) {
   const hours = Number.isFinite(opts.hours) ? opts.hours : 6;
+  PLAY = opts.play === true ? {} : undefined;
   const maxDrops = Number.isFinite(opts.maxDrops) ? opts.maxDrops : 4000;
   const frac = STYLES[style];
   const problems = [];
@@ -92,8 +103,9 @@ export function playBot(style = '70', opts = {}) {
     const mods = meta.getMods();
     const bestBefore = meta.stats.get ? (meta.stats.get().bestDepth || 0) : 0;
     let res;
-    try { res = simulateRun({ rig, mods, seed: seed++, policy }); } catch (e) { fail('engine threw: ' + (e && e.message)); break; }
+    try { res = simulateRun({ rig, mods, seed: seed++, policy, play: opts.play === true ? {} : undefined, withEvents: !!opts.boonStats }); } catch (e) { fail('engine threw: ' + (e && e.message)); break; }
     drops++;
+    if (opts.boonStats && res.events) tallyBoons(opts.boonStats, res.events);
     wait(res.beats * ENGINE.baseBeatMs / 1000 + DROP_PAUSE_S);
     for (const k of ['gold', 'kept', 'depth', 'strain']) if (bad(res[k])) fail(`bad run number: ${k} = ${res[k]} (drop ${drops})`);
     const pay = computePayout({ outcome: res.outcome, gold: res.gold, goldKept: res.kept, depth: res.depth, bestBefore, partsInRig: rig.cells.flat().filter(Boolean) });
@@ -104,7 +116,10 @@ export function playBot(style = '70', opts = {}) {
     const best = meta.stats.get && meta.stats.get().bestDepth !== undefined ? meta.stats.get().bestDepth : res.depth;
     for (const d of DEPTH_MARKS) if (tl.depth[d] === undefined && Math.max(best, res.depth) >= d) tl.depth[d] = simS;
 
-    if (meta.collapse.available()) { tl.collapse = simS; break; }
+    if (opts.onDrop) opts.onDrop({ simS, drops, res, mods, rig, gold: meta.gold(), gps: meta.crew.perSecond() });
+    // Collapse is only noted, not taken: the run goes on so we can see if 1000 m is reachable.
+    if (tl.collapse === null && meta.collapse.available()) tl.collapse = simS;
+    if (tl.collapse !== null && tl.depth[1000] !== undefined) break;
 
     // Stuck check: gold must grow, or something must be buyable, within 20 minutes.
     const earned = meta.stats.get().goldEarned;
@@ -155,7 +170,7 @@ function rigGold(rig, mods) {
   let total = 0;
   const policy = ({ run }) => (run.state.strain >= 0.85 * run.state.maxStrain ? 'haul' : 'continue');
   for (let i = 0; i < IMPACT_SEEDS; i++) {
-    try { total += simulateRun({ rig, mods: { ...mods, cheat: null }, seed: 7000 + i, policy }).kept; } catch (e) { /* counted as 0 */ }
+    try { total += simulateRun({ rig, mods: { ...mods, cheat: null }, seed: 7000 + i, policy, play: PLAY }).kept; } catch (e) { /* counted as 0 */ }
   }
   return total / IMPACT_SEEDS;
 }
@@ -202,12 +217,13 @@ const isMain = typeof process !== 'undefined' && process.argv[1] && import.meta.
 if (isMain) {
   const arg = (k, d) => { const a = process.argv.find((x) => x.startsWith('--' + k + '=')); return a ? a.split('=')[1] : d; };
   const which = arg('style', 'all');
+  const playOn = arg('play', 'off') === 'on';
   const hours = Number(arg('hours', 6));
   const styles = which === 'all' ? ['70', '85', 'never'] : [which];
   let failed = 0;
   for (const s of styles) {
     if (!(s in STYLES)) { console.log('FAIL unknown style ' + s); failed++; continue; }
-    const r = playBot(s, { hours });
+    const r = playBot(s, { hours, play: playOn });
     printResult(r);
     if (r.problems.length) failed++;
   }
