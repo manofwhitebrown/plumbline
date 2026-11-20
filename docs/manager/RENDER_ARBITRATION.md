@@ -23,3 +23,12 @@ Six AIs edit the renderer. These rules keep it from turning into a fight.
 2. One quality ladder: every layer must switch off on `low` and on Reduce motion. Total frame budget: under 16 ms on a mid phone; if over 24 ms for 2 s the renderer drops quality (`quality.js`).
 3. Do not draw the same thing twice. If two layers do the same job (for example wall light and polish lantern glow), the later AI checks the lab and removes its own duplicate.
 4. Before pushing a render change: `npm run check`, and look at `dev/render-lab.html` at 360x640 and 1440x900.
+
+## Requests closed by INTEGRATE-1 (all 12 files in docs/requests/ resolved and deleted)
+- DEPTH-1 to GFX-1 wallTexture: DONE. `wallTexture(biomeId, layer)` exists in `src/render/art/wallTexture.js` and is exported from `art/index.js`; the depth layer finds it by name.
+- DEPTH-1 to NEW-7 hook: ACCEPTED, all seven `[DEPTH-1]` calls are in `src/render/index.js`. The optional speed-up is taken: the flat well is skipped while `depthLayer.covering` is true.
+- GFX-1 to UI homeScene: DONE. `src/ui/screens/homeScene.js` uses `createHomeScene` and falls back to the old SVG scene.
+- HOOK-1 to Manager words: ACCEPTED. "best" on screen, "Biome", "Gold ahead of your best" and the Rope Mender tip stay. Relic Dust, Mastery, Contract and Daily Dive get a glossary line when their item lands.
+- HOOK-1 to NEW-1 hook and chase-hook: ACCEPTED, wired in `drop.js` (guarded) and `resultsPlan.js`. Pill and banner offsets are checked by LAYOUT-1's gate.
+- MODEL-1 to GFX-1 integration: ACCEPTED. Baked sprites in `items.js` and `bucket.js`, `models.setEnabled` and `models.noteFrame` in `index.js`. Keep them.
+- MOTION-1 to NEW-1 hook and results, NEW-2, NEW-3, NEW-4: ACCEPTED as notes. Class names listed there are a contract; the `beforeDrop` line in `drop.js` stays.

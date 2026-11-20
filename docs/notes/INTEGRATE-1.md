@@ -15,3 +15,4 @@
 - Answer and delete the 12 files in docs/requests/ and log them in RENDER_ARBITRATION.md.
 - More dead code (unused exports list from the scan), parts sheet check, 1440x900 sheet.
 - Not measured on a phone.
+- Push 2: all 12 requests answered in RENDER_ARBITRATION.md and deleted.
