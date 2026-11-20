@@ -28,7 +28,8 @@ registerScreen('crew', {
     const total = counter(0, { cls: 'big-num', format: (v) => fmt(v) }, scope);
     const header = h('div', { class: 'card crew-top' },
       h('div', { class: 'sub', text: 'Your Crew earns' }),
-      h('div', { class: 'row crew-total' }, svg(iconHtml('gold')), total, h('span', { class: 'sub', text: 'Gold per second' })));
+      h('div', { class: 'row crew-total' }, svg(iconHtml('gold')), total, h('span', { class: 'sub', text: 'Gold per second' })),
+      h('p', { class: 'sub crew-help', text: 'Crew earn Gold every second, even when you are away. Buy more to earn faster. Each milestone doubles a Crew\'s output. A Manager triples it.' }));
     const toggle = h('div', { class: 'crew-toggle', role: 'group', 'aria-label': 'How many to buy' });
     const modeBtns = CREW_MODES.map((m) => {
       const b = h('button', { type: 'button', class: 'btn crew-mode', text: modeLabel(m) });

@@ -6,6 +6,10 @@ import { holdButton } from './components/holdButton.js';
 import { openFrame } from './modalsWelcome.js';
 import { api } from './api.js';
 import { fmt, fmtDepth, ui, log } from './soft.js';
+import { LIMITS } from '../data/upgrades.js';
+
+const DUST_PCT = Math.round(((LIMITS && LIMITS.coreDustGoldEach) || 0.1) * 100);
+const WHAT = 'Collapse is a fresh start. You lose your Gold, Crew and Parts. You earn Core Dust, and every piece adds +' + DUST_PCT + '% to all Gold you earn, for good.';
 
 const RESETS = ['Gold', 'Crew', 'Parts'];
 const KEEPS = ['Core Dust', 'Shards', 'Codex', 'Best Depth'];
@@ -57,7 +61,7 @@ function buildCollapse() {
   const body = h('div', { class: 'stack collapse' });
   if (available) {
     body.append(
-      h('p', { class: 'sub', text: 'You start again with a fresh rope. Core Dust makes every new Drop stronger.' }),
+      h('p', { class: 'sub', text: WHAT }),
       h('div', { class: 'card stack center collapse-gain' },
         h('p', { class: 'num big-core', text: '+' + fmt(v.gain) + ' Core Dust' }),
         v.bonusText ? h('p', { class: 'sub', text: v.bonusText }) : null),
@@ -67,6 +71,7 @@ function buildCollapse() {
   } else {
     body.append(
       h('p', { class: 'title', text: 'Collapse is not ready yet.' }),
+      h('p', { class: 'sub', text: WHAT }),
       h('p', { class: 'sub', text: v.needText }));
   }
 

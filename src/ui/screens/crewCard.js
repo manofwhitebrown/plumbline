@@ -6,6 +6,7 @@ import { button } from '../components/button.js';
 import { progress } from '../components/progress.js';
 import { bulkCost, affordText } from '../logic/afford.js';
 import { fmt } from '../soft.js';
+import { CREW as CREW_DATA } from '../../data/crew.js';
 
 export const CREW_MODES = [1, 10, 'max'];
 const MODE_KEY = 'plumbline.crewMode';
@@ -94,6 +95,8 @@ export function crewCard(c, handlers, scope) {
   const id = String(c && c.id);
   const name = h('div', { class: 'title ellipsis' });
   const owned = h('div', { class: 'sub ellipsis' });
+  const found = CREW_DATA.find((x) => x.id === id);
+  const desc = h('div', { class: 'sub crew-desc', text: found ? found.desc : '' });
   const rate = h('div', { class: 'num crew-rate' });
   const rateSub = h('div', { class: 'sub crew-rate-sub', text: 'Gold per second' });
   const bar = progress(0, 'Progress to the next doubling');
@@ -111,7 +114,7 @@ export function crewCard(c, handlers, scope) {
       h('span', { class: 'crew-icon', html: crewIconHtml(id), 'aria-hidden': 'true' }),
       h('div', { class: 'grow' }, name, owned),
       h('div', { class: 'crew-rate-box' }, rate, rateSub)),
-    h('div', { class: 'crew-mid' }, bar, msText, lock),
+    h('div', { class: 'crew-mid' }, desc, bar, msText, lock),
     buyRow, reason);
 
   const last = {};
@@ -121,7 +124,7 @@ export function crewCard(c, handlers, scope) {
     card.classList.toggle('locked', st.locked);
     lock.hidden = !st.locked;
     setText(lock, st.lockText);
-    bar.hidden = msText.hidden = st.locked;
+    bar.hidden = msText.hidden = desc.hidden = st.locked;
     buyRow.hidden = reason.hidden = st.locked;
     if (st.locked) {
       setText(owned, 'Locked');

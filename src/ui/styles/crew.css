@@ -24,3 +24,7 @@
 #app[data-reduce="1"] .crew-card.shake, #app[data-reduce="1"] .crew-card.pop { animation: none; }
 .crew-card.shake { animation: shake 260ms var(--ease); }
 .screen-crew [hidden] { display: none !important; }
+
+/* Plain words about what each Crew does (Manager) */
+.crew-help { margin-top: 6px; line-height: 1.35; }
+.crew-desc { line-height: 1.3; margin-bottom: 6px; white-space: normal; overflow-wrap: anywhere; }

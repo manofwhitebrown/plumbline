@@ -11,6 +11,7 @@ import { saveSection } from './settingsSave.js';
 import { createTapCounter, openCheatEntry, USED_TEXT } from './cheatPanel.js';
 
 export const CREDITS = [
+  'Built by Mohammed Abdul Nayeem.',
   'Plumbline. Lower the bucket, then know when to Haul Up.',
   'Made by the Plumbline team, with Claude.',
   'All sound is made in code. All art is drawn in code.',
