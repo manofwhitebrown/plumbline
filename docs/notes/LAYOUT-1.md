@@ -1,6 +1,6 @@
 # Notes — LAYOUT-1 (layout gate, takes over from NEW-8)
 
-STATUS: IN PROGRESS
+STATUS: IN PROGRESS (report written; final push pending)
 
 ## Done
 - `docs/layout/layout1-check.mjs`: runner for LAYOUT_CHECK sections 1 and 2. All 11 screens (Welcome back modal, Home, Rig, Crew, Workshop, Codex, Rewards, Settings, Guide, Drop, Results), 12 sizes, twists (large, reduce, notch with --sat/--sab, zoom, rotate). Reuses NEW-8's audit. Skips the drifting backdrop and the floating gold pops on Drop (they fade and cannot be tapped).

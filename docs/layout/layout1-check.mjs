@@ -103,7 +103,8 @@ function bannerFind() {
   const p = e.parentElement; const b = p.getBoundingClientRect();
   const vw = window.innerWidth; const sat = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat')) || 0;
   const problems = [];
-  if (Number(getComputedStyle(p).opacity) < 0.99) return { settling: true };
+  const tf = getComputedStyle(p).transform;
+  if (Number(getComputedStyle(p).opacity) < 0.99 || (tf !== 'none' && tf !== 'matrix(1, 0, 0, 1, 0, 0)')) return { settling: true };
   if (b.left < -1 || b.right > vw + 1) problems.push(`BANNER OUTSIDE SCREEN ${Math.round(b.left)}..${Math.round(b.right)} of ${vw}`);
   if (b.top < sat - 1) problems.push(`BANNER UNDER NOTCH top ${Math.round(b.top)} < ${sat}`);
   const t = p.querySelector('div:last-child');
