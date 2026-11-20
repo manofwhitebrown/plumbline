@@ -23,7 +23,8 @@
 @media (pointer: coarse) { .ab-key { display: none; } }
 .ab-btn:active { transform: scale(.94); }
 
-.bp { position: absolute; inset: 0; z-index: 9; display: flex; align-items: center; justify-content: center; padding: 12px; background: rgba(7, 10, 18, .78); }
+.bp { position: absolute; inset: 0; z-index: 9; display: flex; align-items: flex-end; justify-content: center; padding: 12px 12px calc(12px + var(--sab, env(safe-area-inset-bottom, 0px))); background: rgba(7, 10, 18, .78); }
+@media (min-height: 760px) { .bp { align-items: center; } } /* short screens: seat the cards low so a banner at the top never covers the timer */
 .bp-panel { width: 100%; max-width: 420px; max-height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
 .bp-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .bp-title { margin: 0; font-size: var(--fs-4); line-height: 1.15; }
