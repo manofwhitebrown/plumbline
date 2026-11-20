@@ -65,7 +65,7 @@ function allEntries() {
     if (id.startsWith('combo:') && !seen.has(id)) out.push({ id, kind: 'combo', name: id.slice(6), desc: '' });
   }
   for (const [id, name, desc] of BIOMES) out.push({ id: `biome:${id}`, kind: 'biome', name, desc });
-  RELICS.forEach((name, i) => out.push({ id: `relic:t${i + 1}`, kind: 'relic', name: `${name} Relic`, desc: `A relic of tier ${i + 1}.` }));
+  RELICS.forEach((name, i) => out.push({ id: `relic:t${i + 1}`, kind: 'relic', name: `${name} Relic`, desc: `A relic of level ${i + 1}.` }));
   return out;
 }
 

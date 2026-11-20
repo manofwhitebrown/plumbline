@@ -156,7 +156,7 @@ test('preview: plain warnings and a power number', () => {
   const rigNoCollector = { cols: 4, rows: 3, cells: [['polisher', null, null, null], [null, null, null, null], [null, null, null, null]] };
   assert.deepEqual(rigs.preview(rigNoCollector).warnings, ['No collector in this rig']);
   const orphan = { cols: 4, rows: 3, cells: [['hook', null, 'polisher', null], [null, null, null, null], [null, null, null, null]] };
-  assert.deepEqual(rigs.preview(orphan).warnings, ['Parts have no collector in their lane']);
+  assert.deepEqual(rigs.preview(orphan).warnings, ['Parts have no collector in their column']);
   const p = rigs.preview(orphan, { full: true });
   assert.equal(p.powerReady, true);
   assert.ok(p.power >= 10 && p.power <= 15);

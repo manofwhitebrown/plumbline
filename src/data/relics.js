@@ -57,7 +57,7 @@ export const RELICS = Object.freeze([
   // void
   r('dark_thread', 'Dark Thread', 'void', 'common', 'luck', 0.01, 'You cannot see where it ends.', 'thread'),
   r('hollow_coin', 'Hollow Coin', 'void', 'common', 'gold', 0.01, 'There is nothing inside.', 'coin'),
-  r('night_seed', 'Night Seed', 'void', 'common', 'relic', 0.01, 'It will not sprout.', 'seed'),
+  r('night_seed', 'Night Acorn', 'void', 'common', 'relic', 0.01, 'It will not sprout.', 'seed'),
   r('star_map', 'Star Map', 'void', 'rare', 'strain', 0.02, 'The stars are in the wrong place.', 'map'),
   r('eclipse_pin', 'Eclipse Pin', 'void', 'rare', 'crew', 0.02, 'It holds a little shade.', 'pin'),
   r('eye_lens', 'Eye Lens', 'void', 'epic', 'luck', 0.03, 'It looks back.', 'lens'),
@@ -67,7 +67,7 @@ export const RELICS = Object.freeze([
   r('black_anchor', 'Black Anchor', 'abyss', 'common', 'strain', 0.01, 'Small, but very heavy.', 'anchor'),
   r('whale_rib', 'Whale Rib', 'abyss', 'rare', 'crew', 0.02, 'Bigger than the bucket.', 'rib'),
   r('endless_knot', 'Endless Knot', 'abyss', 'rare', 'gold', 0.02, 'It has no ends.', 'knot'),
-  r('heart_of_the_well', 'Heart of the Well', 'abyss', 'epic', 'gold', 0.04, 'It beats, slowly.', 'heart'),
+  r('heart_of_the_well', 'Heart of the Well', 'abyss', 'epic', 'gold', 0.04, 'It pulses, slowly.', 'heart'),
 ]);
 
 export const SETS = Object.freeze({

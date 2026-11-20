@@ -40,7 +40,7 @@ export function warningsFor(rig) {
   }
   if (parts === 0) warnings.push('Your rig is empty. Place a part to start.');
   else if (collectors === 0) warnings.push('No collector in this rig');
-  else if (orphan) warnings.push('Parts have no collector in their lane');
+  else if (orphan) warnings.push('Parts have no collector in their column');
   return warnings;
 }
 
