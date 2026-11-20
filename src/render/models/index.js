@@ -95,6 +95,7 @@ export function createModels(options = {}) {
     if (timer || failed) return;
     const tick = () => {
       timer = 0;
+      if (!enabled) return; // [PERF-1] paused (low quality or a slow phone): setEnabled(true) restarts it
       const t = now();
       if (step(sliceBudgetMs(lastFrameMs)) > 0) { lastFrameMs = Math.max(lastFrameMs * 0.9, 1); timer = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame(tick) : setTimeout(tick, 16); }
       void t;
@@ -112,7 +113,7 @@ export function createModels(options = {}) {
       return queue.length === 0 && !job;
     },
     // The renderer turns baked art on (high quality) or off (low quality: the old flat art is used).
-    setEnabled(on) { enabled = !!on; },
+    setEnabled(on) { enabled = !!on; if (enabled && auto && !failed && (queue.length || job)) schedule(); },
     get enabled() { return enabled && !failed; },
     frameCount(key) { const e = entries.get(key); return e ? e.frames : 0; },
     // Frame numbers wrap, so callers can just count up. Returns null until that frame is baked.

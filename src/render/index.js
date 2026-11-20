@@ -13,6 +13,7 @@ import { createParticles } from './particles.js';
 import { createFloaters } from './floaters.js';
 import { createVignette } from './vignette.js';
 import { createQuality } from './quality.js';
+import { createGovernor, TIERS } from './governor.js'; // [PERF-1] frame-time tiers
 import { createFxSprites } from './art/fxSprites.js'; // [GFX-1] pre-rendered effect sprites
 import { createEffects } from './effects.js';
 import { drawFx, drawFlash } from './drawFx.js';
@@ -34,7 +35,9 @@ export function createRenderer(canvas, opts = {}) {
   const items = createItems(), particles = createParticles(), floaters = createFloaters(), vignette = createVignette();
   let dead = false, hidden = false, sized = false, W = 360, H = 640, CW = 360, colX = 0, dpr = 1, reduce = !!o.reduceMotion, frameMs = 16;
   const lay = { trim: false }; // [GFX-1] quality steps that were switched off before dropping to 'low'
+  const governor = createGovernor({ onChange: () => applyQuality() }); // [PERF-1] steps depth, baking and particles down when frames run slow, and back up carefully
   const quality = createQuality(o.quality === 'low' ? 'low' : 'high', applyQuality);
+  governor.setEnabled(o.quality !== 'high' && o.quality !== 'low'); // a hand-picked level is never overridden
   const fx = createEffects({ sc, particles, floaters, camera, rope, bucket, well, vignette });
   const fxSprites = createFxSprites(); particles.setSprites(fxSprites); // [GFX-1]
   const tmp = { x: 0, y: 0 };
@@ -50,10 +53,11 @@ export function createRenderer(canvas, opts = {}) {
 
   function applyQuality() {
     const q = quality.settings;
+    const tier = q.name === 'low' ? TIERS[TIERS.length - 1] : governor.tier; // [PERF-1] governor tier: depth level, baking, particle share
     const baseCap = reduce ? Math.round(q.maxParticles * 0.4) : q.maxParticles;
-    particles.setCap(lay.trim ? Math.round(baseCap * 0.6) : baseCap); // [GFX-1] lay.trim = quality step 2
-    polish.setQuality(q.name); depthLayer.setQuality(q.name); // [DEPTH-1]
-    models.setEnabled(q.name !== 'low'); // [MODEL-1] baked 3D art only on high quality
+    particles.setCap(Math.round((lay.trim ? baseCap * 0.6 : baseCap) * tier.particles)); // [GFX-1] lay.trim = quality step 2
+    polish.setQuality(q.name === 'low' || governor.step >= 2 ? 'low' : 'high'); depthLayer.setQuality(q.name === 'low' ? 'low' : tier.depth); // [DEPTH-1]
+    models.setEnabled(q.name !== 'low' && tier.bake); // [MODEL-1] baked 3D art only on high quality; pausing it also pauses baking
     well.setLow(q.name === 'low');
     items.setLow(q.name === 'low'); // [GFX-1]
     rope.low = q.name === 'low'; bucket.low = rope.low; // [GFX-1] flat rope and still lantern on low quality
@@ -111,6 +115,7 @@ export function createRenderer(canvas, opts = {}) {
     const dt = clamp(num(rawDt, 16), 0, 250);
     frameMs = frameMs * 0.9 + dt * 0.1; models.noteFrame(frameMs); // [MODEL-1] baking backs off when the game is slow
     quality.sample(num(rawDt, 16)); // raw time: a hidden tab must not count as slow
+    if (quality.level !== 'low') governor.sample(num(rawDt, 16)); // [PERF-1]
     if (sc.slowT > 0) { sc.slowT -= dt; if (sc.slowT <= 0) sc.timeScale = 1; else sc.timeScale = 0.3 + 0.7 * (1 - sc.slowT / 600); }
     const sdt = dt * sc.timeScale; sc.time += dt;
     const a = clamp01(num(alpha, 0)), cand = sc.beatCount + a;
@@ -195,7 +200,11 @@ export function createRenderer(canvas, opts = {}) {
       try { step(dtMs, alpha); paint(); }
       catch (e) { warn('frame', e && e.message); try { ctx.restore(); ctx.restore(); } catch (e2) { /* ignore */ } }
     },
-    setQuality(q) { if (!dead) quality.set(q === 'low' ? 'low' : 'high', true); },
+    setQuality(q) { // [PERF-1] 'auto' keeps the governor on; 'high' and 'low' are the player's choice and are never overridden
+      if (dead) return;
+      if (q === 'low' || q === 'high') { governor.setEnabled(false); quality.set(q, true); applyQuality(); }
+      else { quality.setAuto(); governor.setEnabled(true); applyQuality(); }
+    },
     setReduceMotion(v) { reduce = !!v; applyMotion(); },
     // The band where the bucket and items live. top/bottom are the HUD limits; the rest is where things really are.
     safeRect() {
@@ -205,7 +214,7 @@ export function createRenderer(canvas, opts = {}) {
     // Tab hidden / shown. While hidden, frames are skipped; on return the slow-frame count starts fresh.
     setHidden(v) { const h = !!v; if (h === hidden) return; hidden = h; if (!h) { frameMs = 16; quality.sample(0); } },
     // Dev info for the lab.
-    debugStats() { return { frameMs, particles: particles.count, floaters: floaters.count, items: sc.items.live, rings: sc.rings.live, threads: sc.threads.live, streaks: sc.streaks.live, recycled: particles.pool.stats.recycled + sc.items.stats.recycled, quality: quality.level, beatPos: sc.beatPos, dpr, width: W, height: H, column: CW }; },
+    debugStats() { return { frameMs, particles: particles.count, floaters: floaters.count, items: sc.items.live, rings: sc.rings.live, threads: sc.threads.live, streaks: sc.streaks.live, recycled: particles.pool.stats.recycled + sc.items.stats.recycled, quality: quality.level, tier: governor.tier.name, tierStep: governor.step, beatPos: sc.beatPos, dpr, width: W, height: H, column: CW }; },
     // Dev only: fire n particles from the bucket (used by the lab to test the 300 cap).
     debugBurst(n) { if (dead) return; const L = sc.L; particles.burst(L.cx, L.top + L.bucketH / 2, Math.max(0, n | 0), '#ffe3a1', 220, 0, 1400, 2.4, 60); },
     destroy() {

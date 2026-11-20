@@ -32,6 +32,9 @@ export function createQuality(initial = 'high', onChange = null) {
       if (i >= 0) layers[i] = l; else layers.push(l);
     },
     layerState() { return layers.map((l) => ({ name: l.name, importance: l.importance, cost: l.cost, active: l.active })); },
+    get locked() { return locked; },
+    // Back to automatic: the player chose 'auto', so slow frames may lower quality again.
+    setAuto() { locked = false; slow = 0; if (level === 'low') { level = 'high'; for (const l of layers) if (!l.active) { l.active = true; call(l.on); } if (onChange) onChange(level); } },
     set(name, byUser = true) {
       const n = name === 'low' ? 'low' : 'high';
       if (byUser) locked = true;
