@@ -71,13 +71,15 @@ test('engine: safeUntilDepth means no Snap above that depth, normal drops can Sn
   assert.equal(earlyWith, 0, 'no Snap above the safe depth');
 });
 
-test('session: only the tutorial drop gets the fixed seed', async () => {
+test('session: the tutorial drop gets its fixed seed, other drops are random', async () => {
   const { setup } = await import('./run-helpers.js');
   const { session } = await import('../src/run/session.js');
   const t = setup();
   assert.equal(session.start({ tutorial: true, seed: 7, safeUntilDepth: 40 }).seed, 7);
   session.abort(); t.off();
   const t2 = setup();
-  assert.notEqual(session.start({ seed: 7 }).seed, 7, 'a seed without tutorial:true is ignored');
-  session.abort(); t2.off();
+  const a = session.start().seed; session.abort(); t2.off();
+  const t3 = setup(); const b = session.start().seed;
+  assert.notEqual(a, 7); assert.ok(Number.isFinite(b));
+  session.abort(); t3.off();
 });
