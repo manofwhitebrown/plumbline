@@ -25,7 +25,7 @@ export const TEX_H = 192;
 export const COURSE_H = 32;           // stone course height inside the texture (TEX_H / COURSE_H must be an integer)
 export const SLICE_PX = { high: 8, medium: 14 };
 export const SLICE_MAX = 400;         // table capacity (covers H up to ~2300 px at 6 px slices)
-export const LAYER_SCALE = { high: 1.25, medium: 0.75 }; // layer resolution relative to CSS px, capped by dpr
+export const LAYER_SCALE = { high: 1.0, medium: 0.75 }; // [PERF-1] high was 1.25: 36% fewer pixels in every full-layer fill and 3 MB less texture memory // layer resolution relative to CSS px, capped by dpr
 
 // Camera (hard caps, also enforced by clampCam in camera.js).
 export const CAM = { shakePx: 6, rollDeg: 1.5, zoomMax: 1.03, swayPx: 3, fgSwayMul: 1.6 };

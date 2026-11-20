@@ -52,6 +52,7 @@ export function createWallDetail(getFactory) {
   const api = {
     get built() { return Object.keys(strips).filter((k) => strips[k]).length; },
     resize(nw, nh, nd) { w = nw; h = nh; dpr = nd; m = Math.max(16, Math.round(nw * 0.12)); for (const k of Object.keys(strips)) delete strips[k]; },
+    release() { for (const k of Object.keys(strips)) delete strips[k]; }, // [PERF-1] strips are not drawn while depth covers the walls; they rebuild on demand
     // Builds one strip, once. Returns true when it did work (so the caller can spread the cost over frames).
     ensure(id) {
       if (!FEATURES[id] || strips[id] !== undefined) return false;

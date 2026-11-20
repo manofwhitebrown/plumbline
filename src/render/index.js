@@ -33,7 +33,7 @@ export function createRenderer(canvas, opts = {}) {
   try { ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null; } catch (e) { warn('no 2d context'); }
   const sc = createScene(), camera = createCamera(), well = createWell(), rope = createRope(), bucket = createBucket();
   const items = createItems(), particles = createParticles(), floaters = createFloaters(), vignette = createVignette();
-  let dead = false, hidden = false, sized = false, W = 360, H = 640, CW = 360, colX = 0, dpr = 1, reduce = !!o.reduceMotion, frameMs = 16;
+  let coveredFrames = 0, dead = false, hidden = false, sized = false, W = 360, H = 640, CW = 360, colX = 0, dpr = 1, reduce = !!o.reduceMotion, frameMs = 16;
   const lay = { trim: false }; // [GFX-1] quality steps that were switched off before dropping to 'low'
   const governor = createGovernor({ onChange: () => applyQuality() }); // [PERF-1] steps depth, baking and particles down when frames run slow, and back up carefully
   const quality = createQuality(o.quality === 'low' ? 'low' : 'high', applyQuality);
@@ -43,7 +43,7 @@ export function createRenderer(canvas, opts = {}) {
   const tmp = { x: 0, y: 0 };
   // [AI-2] polish hook: extra light, ambience and wall detail. Keep these calls when editing (see docs/manager/POLISH_SPLIT.md).
   const polish = createPolish({ reduceMotion: reduce, quality: o.quality === 'low' ? 'low' : 'high' });
-  const depthLayer = createDepth({ reduceMotion: reduce, quality: o.quality === 'low' ? 'low' : 'high' }); // [DEPTH-1] shaft depth layer (all calls guarded inside; see docs/requests/DEPTH-1-to-NEW-7-hook.md)
+  const depthLayer = createDepth({ reduceMotion: reduce, quality: o.quality === 'low' ? 'low' : 'high', govern: false }); // [DEPTH-1] shaft depth layer (all calls guarded inside; see docs/requests/DEPTH-1-to-NEW-7-hook.md)
   const pst = { depth: 0, biomeId: 'clay', strain01: 0, danger: 0, speed: 1, bucket: { x: 0, y: 0 }, lanes: null, laneCount: 4, arriveY: 0, w: 360, h: 640, time: 0 };
   function fillPolish() {
     const L = sc.L;
@@ -146,7 +146,8 @@ export function createRenderer(canvas, opts = {}) {
     ctx.save();
     camera.apply(ctx, CW, H);
     const covered = depthLayer.covering; // [INTEGRATE-1] depth walls are opaque once faded in: do not paint the flat well under them
-    if (!covered) well.draw(ctx, sc.depthVis * PX_PER_M, sc.depthVis, t, sc.strain01);
+    if (!covered) { coveredFrames = 0; well.draw(ctx, sc.depthVis * PX_PER_M, sc.depthVis, t, sc.strain01); }
+    else if (++coveredFrames === 90) { try { well.release(); polish.releaseWalls(); } catch (e) { /* memory trim only */ } } // [PERF-1] flat well and wall strips are hidden for good: free about 6 + 5 MB at dpr 2
     depthLayer.drawWalls(ctx, pst); // [DEPTH-1] covers the flat well when active
     polish.drawBack(ctx, pst, covered); // [INTEGRATE-1] covered = depth owns the biome blend and wall detail
     drawItems(ctx, false, t);
@@ -214,7 +215,7 @@ export function createRenderer(canvas, opts = {}) {
     // Tab hidden / shown. While hidden, frames are skipped; on return the slow-frame count starts fresh.
     setHidden(v) { const h = !!v; if (h === hidden) return; hidden = h; if (!h) { frameMs = 16; quality.sample(0); } },
     // Dev info for the lab.
-    debugStats() { return { frameMs, particles: particles.count, floaters: floaters.count, items: sc.items.live, rings: sc.rings.live, threads: sc.threads.live, streaks: sc.streaks.live, recycled: particles.pool.stats.recycled + sc.items.stats.recycled, quality: quality.level, tier: governor.tier.name, tierStep: governor.step, beatPos: sc.beatPos, dpr, width: W, height: H, column: CW }; },
+    debugStats() { return { frameMs, particles: particles.count, floaters: floaters.count, items: sc.items.live, rings: sc.rings.live, threads: sc.threads.live, streaks: sc.streaks.live, recycled: particles.pool.stats.recycled + sc.items.stats.recycled, quality: quality.level, tier: governor.tier.name, tierStep: governor.step, covered: coveredFrames, beatPos: sc.beatPos, dpr, width: W, height: H, column: CW }; },
     // Dev only: fire n particles from the bucket (used by the lab to test the 300 cap).
     debugBurst(n) { if (dead) return; const L = sc.L; particles.burst(L.cx, L.top + L.bucketH / 2, Math.max(0, n | 0), '#ffe3a1', 220, 0, 1400, 2.4, 60); },
     destroy() {

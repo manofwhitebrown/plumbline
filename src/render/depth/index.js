@@ -68,7 +68,7 @@ export function createDepth(opts) {
     get active() { return !flat() && walls.ready && assets.ready(forced >= 0 ? forced : biomeIndexAt(depthNow)); },
     resize(w, h, d) {
       if (dead) return;
-      safe(() => { W = Math.max(1, fin(w, W)); H = Math.max(1, fin(h, H)); dpr = clamp(fin(d, 1) || 1, 1, 3); walls.setSize(W, H, dpr); assets.setSilScale(Math.min(dpr, 1.5)); });
+      safe(() => { W = Math.max(1, fin(w, W)); H = Math.max(1, fin(h, H)); dpr = clamp(fin(d, 1) || 1, 1, 3); walls.setSize(W, H, dpr); assets.setSilScale(1); });
     },
     update(dtMs, state) {
       if (dead) return;

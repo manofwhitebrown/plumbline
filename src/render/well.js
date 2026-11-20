@@ -60,6 +60,9 @@ export function createWell() {
       sweep = makeSprite(160, 64, 1, (g) => { const gr = g.createLinearGradient(0, 0, 160, 0); gr.addColorStop(0, 'rgba(255,240,200,0)'); gr.addColorStop(0.5, 'rgba(255,240,200,0.5)'); gr.addColorStop(1, 'rgba(255,240,200,0)'); g.fillStyle = gr; g.fillRect(0, 0, 160, 64); }); },
     setLow(v) { v = !!v; if (v !== low) { low = v; for (const k of Object.keys(tiles)) delete tiles[k]; queue.length = 0; for (const k of Object.keys(queued)) delete queued[k]; } },
     setReduceMotion(v) { reduce = !!v; },
+    // [PERF-1] The depth layer covers the flat well: free its wall tiles (about 6 MB at dpr 2). They rebuild by themselves if the well draws again.
+    release() { for (const k of Object.keys(tiles)) delete tiles[k]; for (const k of Object.keys(fogs)) delete fogs[k]; for (const k of Object.keys(grads)) delete grads[k]; queue.length = 0; for (const k of Object.keys(queued)) delete queued[k]; edge = null; },
+    get tileCount() { return Object.keys(tiles).length; },
     setBiome(id, instant) {
       const to = BIOME_IDS.includes(id) ? id : 'clay';
       if (to === st.to) return;

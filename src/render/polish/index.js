@@ -40,6 +40,7 @@ export function createPolish(opts) {
   }
 
   return {
+    releaseWalls() { safe(() => walls.release()); }, // [PERF-1] free the flat wall strips while the depth layer covers the walls
     resize(nw, nh, nd) {
       if (dead) return;
       safe(() => {
