@@ -14,3 +14,8 @@
 ## Next
 - Wave 2 (chase HUD, relic wall, cosmetics, contracts, daily dive, mastery), Wave 3 (first-hour script, fairness extras, bot tables), cheats.
 - Danger streak limit and mercy-after-3-snaps (data exists in src/data/play.js FAIRNESS, not yet applied in spawn).
+
+## Finish session (FINISH-HOOK-1)
+- PUSHED 8f5f78e: danger streak limit (no third danger in a column above 300 m; `limitStreak` in `src/engine/play/plan.js`, peek-safe, redoes the row after a boon pick), mercy after 3 snaps (`src/engine/play/mercy.js`, `snapStreak` in the `run` slice, session gives a free Brace and kinder gems). Tests: `tests/hook-fairness.test.js`. 874 tests green.
+- A REAL BROWSER WORKS HERE: in a scratch folder (not the repo) run `npm i puppeteer-core @sparticuz/chromium`, then launch with `chromium.executablePath()` and `headless: 'shell'`. Run `npx vite --port 5199` detached (`setsid nohup ... &`), open `/?debug=1&fixture=busy`, wait for the Drop button (the loading screen takes a few seconds), press it. The first boon offer comes at 100 m (about 45 s).
+- NEXT (in order): 1) picker and skill buttons screenshots at 320x568, 360x640, 430x932, 1440x900, plain and with Large text + Reduce motion; fix what is cut off. 2) First-hour script (`docs/design/FIRST_HOUR.md` is named in code comments but does not exist yet). 3) Cheats for the play layer in `docs/CHEATS.md` and `src/cheats`. 4) Wave 2 items 6-9 only if the wave 2 session has not pushed them (check `git log`).
