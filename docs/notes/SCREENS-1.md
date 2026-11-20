@@ -20,3 +20,28 @@ I own: src/ui/screens/{crew,workshop,codex,rewards,guide,settings,results}*.js a
 ## Tools (outside the repo)
 Headless Chromium from the npm package @sparticuz/chromium + puppeteer-core in a folder outside the repo. Screenshots are slow (about 20 s each).
 - Push 3: Codex materials (leather rows, metal tabs, fresh glow, tab fade). The one red test (engine-balance speed) was only my browser using the CPU; green alone.
+- Push 4: Guide gets the Codex bookshelf backdrop under a dark veil. Full `npm run check` green.
+
+## Layout check (real headless Chromium, ?debug=1)
+| Screen | 320x568 extreme | 360x640 | 430x932 | 1440x900 |
+|---|---|---|---|---|
+| Crew | PASS | looked, PASS | looked, PASS | PASS |
+| Workshop | PASS (chip row scrolls sideways by design) | looked, PASS | looked, PASS | PASS |
+| Codex | PASS | looked, FIXED (flat rows, dark tab block) | not run | PASS |
+| Rewards | PASS | looked, PASS | not run | PASS |
+| Settings | PASS | looked, PASS | not run | PASS |
+| Guide | PASS | looked, FIXED (backdrop) | not run | not run |
+| Results | PASS | looked, FIXED (see Push 2) | looked, PASS | measured PASS |
+"PASS" = no sideways scroll, no tap target under 44 px, no text under 12 px, no console errors.
+
+## NOT verified (honest)
+- Reduce motion and Large text in a browser. My injected settings did not take effect, so the 320 "Large text" run was really normal text. The code paths are right by reading (counters finish at once, `.rv` rows show, the gold glow is off), but nobody has looked.
+- 430x932 for Codex, Rewards, Settings, Guide; 1440x900 for Guide (screenshot).
+- Headless Chromium is slow under software drawing. A screenshot taken before about 15 s can show Results mid-animation (tiny or mirrored rows). That is timing, not a bug.
+- The `engine-balance` speed test (under 5 ms per run) fails when the CPU is busy. It is green alone.
+
+## For other owners
+- src/ui/motion/wiring.js shows "New achievement" when no name is passed.
+- src/main.js debug route cannot carry relics or chase text; I added `&fake=full` inside results.js for that.
+
+STATUS: DONE

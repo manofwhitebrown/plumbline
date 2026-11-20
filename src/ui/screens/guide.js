@@ -6,6 +6,7 @@ import { button } from '../components/button.js';
 import { api } from '../api.js';
 import { guideSections, familyShowcase } from './guideData.js';
 import '../styles/guide.css';
+import { backdropUrl } from '../theme/textures.js'; // [SCREENS-1]
 
 let scope = null;
 
@@ -61,7 +62,9 @@ registerScreen('guide', {
     });
     if (!sections.length) body.append(h('p', { class: 'sub', text: 'The guide is not ready. Try again soon.' }));
     body.append(h('div', { class: 'gd-go' }, button({ label: 'Open Rig', kind: 'primary', onPress: () => go('rig') }, scope)));
-    el.append(h('section', { class: 'screen screen-guide no-pad' },
+    let bdStyle = '';
+    try { const u = backdropUrl('codex'); if (u) bdStyle = '--gd-bd:url("' + u + '")'; } catch (e) { /* plain gradient stays */ } // [SCREENS-1] bookshelf backdrop
+    el.append(h('section', { class: 'screen screen-guide no-pad', style: bdStyle },
       h('div', { class: 'gd-top' }, backBtn, h('h1', { class: 'gd-title', text: 'How to play' })), body));
   },
   unmount() {

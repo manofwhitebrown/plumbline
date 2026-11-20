@@ -18,3 +18,5 @@
 .gd-fallback { display: inline-flex; color: var(--muted); } .gd-fallback .icon { width: 100%; height: 100%; }
 .gd-pname { font-size: var(--fs-1); font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gd-go { display: flex; } .gd-go .btn { width: 100%; }
+.screen-guide { background: linear-gradient(180deg, rgba(7, 10, 18, .55), rgba(7, 10, 18, .8)), var(--gd-bd, none) center / cover no-repeat fixed, var(--ink-800); }
+[data-contrast="1"] .screen-guide { background: #070a12; }
