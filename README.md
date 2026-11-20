@@ -1,3 +1,5 @@
+> **PUSH OFTEN: you can be cut off at any time. Commit and push after every small working piece (pull --rebase, npm run check, push). Details: docs/manager/PUSH_OFTEN.md**
+
 # Plumbline
 
 **Play now (laptop or phone browser): https://manofwhitebrown.github.io/plumbline/**

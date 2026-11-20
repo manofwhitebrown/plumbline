@@ -1,3 +1,5 @@
+> **PUSH OFTEN: you can be cut off at any time. Commit and push after every small working piece (pull --rebase, npm run check, push). Details: docs/manager/PUSH_OFTEN.md**
+
 # CONTRACT (shared by all AIs — follow exactly)
 
 AI-1 commits this section verbatim as `docs/CONTRACT.md` in the first commit. Only the Manager edits it afterwards.
