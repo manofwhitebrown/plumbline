@@ -39,7 +39,7 @@
 
 /* ---------- 3. Typography ---------- */
 body, button, input, select, textarea { font-family: var(--font-ui); }
-h1, h2, h3, .res-title, .rw-title, .pause-title, .cheat-title, .ws-name, .btn.big {
+h1, h2, h3, .res-title, .rw-title, .pause-title, .cheat-title, .btn.big {
   font-family: var(--font-display); letter-spacing: var(--ls-display); font-weight: 700; }
 .title { letter-spacing: .005em; }
 .sub, .tabbar button, .pill, .btn small, .reason { letter-spacing: .01em; }
@@ -180,7 +180,7 @@ h1, h2, h3, .res-title, .rw-title, .pause-title, .cheat-title, .ws-name, .btn.bi
 [data-contrast="1"] .screen-host > .screen { background: #070a12; }
 [data-contrast="1"] :is(.card, .set-card, .modal, .sheet, .pill, .partcard, .toast, .ws-card, .rw-quest, .rw-ach, .rw-day, .set-row) { background: #0d1220; outline: 0; border-color: #e8d29a; box-shadow: none; }
 /* Large text: keep display type from getting too wide (Cinzel is a wide face). */
-[data-large="1"] :is(h1, h2, h3, .ws-name) { letter-spacing: .01em; }
+[data-large="1"] :is(h1, h2, h3) { letter-spacing: .01em; }
 /* Old browsers without color-mix keep the plain card look. */
 @supports not (color: color-mix(in srgb, red, blue)) { .partcard { background: #141b2e; border-color: var(--line); } }
 /* Reduce motion: static light only. */
