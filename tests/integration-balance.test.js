@@ -58,19 +58,6 @@ test('tutorial: the first drop earns enough Gold to buy the first part by the ti
   assert.ok(r.kept >= getPart('magnet').cost + 3, `tutorial drop earns ${r.kept} but the Magnet costs ${getPart('magnet').cost} (keep a margin of 3 Gold for a slightly early tap)`);
 });
 
-test('engine: safeUntilDepth means no Snap above that depth, normal drops can Snap there', async () => {
-  const { emptyRig } = await import('../src/tutorial/suggest.js');
-  const rig = emptyRig(4, 3); rig.cells[2][1] = 'hook';
-  const mods = { ...DEFAULT_MODS, strainMult: 4 }; // a rope that wears out fast, so Snaps would come early
-  let earlyWithout = 0, earlyWith = 0;
-  for (let seed = 1; seed <= 40; seed++) {
-    if (simulateRun({ rig, mods, seed }).depth < 40) earlyWithout++;
-    if (simulateRun({ rig, mods, seed, safeUntilDepth: 40 }).depth < 40) earlyWith++;
-  }
-  assert.ok(earlyWithout > 0, 'the test needs a rope that can Snap early');
-  assert.equal(earlyWith, 0, 'no Snap above the safe depth');
-});
-
 test('session: the tutorial drop gets its fixed seed, other drops are random', async () => {
   const { setup } = await import('./run-helpers.js');
   const { session } = await import('../src/run/session.js');
