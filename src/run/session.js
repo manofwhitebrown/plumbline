@@ -1,7 +1,7 @@
 // A drop from start to finish. Owns the loop, hands events to everyone, and finishes once.
 // Bus events: run:started, run:events (once per beat), run:ended, run:paused, run:resumed,
 // run:aborted, run:recovered, goal:done.
-import { mercyOptions } from '../engine/play/mercy.js'; // [HOOK-1]
+import { startOptions } from '../engine/play/firstHour.js'; // [HOOK-1]
 import { deps, call } from './deps.js';
 import { S, resetState } from './state.js';
 import rigs from './rigs.js';
@@ -164,7 +164,7 @@ export function start(opts = {}) {
     const safe = Number(opts && opts.safeUntilDepth);
     S.tutorial = !!(opts && opts.tutorial);
     let playOpt = opts && opts.play === false ? undefined : (opts && typeof opts.play === 'object' ? opts.play : (S.tutorial ? undefined : {})); // [HOOK-1] off in the tutorial drop
-    if (playOpt && !(opts && typeof opts.play === 'object')) playOpt = Object.assign({}, mercyOptions(records.getSnapStreak())); // [HOOK-1] mercy after 3 snaps
+    if (playOpt && !(opts && typeof opts.play === 'object')) playOpt = startOptions(records.get().totalDrops, records.getSnapStreak()); // [HOOK-1] first-hour script + mercy after 3 snaps
     S.run = deps.engine.createRun({ rig, mods, seed: S.seed, safeUntilDepth: Number.isFinite(safe) && safe > 0 ? safe : 0, play: playOpt });
     if (!S.run || !S.run.state) throw new Error('engine gave no run');
     S.bestBefore = records.bestDepth();

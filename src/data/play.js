@@ -23,3 +23,13 @@ export const FAIRNESS = Object.freeze({
   noJumpCap: 0.97,
   secondWindStrain: 0.1,
 });
+
+// First hour script (docs/design/FIRST_HOUR.md). `until` = drops finished so far. Steps are tried in order.
+export const FIRST_HOUR = Object.freeze({
+  steps: Object.freeze([
+    Object.freeze({ until: 1, opts: Object.freeze({}) }),                                                           // 0 drops finished: the tutorial drop (play layer is off there anyway)
+    Object.freeze({ until: 2, opts: Object.freeze({ encounters: false, guardians: false, firstOfferDepth: 30 }) }),  // the drop right after the tutorial: one early boon pick, no surprises
+    Object.freeze({ until: 4, opts: Object.freeze({ encounters: false, firstOfferDepth: 40 }) }),                    // drops 2-3: boons, Brace and Surge, still calm
+    Object.freeze({ until: 9, opts: Object.freeze({ firstOfferDepth: 60 }) }),                                       // drops 4-8: surprises start, first pick comes sooner than the usual 100 m
+  ]),
+});
