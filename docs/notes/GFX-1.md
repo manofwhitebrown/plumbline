@@ -20,6 +20,9 @@
 - Looked at at 22/44/96/200 px and side by side with the gems at 24 px: hazards have a thick red-orange rim and angular or organic silhouettes, gems are polished and unrimmed, so they cannot be confused. Fixed two problems found by looking: the root's rim was hidden under its own body, and the steam was a glowing white ball (now real puffs).
 - Tests: `tests/render-art-hazards.test.js` (7 tests).
 
+- `wallTexture(biomeId, layer)` added to `src/render/art/index.js` (file `art/wallTexture.js`), as DEPTH-1 asked (`docs/requests/DEPTH-1-to-GFX-1-wallTexture.md`): 160 x 192 canvas, tiles top to bottom (checked by stacking), crisp stone with biome details, lit from the left, no vignette, cached per biome, built lazily, null without a canvas (the depth layer then keeps its own texture). About 10-20 ms per biome when warm in Node. `disposeWallTextures()` frees them. Tests: `tests/render-art-walltexture.test.js`.
+- COORDINATION NOTE: while doing steps 5 and 6 I found that a second GFX-1 session had already pushed the twisted rope tiles and hero lantern (b0fa6b1) and the 26 hero icons (c9517e9), and MODEL-1 owns the baked barrel in `bucket.js`. I dropped my duplicate versions rather than overwrite them. They are kept, unmerged and unused, on the branch `gfx-1-alt-rope-icons-bucket` (rope strip tile + strain multiply tint, wooden stave bucket body with brass hoops, icon tile style). Please run only one GFX-1 session, or split the steps between sessions.
+
 ## In progress
 - Nothing half-done.
 

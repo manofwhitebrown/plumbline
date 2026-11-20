@@ -11,9 +11,10 @@ import { BIOME_IDS } from '../palette.js';
 export { hasGlow };
 export const LAYER_SCALE = { far: 0.5, mid: 0.5, glow: 0.5, near: 1 }; // sprite resolution vs dpr
 
-export function paintWallLayer(g, w, h, id, layer, quality = 'high') {
+// stepOverride (optional): sample the stone every N px instead of the default (bigger = faster, softer).
+export function paintWallLayer(g, w, h, id, layer, quality = 'high', stepOverride = 0) {
   try {
-    if (layer === 'far' || layer === 'near') paintStoneBody(g, w, h, id, layer, quality);
+    if (layer === 'far' || layer === 'near') paintStoneBody(g, w, h, id, layer, quality, stepOverride);
     if (layer === 'glow') paintDetail(g, w, h, id, 'far', 'glow', quality);
     else if (layer === 'mid') paintDetail(g, w, h, id, 'mid', 'base', quality);
     else paintDetail(g, w, h, id, layer, 'base', quality);
