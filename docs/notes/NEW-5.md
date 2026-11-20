@@ -57,3 +57,18 @@ ci.yml, pages.yml and android.yml are green on main. Pages is deployed at https:
 ## Not checked
 - I had no real browser here. The journey is covered by tests with the real modules (`tests/integration-flow-real.test.js`), not by clicking the real page. Install the APK on a phone and play one session to confirm.
 - Left for others: docs/requests/ still holds files for other owners.
+
+## Follow-up (second NEW-5 pass, from a real browser)
+I had headless Chromium here (Python Playwright), so I played the production build at 390x844 and found real problems. Fixed:
+- **Top bar**: Gold, Shard and Core Dust pills ran into the gear and gift buttons at 320 and 360 px with an ordinary mid-game save. The pill row now wraps (`src/ui/styles/screens.css`).
+- **Tutorial skipped itself after the first drop**: the Results screen has no tab bar, so "Open the Workshop" pointed at a hidden tab and timed out. New step `results-home` ("Tap Home", marker on the Results Home button).
+- **Tutorial could not buy a part**: the cheapest part cost 40 Gold and the first drop earns under that. Magnet now costs 22 (a 20 would break the "each part at most 3.2x the last" test), the two hint steps run 14 s each (beats are now 800 ms), so Haul is offered at about 28 s with about 27 Gold. Guarded by `tests/integration-balance.test.js`.
+- The tutorial highlight is on the Workshop **Buy button** (tapping the card only opens details).
+- Deleted the unused `src/ui/collapse.js` and the fulfilled AI-2 polish request.
+
+## Found, not fixed (needs the drop screen owner)
+- In headless Chromium the first drop is **auto-paused about 1.5 s after it starts** ("Paused / Resume / Haul Up now / Quit"), and the pause scrim covers the Haul button. It happens on plain upstream main too. A window `blur` event fires just before it. The cause is not in the code paths I searched (no `blur` handler, the drop screen is not removed). It may be a headless-only artefact; it needs a check on a real phone. If it happens on a phone, a new player cannot Haul during the tutorial.
+- The tutorial steps after "Open the Rig tab" (place the new part, second drop, finish) were not replayed in a browser because of the pause above.
+
+## Not done
+- A real phone playthrough and the APK install (owner: you).

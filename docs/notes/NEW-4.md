@@ -17,7 +17,7 @@
 
 ## Small edits outside my files (tiny, on purpose)
 - `src/ui/settings.js`: Quality now accepts `auto` (new default), and `applySettings` also sets `data-reduce-motion="true"` on the page (the tutorial glow reads it).
-- `src/ui/screens/home.js`: uses the new Welcome back and Collapse modals. The old inline code was removed. `src/ui/collapse.js` is no longer used by anyone; AI-7 or the Manager may delete it.
+- `src/ui/screens/home.js`: uses the new Welcome back and Collapse modals. The old inline code was removed. `src/ui/collapse.js` was unused and has been deleted.
 
 ## What other AIs must know
 - Drop screen owner: Quality `auto` means do not lock the renderer (its own auto-lowering stays on). `high` or `low` means call `setQuality(level)` as a player choice.
