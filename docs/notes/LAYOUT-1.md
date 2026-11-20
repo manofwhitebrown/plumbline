@@ -12,3 +12,4 @@ STATUS: IN PROGRESS
 
 ## Next
 - Write `docs/layout/LAYOUT-1.md` pass/fail table, `tests/integration-layout-*.test.js` for the fixes.
+- Push 3: empty fixture 108/108 PASS, busy fixture 108/108 PASS (12 sizes, no twist). Runner now checks the Achievement banner (fits, clears notch) and waits for it to vanish before measuring.

@@ -95,6 +95,29 @@ function modalCheck() {
   return out;
 }
 
+// The "Achievement unlocked" banner (MOTION-1) floats over the top for about 3 seconds, on purpose.
+// We check that it fits the screen and clears the notch, then wait until it is gone before measuring screens.
+function bannerFind() {
+  const e = [...document.querySelectorAll('div')].find((d) => d.children.length === 0 && /Achievement unlocked/.test(d.textContent));
+  if (!e) return null;
+  const p = e.parentElement; const b = p.getBoundingClientRect();
+  const vw = window.innerWidth; const sat = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat')) || 0;
+  const problems = [];
+  if (Number(getComputedStyle(p).opacity) < 0.99) return { settling: true };
+  if (b.left < -1 || b.right > vw + 1) problems.push(`BANNER OUTSIDE SCREEN ${Math.round(b.left)}..${Math.round(b.right)} of ${vw}`);
+  if (b.top < sat - 1) problems.push(`BANNER UNDER NOTCH top ${Math.round(b.top)} < ${sat}`);
+  const t = p.querySelector('div:last-child');
+  if (t && t.scrollWidth > t.clientWidth + 1 && getComputedStyle(t).textOverflow !== 'ellipsis' && /(hidden|clip)/.test(getComputedStyle(t).overflowX)) problems.push('BANNER TEXT CUT OFF');
+  return { problems };
+}
+async function bannerPass(page, w, h, tw) {
+  if (FIXTURE !== 'busy') return;
+  let found = null;
+  for (let i = 0; i < 24 && !found; i++) { const r = await page.evaluate(bannerFind); if (r && !r.settling) found = r; else await wait(250); }
+  if (found) results.push({ screen: 'banner', size: `${w}x${h}`, twist: tw, problems: found.problems });
+  for (let i = 0; i < 40; i++) { if (!(await page.evaluate(() => !![...document.querySelectorAll('div')].find((d) => d.children.length === 0 && /Achievement unlocked/.test(d.textContent))))) break; await wait(250); }
+}
+
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--no-sandbox', '--disable-gpu'] });
 const results = [];
 const consoleProblems = new Set();
@@ -123,6 +146,7 @@ async function openPage(w, h, tw, screen) {
     if (t === 'notch') { const st = document.documentElement.style; st.setProperty('--sat', '44px'); st.setProperty('--sab', '34px'); }
   }, tw);
   await wait(300);
+  await bannerPass(page, w, h, tw);
   return page;
 }
 
