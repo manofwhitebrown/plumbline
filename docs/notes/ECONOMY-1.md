@@ -19,7 +19,6 @@
 3. Tables for styles 50, 70, 85, 100 and boon pick rates.
 
 - Pushed: boon caps cut (strain cap 0.4, hazard 0.5, coolPerGem 0.006, Cool Head 0.0015). Next: tests pin Cooler/Oil Can/Brace/Manager/rope numbers (test 518, 218, crew, upgrades), so those stay as they are unless the test owners agree.
-STATUS: NOT DONE (in progress)
 - Pushed: biome gold factors flattened (1, 1.3, 1.7, 2.2, 2.8, 3.4). Tested alone: engine numbers (strainPerMeter, depthBonusDiv) break tests 145 and 255 (pinned Gold example and first drop 45-90 s), so not applied.
 - Pushed: Crew tiers 2 to 6 output cut (smithy 4, cart 16, lamp 80, assay 400, foundry 2000 Gold/s). Winch Hand (1) and Manager (x3) stay: tests pin them.
 - Measured with boons on (--play=on, 6 h cap), after biome + crew + boon-cap changes:
@@ -56,5 +55,19 @@ Part checks passed at all three styles with the trimmed mean (no must-have part,
 5. Run `node tools/balance-report.js` once the numbers are applied and paste its table here (not run this session).
 6. Re-check numbers: all displayed numbers must stay 8 characters or fewer (tests/engine-hud-extremes covers the formatter).
 
-STATUS: NOT DONE (bot tooling pushed; numbers parked in a patch, tests not updated)
 - Pushed: rare boons cut (Golden Age 20%, Unbreakable 18%/8%, Phoenix Rope one snap, Time Tinker, Star Chain, Iron Rope), boon caps (gold 0.8, second 1, ward 2, maxStrain 0.25), rope cost growth 2.2, deep-biome gold factors 1.5/1.8/2/2.4.
+
+## FINAL TABLES (latest live numbers, boons on, `node tools/bot.js --style=N --hours=6 --play=on`)
+| Style | 250 m | 500 m = Collapse ready | 1000 m | Target met? |
+|---|---|---|---|---|
+| haul at 50% | 19.6 min | 3.72 h | not reached | no (too slow) |
+| haul at 70% | 16.3 min | 59.8 min | 59.8 min | no (too fast) |
+| haul at 85% | 13.6 min | 71.4 min | 71.4 min | no (too fast) |
+| haul at 100% | 19.1 min | 59.9 min | 88.3 min | no (too fast) |
+
+Boon pick rates (250 drops, rig from 30 min, haul at 85%): highest per-offer rates are Unbreakable 80%, Phoenix Rope 76%, Star Chain 65%, Golden Age 65%, Good Grease 60%. Share of all picks stays at 7% or less for every boon. Never picked: Flare Lamp, Bright Eyes, Tinker's Luck, Chain Spark, Lucky Lamp. So the 35% rule is not met per offer, and five boons are dead.
+
+## Why it is not finished
+Every remaining lever is pinned by tests owned by others: strain per metre and depth bonus (tests 145, 255), Cooler / Oil Can / Brace numbers (518, 218), Manager x3 and Winch 1 Gold/s (crew, offline tests), rope cost ladder (upgrades test), Collapse gold gate 1M (collapse tests). The Manager must let their owners update those tests, then apply `ECONOMY-1-wip-numbers-v2.patch` (or `-numbers.patch`) and re-tune. The big problem left is the deep-drop Gold tail: rare drops jump 500 m to 1000 m+ in one go.
+
+STATUS: NOT DONE (tools pushed, safe numbers pushed, rest blocked on pinned tests)
