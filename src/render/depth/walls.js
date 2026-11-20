@@ -14,16 +14,16 @@ export function createWalls(env) {
   const table = makeSliceTable();
   let W = 360, H = 640, dpr = 1, level = 'high', ls = 1, layer = null, g = null, geo = shaftGeom(W, H), mask = null, maskKey = '', dirty = true;
   const backG = [], fogG = [], edgeCss = [];
-  let slicesDrawn = 0;
+  let slicesDrawn = 0, maxW = 60;
 
   function palCss(i) {
     const p = biomePalette(BIOME_ORDER[i]);
     edgeCss[i] = rgbToCss(mix(hexToRgb(p.wallDark), INK, 0.35));
-    const top = mix(hexToRgb(p.top), INK, 0.35), bot = mix(hexToRgb(p.bottom), INK, 0.45);
+    const top = mix(hexToRgb(p.top), INK, 0.0), bot = mix(hexToRgb(p.bottom), hexToRgb(p.top), 0.55);
     const b = g.createLinearGradient(0, -OV, 0, H + OV); b.addColorStop(0, rgbToCss(top)); b.addColorStop(1, rgbToCss(bot)); backG[i] = b;
     const fogC = mix(hexToRgb(STYLE[BIOME_ORDER[i]].fog), hexToRgb(p.glow), 0.06);
     const f = g.createLinearGradient(0, -OV, 0, H + OV);
-    f.addColorStop(0, rgbToCss(fogC, 0)); f.addColorStop(0.3, rgbToCss(fogC, 0.1)); f.addColorStop(0.7, rgbToCss(fogC, 0.5)); f.addColorStop(1, rgbToCss(fogC, LIGHT.fogMax));
+    f.addColorStop(0, rgbToCss(fogC, 0)); f.addColorStop(0.3, rgbToCss(fogC, 0.08)); f.addColorStop(0.7, rgbToCss(fogC, 0.28)); f.addColorStop(1, rgbToCss(fogC, LIGHT.fogMax));
     fogG[i] = f;
   }
 
@@ -38,7 +38,7 @@ export function createWalls(env) {
       ls = level === 'high' ? Math.min(dpr, LAYER_SCALE.high) : Math.min(dpr, LAYER_SCALE.medium);
       layer = mk(Math.round((W + OV * 2) * ls), Math.round((H + OV * 2) * ls));
       g = layer ? layer.getContext('2d') : null;
-      geo = shaftGeom(W, H);
+      geo = shaftGeom(W, H); maxW = Math.ceil(wallWidth(H * 1.05, geo)) + 14;
       buildSliceTable(table, W, H, SLICE_PX[level] || SLICE_PX.high);
       return !!g;
     },
@@ -62,10 +62,10 @@ export function createWalls(env) {
       g.fillStyle = edgeCss[bi0]; g.fillRect(-OV, -OV, OV, H + OV * 2); g.fillRect(W, -OV, OV, H + OV * 2);
       // 2. far wall: the back of the shaft, slow (parallax 0.2), very dark, only a hint
       const tex0 = assets.tex(bi0);
-      if (tex0) {
+      if (tex0 && level === 'high') {
         const c2 = tex0.L[2], per = (TEX_H / 4) * 2.4, y0 = -((d * FAR_PX) % per) - per;
-        g.globalAlpha = 0.1;
-        for (let y = y0; y < H + OV; y += per) g.drawImage(c2, 0, 0, c2.width, TEX_H / 4, -OV, y, W + OV * 2, per + 1);
+        g.globalAlpha = 0.16;
+        for (let y = y0; y < H + OV; y += per) g.drawImage(c2, 0, 0, c2.width, TEX_H / 4, W * 0.08, y, W * 0.84, per + 1);
         g.globalAlpha = 1;
       }
       // 3. wall slices (the mode-7 part)
@@ -98,14 +98,17 @@ export function createWalls(env) {
       // 4. ribs and door rings (they cut across the walls and the shaft; centre is see-through in the sprite)
       this.rings(d, bi0, forcedOnly);
       // 5. shade mask (inner wall edge, HUD dim)
-      if (mask) g.drawImage(mask, -OV, -OV, W + OV * 2, H + OV * 2);
+      if (mask) { // only the two wall strips carry any ink, so only those are drawn
+        const sw = maxW + OV, srcW = Math.min(mask.width, Math.round(sw * ls)), dH = H + OV * 2;
+        g.drawImage(mask, 0, 0, srcW, mask.height, -OV, -OV, srcW / ls, dH);
+        g.drawImage(mask, mask.width - srcW, 0, srcW, mask.height, W + OV - srcW / ls, -OV, srcW / ls, dH);
+      }
       // 6. fog: thicker toward the vanishing row, tinted per biome
-      g.globalAlpha = 1; g.fillStyle = fogG[bi0]; g.fillRect(-OV, -OV, W + OV * 2, H + OV * 2);
-      if (useB) { g.globalAlpha = tb; g.fillStyle = fogG[bi1]; g.fillRect(-OV, -OV, W + OV * 2, H + OV * 2); g.globalAlpha = 1; }
+      const breath = 1 + (light.exposure - 0.04) * 3; // slow breathing: fog density and lantern strength move a few percent
+      g.globalAlpha = clamp(breath, 0.85, 1); g.fillStyle = fogG[bi0]; g.fillRect(-OV, H * 0.2, W + OV * 2, H * 0.8 + OV);
+      if (useB) { g.globalAlpha = tb * clamp(breath, 0.85, 1); g.fillStyle = fogG[bi1]; g.fillRect(-OV, H * 0.2, W + OV * 2, H * 0.8 + OV); g.globalAlpha = 1; }
       // 7. light: lantern lobes on the near walls, warmer with danger, pulses on collects
       this.lights(bi0, bi1, useB ? tb : 0, frame);
-      // 8. exposure (slow breathing)
-      g.globalCompositeOperation = 'source-over'; g.fillStyle = '#020108'; g.globalAlpha = clamp(light.exposure, 0, 0.2); g.fillRect(-OV, -OV, W + OV * 2, H + OV * 2); g.globalAlpha = 1;
       return true;
     },
     rings(d, bi0, forcedOnly) {
@@ -144,7 +147,7 @@ export function createWalls(env) {
         const dg = frame.danger;
         if (dg > 0.02) { const em = assets.pulse(3); if (em) { g.globalAlpha = 0.16 * dg; g.drawImage(em, cx - lw / 2, by - lh / 2, lw, lh); } }
       }
-      if (lobe0) { g.globalAlpha = 0.09 * (1 - tb) * light.flicker; g.drawImage(lobe0, W / 2 - W * 0.65, H * 1.02 - H * 0.28, W * 1.3, H * 0.56); } // far end of the shaft: a faint haze
+      if (lobe0) { g.globalAlpha = 0.09 * (1 - tb) * light.flicker; g.drawImage(lobe0, W / 2 - W * 0.5, H * 1.02 - H * 0.2, W, H * 0.4); } // far end of the shaft: a faint haze
       for (const p of light.pulses) {
         if (!p.live) continue;
         const sp = assets.pulse(p.tier); if (!sp) continue;
@@ -157,15 +160,20 @@ export function createWalls(env) {
       }
       g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
     },
-    blit(ctx, cam, alpha) {
+    // simple = medium quality: shift only (whole pixels), no roll or zoom. A rotated, smoothed blit is one cheap quad on a GPU canvas
+    // but the slowest single call on a software canvas, so the lower tier skips it.
+    blit(ctx, cam, alpha, simple) {
       if (!layer) return;
       const px = W / 2, py = geo.yRef;
       ctx.save();
-      ctx.translate(px + cam.dx, py + cam.dy);
-      if (cam.roll) ctx.rotate((cam.roll * Math.PI) / 180);
-      if (cam.zoom !== 1) ctx.scale(cam.zoom, cam.zoom);
-      ctx.translate(-px, -py);
-      ctx.imageSmoothingEnabled = true;
+      if (simple) ctx.translate(Math.round(cam.dx), Math.round(cam.dy));
+      else {
+        ctx.translate(px + cam.dx, py + cam.dy);
+        if (Math.abs(cam.roll) > 0.02) ctx.rotate((cam.roll * Math.PI) / 180);
+        if (cam.zoom !== 1) ctx.scale(cam.zoom, cam.zoom);
+        ctx.translate(-px, -py);
+      }
+      ctx.imageSmoothingEnabled = !simple;
       ctx.globalAlpha = alpha;
       ctx.drawImage(layer, -OV, -OV, W + OV * 2, H + OV * 2);
       ctx.restore();

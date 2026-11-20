@@ -99,7 +99,7 @@ export function createDepth(opts) {
         if (!assets.ready(forced >= 0 ? forced : biomeIndexAt(depthNow)) || fade <= 0) return false;
         walls.ensureMask(margin);
         if (!walls.render(depthNow, { forced, time, bucketY, danger })) return false;
-        walls.blit(ctx, cam, fade);
+        walls.blit(ctx, cam, fade, level === 'medium');
         drawnThisFrame = true;
         costFrame += now() - t0;
         return true;

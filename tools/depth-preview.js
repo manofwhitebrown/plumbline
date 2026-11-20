@@ -72,7 +72,7 @@ async function renderFrame(biome, depth, W, H, dpr, cols, flat, pulse) {
 
 if (BENCH) {
   const [W, H] = SIZES[0], dpr = 1, c = createCanvas(W, H), ctx = c.getContext('2d');
-  const dl = createDepth({ quality: 'high' }); dl.resize(W, H, dpr);
+  const Q = String(opt('quality', 'high')); const dl = createDepth({ quality: Q, govern: false }); dl.resize(W, H, dpr); // governor off: we want the raw cost
   const lanes = new Float32Array(5); for (let i = 0; i < 5; i++) lanes[i] = 180 + (i - 2) * 56;
   const st = { depth: 40, biomeId: 'clay', strain01: 0.3, danger: 0.2, speed: 1, bucket: { x: 180, y: 240 }, lanes, laneCount: 5, arriveY: 330, w: W, h: H, time: 0 };
   const times = [];
@@ -84,7 +84,7 @@ if (BENCH) {
   }
   times.sort((a, b) => a - b);
   const q = (p) => times[Math.min(times.length - 1, Math.floor(p * times.length))].toFixed(2);
-  console.log(`depth layer alone, ${W}x${H}, CPU canvas (not a phone): p50 ${q(0.5)} ms  p95 ${q(0.95)} ms  p99 ${q(0.99)} ms  max ${times[times.length - 1].toFixed(2)} ms`);
+  console.log(`depth layer alone (${Q}), ${W}x${H}, CPU canvas (not a phone): p50 ${q(0.5)} ms  p95 ${q(0.95)} ms  p99 ${q(0.99)} ms  max ${times[times.length - 1].toFixed(2)} ms`);
   console.log(JSON.stringify(dl.debug()));
   process.exit(0);
 }

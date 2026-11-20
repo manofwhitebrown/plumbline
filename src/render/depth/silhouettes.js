@@ -8,7 +8,7 @@ export const SIL_KINDS = ['root', 'stalactite', 'crystal', 'pipe', 'ladder', 'pl
 
 const INK = [4, 3, 10];
 function bodyColor(pal) { return rgbToCss(mix(INK, hexToRgb(pal.bottom), 0.22), 0.96); }
-function rimColor(pal, a) { return rgbToCss(hexToRgb(pal.glow), a); }
+function rimColor(pal, a) { return rgbToCss(hexToRgb(pal.glow), Math.min(0.7, a * 1.7)); } // a stronger rim so the shape reads against dark walls
 
 function taper(g, pts, w0, w1, color) { // a curved strand that gets thinner: many short segments
   g.strokeStyle = color; g.lineCap = 'round';

@@ -19,13 +19,13 @@ export const GEOM = {
   curve: 1.6,        // >1 bows the wall inner edge (fast near the top, flat at the bottom)
 };
 
-export const OV = 32;                 // overscan (px) so roll, zoom and shake never show the layer edge
+export const OV = 26;                 // overscan (px) so roll, zoom and shake never show the layer edge
 export const TEX_W = 160;             // wall texture size (one tile; stored doubled vertically)
 export const TEX_H = 192;
 export const COURSE_H = 32;           // stone course height inside the texture (TEX_H / COURSE_H must be an integer)
 export const SLICE_PX = { high: 8, medium: 14 };
 export const SLICE_MAX = 400;         // table capacity (covers H up to ~2300 px at 6 px slices)
-export const LAYER_SCALE = { high: 1.5, medium: 1 }; // layer resolution relative to CSS px, capped by dpr
+export const LAYER_SCALE = { high: 1.25, medium: 0.75 }; // layer resolution relative to CSS px, capped by dpr
 
 // Camera (hard caps, also enforced by clampCam in camera.js).
 export const CAM = { shakePx: 6, rollDeg: 1.5, zoomMax: 1.03, swayPx: 3, fgSwayMul: 1.6 };
@@ -42,7 +42,7 @@ export const FG = {
   hudTop: 88, hudBottom: 120, hudAlpha: 0.35,
   guardPx: 18,       // gap kept between a silhouette and the bucket rim (pad 12 + 6)
   minIntrude: 6, maxIntrude: 74,
-  topIntrudeK: 0.30, topIntrudeMax: 120, // above the bucket there are no lanes: silhouettes may reach this far in (share of W)
+  topIntrudeK: 0.34, topIntrudeMax: 130, // above the bucket there are no lanes: silhouettes may reach this far in (share of W)
   maskFeatherY: 70, maskFeatherX: 14,
 };
 
@@ -53,7 +53,7 @@ export const LIGHT = {
   flicker: 0.12,     // max 15 percent per art direction
   pulseAlpha: 0.34, pulseAttackMs: 70, pulseDecayMs: 720, pulseSlots: 6,
   breathHz: 0.07, breathAmp: 0.045,
-  fogMax: 0.78,
+  fogMax: 0.55,
 };
 
 // Per-biome look beyond the shared palette: fog tint (mixed from palette), crack glow, silhouette set.
