@@ -5,6 +5,7 @@ import records from './records.js';
 import goalsApi from './goals.js';
 import { computePayout } from './payout.js';
 import { buildView } from './view.js';
+import { nearMiss, bestNextTip } from './chase.js'; // [HOOK-1] wave 2
 
 export const SNAP_KEEP_MAX = 0.6;
 
@@ -15,10 +16,10 @@ export function keepFraction(mods) {
 
 // Money is added, the checkpoint is cleared, then everything is saved in one write.
 // If the page dies before that write, the old checkpoint stays and pays once on the next start.
-export function applyPayout(payout, seed, biomeId, cheated) {
+export function applyPayout(payout, seed, biomeId, cheated, ghost) {
   call(deps.meta, 'addGold', payout.kept);
   call(deps.meta, 'addShards', payout.shardsEarned);
-  records.recordDrop({ outcome: payout.outcome, depth: payout.depth, kept: payout.kept, biomeId, cheated });
+  records.recordDrop({ outcome: payout.outcome, depth: payout.depth, kept: payout.kept, biomeId, cheated, ghost });
   records.markPaid(seed);
   records.clearCheckpoint();
   call(deps.save, 'saveNow');
@@ -51,10 +52,17 @@ export function finishRun(outcome) {
     payout.play = { boons: pl.boons.slice(), relics: pl.relics.slice(), shards: pl.shardsWon, guardians: pl.gd ? pl.gd.beaten.slice() : [], stats: pl.stats };
   }
   try {
-    applyPayout(payout, S.seed, st.biomeId, cheated);
+    applyPayout(payout, S.seed, st.biomeId, cheated, S.ghostRec ? S.ghostRec.finish() : null);
   } catch (e) {
     deps.log.error('run: payout failed', e && e.message);
   }
+  try { // [HOOK-1] wave 2: near-miss line and one tip for the Results screen (after the payout, so 'you can buy it now' is true)
+    const ups = deps.meta && deps.meta.upgrades, d = ups && typeof ups.def === 'function' ? ups.def('mender') : null, inf = ups && typeof ups.info === 'function' ? ups.info('mender') : null;
+    payout.chase = {
+      nearMiss: nearMiss({ depth: st.depth, bestBefore: S.bestBefore, newRecord: payout.newRecord, cheated, fmt: deps.fmt }),
+      tip: bestNextTip({ outcome: final, gold, cheated, upgrade: inf && d ? { id: inf.id, name: inf.name, level: inf.level, max: inf.max, maxed: inf.maxed, per: d.per, canBuy: inf.canBuy } : null, fmt: deps.fmt }),
+    };
+  } catch (e) { payout.chase = { nearMiss: null, tip: null }; }
 
   const result = { ...payout, seed: S.seed, rig: S.rig };
   S.result = result;

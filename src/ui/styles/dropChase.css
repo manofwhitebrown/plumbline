@@ -1,0 +1,7 @@
+/* Chase pills on the Drop screen (HOOK-1 wave 2). Shared tokens only. Sits under the banner and guardian bar, over the bucket, never over the columns. */
+.cz { position: absolute; left: 36px; right: 12px; top: 172px; z-index: 4; display: flex; gap: 6px; min-width: 0; pointer-events: none; }
+.cz-pill { flex: 0 1 auto; min-width: 0; max-width: 100%; padding: 2px 8px; border-radius: var(--radius-pill); border: 1px solid var(--line); background: rgba(13, 18, 32, .78);
+  color: var(--muted); font-size: var(--fs-1); font-weight: 700; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cz-pill[hidden] { display: none; }
+.cz-pill[data-tone="good"] { color: var(--ok); border-color: var(--ok); }
+.cz-pill[data-tone="bad"] { color: var(--ember); border-color: var(--ember); }

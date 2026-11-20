@@ -11,6 +11,7 @@ import { buildView, idleView } from './view.js';
 import { finishRun, keepFraction } from './finish.js';
 import { ensureRecovered, recover } from './recover.js';
 import { computePayout } from './payout.js';
+import { createGhost, chaseView } from './chase.js'; // [HOOK-1] wave 2
 
 const CHECKPOINT_EVERY = 10;  // beats between crash checkpoints
 const SPEED_EFFECT = 0.5;     // a rig that is 2x faster plays 1.5x quicker, so it stays readable
@@ -26,6 +27,7 @@ function viewNow(status) {
   return buildView(S.run, {
     goals: S.goals, bestDepth: S.bestBefore, status, playView: deps.engine && deps.engine.playView,
     riskInfo: deps.engine && deps.engine.riskInfo,
+    chase: (x) => chaseView({ ...x, ghost: S.ghost, goals: S.goals, fmt: deps.fmt }), // [HOOK-1]
   });
 }
 
@@ -65,6 +67,7 @@ function afterEvents(events) {
     else if (e.t === 'RECORD') hasRecord = true;
   }
   addEvents(S.tally, list);
+  try { if (S.ghostRec && !(S.mods && S.mods.cheat)) S.ghostRec.sample(st.depth, st.gold); } catch (e) { /* the ghost is a nice-to-have */ } // [HOOK-1]
   if (hasRecord) S.recordSent = true;
   if (!S.recordSent && S.bestBefore > 0 && !(S.mods && S.mods.cheat) && Number(st.depth) > S.bestBefore) {
     S.recordSent = true;
@@ -163,6 +166,7 @@ export function start(opts = {}) {
     S.run = deps.engine.createRun({ rig, mods, seed: S.seed, safeUntilDepth: Number.isFinite(safe) && safe > 0 ? safe : 0, play: playOpt });
     if (!S.run || !S.run.state) throw new Error('engine gave no run');
     S.bestBefore = records.bestDepth();
+    S.ghostRec = createGhost(); S.ghost = records.getGhost(); // [HOOK-1]
     S.goals = goalsApi.generate({ bestDepth: S.bestBefore, rng: deps.makeRng(S.seed ^ 0x9e3779b9) });
     S.lastBeatMs = beatMsFor(S.run.state.speed);
     S.loop = deps.createLoop({ beatMs: S.lastBeatMs, onBeat, onFrame });

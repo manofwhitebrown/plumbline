@@ -36,6 +36,7 @@ export function normalizeResult(p) {
     goalsDone: goals.filter((g) => g.done).length,
     summaryText: str(sum.text, 140) || (outcome === 'hauled' ? 'You hauled ' + fmt(kept) + ' gold.' : 'The rope snapped.'),
     gem, bestCombo: Math.max(0, Math.floor(num(sum.bestCombo))), parts,
+    chase: { near: str(r.chase && r.chase.nearMiss && r.chase.nearMiss.text, 60), tip: str(r.chase && r.chase.tip && r.chase.tip.text, 90) }, // [HOOK-1] wave 2
   };
 }
 
@@ -70,6 +71,7 @@ export function revealPlan(r, reduceMotion) {
   if (r && (r.gem || r.bestCombo > 1)) steps.push({ id: 'best', at: 2200 });
   if (r && r.parts && r.parts.length) steps.push({ id: 'parts', at: 2300 });
   steps.push({ id: 'summary', at: 2400 });
+  if (r && r.chase && (r.chase.near || r.chase.tip)) steps.push({ id: 'chase', at: 2450 }); // [HOOK-1] wave 2
   steps.push({ id: 'buttons', at: 2500 });
   if (reduceMotion) return steps.map((s) => ({ ...s, at: 0, dur: 0, each: 0 }));
   return steps;

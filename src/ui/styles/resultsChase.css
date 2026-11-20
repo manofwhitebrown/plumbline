@@ -1,0 +1,5 @@
+/* The near-miss line and the tip on Results (HOOK-1 wave 2). */
+.res-chase { display: grid; gap: 4px; text-align: center; }
+.res-near { font-size: var(--fs-3); font-weight: 800; color: var(--gold-soft); overflow-wrap: anywhere; }
+.res-tip { font-size: var(--fs-2); color: var(--muted); overflow-wrap: anywhere; }
+.res-near:empty, .res-tip:empty { display: none; }

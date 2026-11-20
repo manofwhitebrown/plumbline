@@ -36,3 +36,12 @@ COLLECT with kind 'relic' and tier 1 can also come from Gold Tooth (a danger pai
 
 ## Determinism
 One stream, `run.play.rng`, seeded from the run seed. Offers draw once per card; encounters and guardians draw a fixed number when built.
+
+## HOOK-1 wave 2, item 5: chase data (additions only; no new engine events)
+- `view.chase` (from `session.getView()` and in every `run:events` payload view): `null` when there is no run, else
+  `{ toBest: number|null, pastBest: bool, nextIn: number|null, ghost: { gold, diff, tone: 'good'|'bad'|'even' } | null, goals: { done, total }, pills: [{ id: 'best'|'ghost'|'next', text, tone }] }`.
+  `pills` has at most 3 entries and plain words. Old screens ignore the field.
+- The `run:ended` payload and `session.getResult()` gain `chase: { nearMiss: { kind: 'best'|'biome', gap, text } | null, tip: { id, extra, canBuy, text } | null }`.
+- `records.getGhost()` returns the saved ghost (Gold at each 10 m of your deepest drop) as a clean number list. `records.recordDrop({ ..., ghost })` takes an optional list and stores it only on a new best (never for cheated drops). The `run` save slice gains `ghost: []` (older saves load fine).
+- `finish.applyPayout(payout, seed, biomeId, cheated, ghost)` takes an optional fifth argument.
+- New pure module `src/run/chase.js`: `createGhost`, `cleanGhost`, `ghostAt`, `chaseView`, `nearMiss`, `bestNextTip`. Numbers and lines: `src/data/chase.js`.

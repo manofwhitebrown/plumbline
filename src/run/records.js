@@ -1,5 +1,6 @@
 // Slice `run`: best depth, per-biome bests, total drops, longest haul, plus the crash checkpoint.
 import { deps, call } from './deps.js';
+import { cleanGhost } from './chase.js'; // [HOOK-1] wave 2: ghost of the best drop
 
 const SLICE = 'run';
 const VERSION = 1;
@@ -38,6 +39,7 @@ export function clean(old) {
     totalDrops: Math.floor(num(o.totalDrops)), longestHaul: num(o.longestHaul),
     totalKept: num(o.totalKept), checkpoint: cleanCheckpoint(o.checkpoint),
     lastPaidSeed: Number.isFinite(Number(o.lastPaidSeed)) ? Number(o.lastPaidSeed) : null,
+    ghost: cleanGhost(o.ghost), // [HOOK-1] Gold by depth of the best drop
   };
 }
 
@@ -56,6 +58,7 @@ function slice() {
 function dirty() { call(deps.save, 'markDirty', SLICE); }
 
 export function bestDepth() { return slice().bestDepth; }
+export function getGhost() { return cleanGhost(slice().ghost); } // [HOOK-1]
 
 export function get() {
   const s = slice();
@@ -63,13 +66,13 @@ export function get() {
 }
 
 // Record a finished drop. Cheated drops count for nothing.
-export function recordDrop({ outcome, depth, kept, biomeId, cheated } = {}) {
+export function recordDrop({ outcome, depth, kept, biomeId, cheated, ghost } = {}) {
   const s = slice();
   const bestBefore = s.bestDepth;
   if (cheated) return { bestBefore, newRecord: false };
   const d = num(depth);
   const newRecord = d > bestBefore;
-  if (newRecord) s.bestDepth = d;
+  if (newRecord) { s.bestDepth = d; if (Array.isArray(ghost)) s.ghost = cleanGhost(ghost); } // [HOOK-1]
   s.totalDrops += 1;
   s.totalKept += num(kept);
   if (outcome === 'hauled') s.longestHaul = Math.max(s.longestHaul, d);
@@ -94,5 +97,5 @@ export function markPaid(seed) { const s = slice(); s.lastPaidSeed = Number.isFi
 // For tests: forget that the slice was registered.
 export function _forget() { registered = false; }
 
-export const records = { bestDepth, get, recordDrop, saveCheckpoint, peekCheckpoint, clearCheckpoint, lastPaidSeed, markPaid };
+export const records = { bestDepth, getGhost, get, recordDrop, saveCheckpoint, peekCheckpoint, clearCheckpoint, lastPaidSeed, markPaid };
 export default records;

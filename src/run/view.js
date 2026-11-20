@@ -43,8 +43,10 @@ export function buildView(run, ctx = {}) {
 
   let play = null;
   if (run && run.play && typeof ctx.playView === 'function') { try { play = ctx.playView(run); } catch (e) { play = null; } } // [HOOK-1]
+  let chase = null; // [HOOK-1] wave 2: pills for the HUD
+  if (run && typeof ctx.chase === 'function') { try { chase = ctx.chase({ depth, gold: Math.max(0, num(s.gold)), bestDepth: Math.max(0, num(ctx.bestDepth)), nextBiomeIn: Math.ceil(nextBiomeIn(depth)) }); } catch (e) { chase = null; } }
   return {
-    play,
+    play, chase,
     status: ctx.status || s.status || 'idle',
     depth, gold: Math.max(0, num(s.gold)),
     strain, maxStrain, strain01,

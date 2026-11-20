@@ -1,5 +1,6 @@
 // Results: a staged reveal of what the drop earned. Tap to skip. Buttons: Drop again, Home, Tweak rig.
 import '../styles/results.css';
+import '../styles/resultsChase.css'; // [HOOK-1] wave 2
 import { registerScreen } from '../shell.js';
 import { h, svg, createScope } from '../dom.js';
 import { iconHtml } from '../icons.js';
@@ -85,6 +86,7 @@ registerScreen('results', {
     }
 
     add('summary', h('p', { class: 'res-summary sub', text: r.summaryText }));
+    if (has('chase')) add('chase', h('div', { class: 'res-chase', role: 'status' }, h('div', { class: 'res-near', text: r.chase.near }), h('div', { class: 'res-tip', text: r.chase.tip }))); // [HOOK-1] wave 2: near-miss line and one tip
 
     // Buttons stay hidden until the end, so an early tap skips the reveal instead of pressing one.
     const again = button({ label: 'Drop again', kind: 'primary', big: true, onPress: () => { startDrop(); } }, scope);

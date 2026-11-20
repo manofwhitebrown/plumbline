@@ -10,6 +10,7 @@ import { createDropController } from '../logic/dropController.js';
 import { createHud } from './dropHud.js';
 import { createPauseMenu } from './dropPause.js';
 import { createPlayUi } from './dropPlay.js'; // [HOOK-1] boons, skills, banners
+import { createChaseUi } from './dropChase.js'; // [HOOK-1] wave 2: chase pills
 import { beforeDrop } from '../motion/index.js'; // [MOTION-1]
 
 let scope = null;
@@ -63,7 +64,9 @@ registerScreen('drop', {
 
     let playNodes = [];
     try { playNodes = createPlayUi({ bus, session }, scope).nodes; } catch (e) { log.warn('drop: play ui failed'); } // [HOOK-1] optional layer
-    const screen = h('section', { class: 'screen no-pad screen-drop' }, stage, ...hud.nodes, ...playNodes, pause.el);
+    let chaseNodes = [];
+    try { chaseNodes = createChaseUi({ bus }, scope).nodes; } catch (e) { log.warn('drop: chase ui failed'); } // [HOOK-1] wave 2 optional pills
+    const screen = h('section', { class: 'screen no-pad screen-drop' }, stage, ...hud.nodes, ...playNodes, ...chaseNodes, pause.el);
     el.append(screen);
 
     // Keep the canvas sharp and the right size.
