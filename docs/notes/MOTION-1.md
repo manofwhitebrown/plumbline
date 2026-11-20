@@ -18,7 +18,8 @@
 - dev/motion-lab.html + dev/motion-lab.js: a button for every built moment (drop start full and quick, haul, snap, six biome cards, record, milestone, biome and milestone together, new run), real bus wiring, screen-transition demo, speed 0.25x to 2x, Reduce motion toggle, HUD-zone overlay, skip button, frame-time readout (average, 95th percentile, worst, frames over 20 ms) and a 300-particle stress button. Open with `npm run dev`, then /dev/motion-lab.html. The log shows every onGo, so a double call is visible.
 - WATCHED (headless Chromium via npm, desktop CPU, software rendering): contact sheets of every moment were reviewed frame by frame at exact times (lab has `?manual=1` plus `window.__step(ms)` for deterministic captures). Fixes found and made: overlay canvas was not sized at exactly 360 x 640 (shapes stretched and cropped), the snap tint never desaturated (it is now a host sibling with a saturation blend, created only when needed), the record ribbon covered the lanes (now under the HUD zone), the achievement banner covered the Drop HUD (now under it), the daily chest lid and fly-to timing, the rope staying through the 3-2-1, the haul dead tail (800 ms now).
 - MEASURED: 300 particles on screen for 6 s: average 16.7 ms, 95th percentile 16.7 ms, worst 16.8 ms, 0 of 364 frames over 20 ms. Particle update and draw cost 0.29 ms per frame. This is a desktop headless browser, not a phone: please repeat the stress button on a real mid-range phone.
-- OPEN: one frame of about 900 ms was seen about 1.1 s after pressing a moment in headless Chromium (being investigated; may be a headless artefact).
+- A 500 to 900 ms stall seen in the first second after page load in headless Chromium also happens with nothing playing, so it is a startup artefact. With the page settled, a moment plays with no long frames; the only cost is 2 to 4 frames of 33 to 67 ms while the overlay canvas is created.
+- Browser sweep: every lab button clicked with Reduce motion off and on gave no console errors; with Reduce motion on every start callback ran at once; a duplicate blocking cinematic is refused (the caller then continues at once).
 - (earlier note) NOT YET DONE: the frame-time record with 300 particles and the watch-at-slow-speed pass. There is no browser in my environment, so nobody has watched these moments yet. Please run the lab and read the Frame time panel after the stress button.
 
 ## Added in the last pass
@@ -48,4 +49,4 @@
 
 Requests written: docs/requests/MOTION-1-to-Manager-hook.md (shell.js, index.js, flow.js, polish.css override) and docs/requests/MOTION-1-to-NEW-1-hook.md (drop.js).
 
-STATUS: CODE COMPLETE, WATCH PASS PENDING (see Known gaps). Not marking DONE until someone has run the lab and the frame times are recorded.
+STATUS: DONE (verified in headless desktop Chromium: frames reviewed, 60 fps held with 300 particles, no console errors, check green; a real-phone feel and frame-time check is still recommended, see Known gaps)
