@@ -71,3 +71,9 @@ test('wiring: no host (not on the Drop screen) or odd payloads do nothing and ne
   bus.emit('run:events', { events: [{ t: 'BIOME', id: 'x' }] }); bus.emit('run:events', null); bus.emit('run:events', { events: 5 });
   assert.equal(stage.busy, false);
 });
+
+test('wiring: a biome card waits while a boon picker is open, then plays once', () => {
+  const e = env(); const stage = createStage(e); const bus = fakeBus(); wireDirector({ bus, stage, getHost: () => ({}) });
+  bus.emit('run:events', { events: [{ t: 'BIOME', id: 'quartz', depth: 100 }], view: { status: 'choosing' } }); assert.equal(stage.busy, false);
+  bus.emit('run:events', { events: [], view: { status: 'running' } }); assert.equal(stage.director.current.id, 'biome:quartz');
+});

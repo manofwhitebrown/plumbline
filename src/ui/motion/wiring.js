@@ -12,7 +12,7 @@ export function wireDirector(opts) {
   const biomeName = opts.biomeName || ((id) => id);
   const getOverlay = opts.getOverlayHost || (() => null); // a host that sits over every screen (the app root)
   const info = opts.info || {}; // optional lookups: achievement(id), codex(id), targets(), ownedParts(), partIcon(id), dailyState()
-  const state = { seen: new Set(), recordDone: false, streak: null };
+  const state = { seen: new Set(), recordDone: false, streak: null, pendingBiome: null };
   const safe = (f, ...a) => { try { return typeof f === 'function' ? f(...a) : undefined; } catch (e) { return undefined; } };
   const reward = (id, build, priority) => { const host = getOverlay(); return host ? stage.playMoment(host, { id, group: 'reward', priority: priority == null ? PRIORITY.reward : priority, dedupeMs: 400, build }) : false; };
   const offs = [];
@@ -22,9 +22,12 @@ export function wireDirector(opts) {
   on('run:ended', () => { state.seen.clear(); });
 
   on('run:events', (p) => {
-    const evs = p && Array.isArray(p.events) ? p.events : null;
-    if (!evs || !evs.length) return;
+    const evs = p && Array.isArray(p.events) ? p.events.slice() : null;
+    if (!evs) return;
     const host = getHost(); if (!host) return;
+    const choosing = !!(p.view && p.view.status === 'choosing'); // a boon picker is open: do not stack a title card on it
+    if (!choosing && state.pendingBiome) { const id = state.pendingBiome; state.pendingBiome = null; evs.push({ t: 'BIOME', id, depth: 0, late: true }); }
+    if (!evs.length) return;
     // order matters: biome card and record first, the small milestone only if nothing else is playing
     const rank = { BIOME: 0, RECORD: 1, MILESTONE: 2 };
     const list = evs.filter((e) => e && rank[e.t] != null).sort((a, b) => rank[a.t] - rank[b.t]);
@@ -32,6 +35,7 @@ export function wireDirector(opts) {
       if (e.t === 'BIOME') {
         const id = String(e.id || '');
         if (!id || state.seen.has(id)) continue;
+        if (choosing) { state.pendingBiome = id; continue; }
         state.seen.add(id);
         stage.playMoment(host, { id: 'biome:' + id, group: 'hud', priority: PRIORITY.reward, dedupeMs: 0, build: ({ host: hs }) => makeBiomeCard(hs, { id, name: biomeName(id) }) });
       } else if (e.t === 'RECORD') {
