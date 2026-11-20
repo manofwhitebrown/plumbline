@@ -65,9 +65,12 @@ export function createDropController(d) {
         if (typeof off === 'function') offs.push(off);
       }
       if (typeof session.isRunning === 'function' && safe(() => session.isRunning())) {
-        started = true; // come back to a drop that is already going
+        // A drop is already going: either flow.startDrop() just started it (status 'running': show it, do not pause),
+        // or the player left it and came back (status 'paused': show the pause menu).
+        started = true;
         onStarted({ view: viewNow() });
-        api.openPause();
+        const v = safe(() => session.getView && session.getView());
+        if (v && v.status === 'paused') api.openPause();
         return true;
       }
       const res = safe(() => session.start(opts || {}));

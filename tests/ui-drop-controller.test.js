@@ -178,13 +178,26 @@ test('mount and unmount 50 times leaves no listeners', () => {
   assert.equal(bus.live(), 0);
 });
 
-test('re-entering a drop that is already going shows the pause menu', () => {
+test('re-entering a drop that was left (paused) shows the pause menu', () => {
   const t = setup();
   t.c.start({});
   const t2 = setup();
-  // pretend a run is already going
   t2.session.isRunning = () => true;
+  t2.setStatus('paused');
   t2.c.start({});
   assert.equal(t2.calls.includes('start'), false);
   assert.equal(t2.pause.isOpen(), true);
+});
+
+// Found in a real browser: flow.startDrop() starts the session, then the Drop screen calls start(). That must
+// show the running drop and NOT open the pause menu (it paused every drop about 1.5 s in).
+test('a drop that flow.startDrop() just started is shown, not paused', () => {
+  const t = setup();
+  t.session.isRunning = () => true;
+  t.setStatus('running');
+  assert.equal(t.c.start({}), true);
+  assert.equal(t.calls.includes('start'), false, 'must not start a second run');
+  assert.equal(t.calls.includes('pause'), false);
+  assert.equal(t.pause.isOpen(), false);
+  assert.equal(t.c.haul(), true, 'Haul works right away');
 });
