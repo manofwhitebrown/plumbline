@@ -187,3 +187,8 @@ h1, h2, h3, .res-title, .rw-title, .pause-title, .cheat-title, .btn.big {
 [data-reduce="1"] .ui-bd.on, [data-reduce="1"] .bar > i::after, [data-reduce="1"] .partcard.sel::after, [data-reduce="1"] .pill.ui-bump, [data-reduce="1"] .btn.pulse { animation: none; }
 [data-reduce="1"] .tabbar button::after, [data-reduce="1"] .tabbar button .icon, [data-reduce="1"] .ui-bd { transition: none; }
 @media (prefers-reduced-motion: reduce) { .ui-bd.on, .bar > i::after, .partcard.sel::after, .pill.ui-bump, .btn.pulse { animation: none; } .ui-bd, .tabbar button::after { transition: none; } }
+
+/* ---------- 8. Desktop: theme the page beside the phone column ---------- */
+html, body { background: radial-gradient(ellipse at 50% 0%, #1b2140 0%, #0a0e1c 55%, #05070d 100%) fixed; }
+@media (prefers-contrast: more) { html, body { background: #05070d; } }
+[data-contrast="1"] body { background: #05070d; }

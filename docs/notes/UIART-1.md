@@ -24,7 +24,7 @@
 ## Known gaps
 - Empty/locked/error illustrations exist (icons illo-empty/illo-locked/illo-error) but screen JS must call iconHtml() for them; theme.css has the .ui-state class ready.
 - Home backdrop is behind the game's own SVG scene, so only the scene shows.
-- On desktop the area beside the phone column is the page background (not themed).
+- Desktop: the page beside the phone column now has a themed dusk gradient (section 8 of theme.css).
 - Pre-existing at 320-360 px with big wallet numbers: the Home gear button overlaps the core pill; "Winch Hand" and "Day 1 reward is ready" truncate in Large text (same without the theme).
 - Screenshot harness used a throwaway headless Chromium outside the repo; tools/ui-preview.js renders icons and backdrops only (`node tools/ui-preview.js icons|backdrops [outDir]`).
 
