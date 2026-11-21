@@ -73,8 +73,8 @@ export const wiring = wireDirector({
   getOverlayHost: appEl,
   biomeName: (id) => { try { const b = dep('biomes'); const d = b && b.byId ? b.byId(id) : null; return (d && d.name) || id; } catch (e) { return id; } },
   info: {
-    achievement: (id) => nameOf(() => api.achievements.list(), id),
-    codex: (id) => nameOf(() => api.codex.list(), id),
+    achievement: (id) => nameOf(() => api.meta.achievements.list(), id),
+    codex: (id) => nameOf(() => api.meta.codex.list(), id),
     targets: () => ({ gold: centerOf('[data-tut="gold"], .pill.gold'), shards: centerOf('[data-tut="shards"], .pill.shards'), coreDust: centerOf('[data-tut="coredust"], .pill.coredust') }),
     bannerTop: () => (shell.currentId() === 'drop' ? 96 : 12), // never cover the Drop HUD
     ownedParts: () => api.ownedParts(),
