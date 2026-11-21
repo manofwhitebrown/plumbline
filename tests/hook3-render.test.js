@@ -1,4 +1,6 @@
 import test from 'node:test';
+import v8 from 'node:v8';
+import vm from 'node:vm';
 const REAL_RANDOM = Math.random;
 import assert from 'node:assert/strict';
 import { createCanvas } from '@napi-rs/canvas';
@@ -11,6 +13,8 @@ const hook = await import('../src/render/cosmeticsHook.js');
 const { cosmeticById } = await import('../src/data/cosmetics.js');
 const { computeLayout, createLayout } = await import('../src/render/layout.js');
 
+v8.setFlagsFromString('--expose-gc');
+const gc = vm.runInNewContext('gc');
 const look = (id) => cosmeticById(id).look;
 const EMPTY_RIG = { cols: 4, rows: 3, cells: [[null, null, null, null], [null, null, null, null], [null, null, null, null]] };
 
@@ -79,11 +83,19 @@ test('hook3 render: no per-frame allocation (gradients are built once; heap stay
   one(); const first = grads;
   assert.ok(first >= 1 && first <= 2, 'built once: ' + first);
   for (let i = 0; i < 200; i++) one(); // warm up
-  const before = process.memoryUsage().heapUsed;
-  for (let i = 0; i < 20000; i++) one();
-  const grew = process.memoryUsage().heapUsed - before;
+  // [FIX-1] Flaky before: heapUsed was read with no garbage collection, so short-lived garbage from 20000 frames counted
+  // as growth whenever a big collection had not run yet (6.9 MB against a 6 MB limit on a slow or busy machine).
+  // Now: collect first, measure only what is still alive afterwards, and take the best of 3 rounds. A real leak
+  // (something kept per frame) grows every round; the gradient counter below still catches a gradient built per frame.
+  const settle = () => { gc(); gc(); return process.memoryUsage().heapUsed; };
+  let grew = Infinity;
+  for (let k = 0; k < 3; k++) {
+    const before = settle();
+    for (let i = 0; i < 20000; i++) one();
+    grew = Math.min(grew, settle() - before);
+  }
   assert.equal(grads, first, 'no new gradients per frame');
-  assert.ok(grew < 6 * 1024 * 1024, 'heap grew by ' + grew + ' bytes over 20000 frames');
+  assert.ok(grew < 2 * 1024 * 1024, 'heap kept ' + grew + ' bytes after 20000 frames (best of 3)');
 });
 
 test('hook3 render: Home scene draws with Looks and keeps its memory the same', () => {
