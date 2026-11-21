@@ -57,7 +57,9 @@ test('a haul pays exactly once: gold and shards match run:ended', () => {
 });
 
 test('a snap pays exactly once', () => {
-  const t = setup();
+  // A rope that snaps at once, so the test does not depend on tuning or luck. [FINISH-3]
+  const weak = { ...meta, getMods: () => ({ ...meta.getMods(), maxStrain: 10, strainMult: 100 }) };
+  const t = setup({ meta: weak });
   const g0 = meta.gold();
   session.start();
   loop.tick(2000);
