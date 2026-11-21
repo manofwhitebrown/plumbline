@@ -23,7 +23,7 @@ const BASE = [
     tierWeights: [50, 35, 15, 0, 0, 0],
     mix: { empty: 25, gem: 38, ore: 20, hazard: 17 },
     hazardWeights: { rock: 3, bat: 2 },
-    hazardStrain: { rock: 2, bat: 3 },
+    hazardStrain: { rock: 2, bat: 2 },
     relicChance: 0,
     ambience: 'quartz_cold',
     palette: { top: '#1c2a4a', bottom: '#0b1020', accent: '#7fa8ff' },

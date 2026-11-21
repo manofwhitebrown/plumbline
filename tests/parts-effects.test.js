@@ -123,7 +123,7 @@ test('spare rope adds 20 max strain, only once', () => {
 
 test('drill and anchor change speed and strain', () => {
   const d = beatWith(run1([['drill']]), []).fx;
-  assert.equal(d.speedAdd, 0.7); assert.ok(d.strainDelta > 0); // [ECONOMY-2] Drill 0.7 speed, 0.8 strain (was 1 and 0.5)
+  assert.equal(d.speedAdd, 1); assert.ok(d.strainDelta > 0);
   const a = beatWith(run1([['anchor']]), []).fx;
   assert.equal(a.speedAdd, -0.3); assert.ok(a.strainDelta < 0);
 });
@@ -177,4 +177,10 @@ test('fuse blows up neighbour hazards for gold, and chains to the next fuse', ()
 test('hazard gold twist pays for blocked hazards', () => {
   const out = beatWith(run1([['plate']], { hazardGold: 4 }), [rock()]);
   assert.equal(out.fx.bonusValue, 4);
+});
+
+test('magnet also grabs side-column gems at half pay, not its own column (second wide collector)', () => {
+  const out = beatWith(run1([[null, 'magnet', null, null]]), [gem(1, 4), gem(1, 4), gem(1, 4), null]);
+  assert.equal(out.collected.length, 2); // left and right of the Magnet
+  assert.equal(out.gold, 2 + 2);
 });

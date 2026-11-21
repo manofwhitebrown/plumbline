@@ -20,8 +20,8 @@ export const PART_DATA = {
   },
   magnet: {
     name: 'Magnet', family: 'collector', tags: ['grab', 'ore', 'wide'],
-    desc: 'Grabs ore in its column and both side columns.',
-    cost: 22, unlock: { type: 'gold', value: 10 }, tune: {}, // 22: affordable after the tutorial drop (about 23 Gold at 22 s); Polisher (70) stays under 3.2x of it
+    desc: 'Grabs ore in 3 columns, and side-column gems at half pay.',
+    cost: 22, unlock: { type: 'gold', value: 10 }, tune: { sidePay: 0.5 }, // 22: affordable after the tutorial drop (about 23 Gold at 22 s); Polisher (70) stays under 3.2x of it
   },
   net: {
     name: 'Net', family: 'collector', tags: ['grab', 'gem', 'wide'],
@@ -109,7 +109,7 @@ export const PART_DATA = {
   drill: {
     name: 'Drill', family: 'engine', tags: ['fast', 'strain', 'greedy'],
     desc: 'Dive faster (+1 m a step) but adds Strain.',
-    cost: 7200, unlock: { type: 'depth', value: 260 }, tune: { speed: 0.7, strain: 0.8 },
+    cost: 7200, unlock: { type: 'depth', value: 260 }, tune: { speed: 1, strain: 0.5 },
   },
   metronome: {
     name: 'Metronome', family: 'engine', tags: ['timing', 'double'],

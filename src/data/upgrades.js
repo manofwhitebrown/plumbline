@@ -34,7 +34,7 @@ export const LIMITS = {
 
 export const COLLAPSE = {
   minBestDepth: 500,
-  minGold: 5e7,
+  minGold: 1e8,
   depthDivisor: 1000,
-  goldDivisor: 2.5e7,
+  goldDivisor: 5e7,
 };

@@ -96,7 +96,7 @@ test('collapse: needs depth and gold, resets the right things, keeps Core Dust',
   assert.equal(meta.collapse.available(), false);
   assert.equal(meta.collapse.do().ok, false);
   s().bestDepth = 500;
-  s().goldThisCollapse = 5e7;
+  s().goldThisCollapse = 2e8;
   s().gold = 12345;
   s().parts = { hook: 1, magnet: 1 };
   s().upgrades = { rope: 2, deepstart: 1 };

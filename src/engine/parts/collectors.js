@@ -19,7 +19,10 @@ export const collectors = [
   mk('magnet', {
     reach: [-1, 0, 1],
     onItem(ctx, item) {
-      return item.kind === 'ore' ? grab(ctx, item) : item;
+      if (item.kind === 'ore') return grab(ctx, item);
+      // [ECONOMY-2] A second wide collector so the Net is not a must-have: side-column gems at half pay.
+      if (item.kind === 'gem' && ctx.dLane !== 0) { item.value *= T('magnet').sidePay; return grab(ctx, item); }
+      return item;
     },
   }),
   mk('net', {

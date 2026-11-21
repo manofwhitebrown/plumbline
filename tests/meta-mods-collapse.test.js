@@ -96,7 +96,7 @@ test('auto-haul needs the upgrade, then keeps a safe percent', () => {
   assert.equal(meta.upgrades.setAutoHaul(0).pct, 0);
 });
 
-function readyForCollapse(gold = 8e7, depth = 600) {
+function readyForCollapse(gold = 2e8, depth = 600) {
   const st = s();
   st.bestDepth = depth; st.goldThisCollapse = gold; st.gold = 777;
   st.crew = { winch: 30, smithy: 12 }; st.managers = { winch: 1 };
@@ -105,23 +105,23 @@ function readyForCollapse(gold = 8e7, depth = 600) {
   st.shards = 42;
 }
 
-test('Collapse is locked until 500 m and 50M gold', () => {
+test('Collapse is locked until 500 m and 100M gold', () => {
   fresh();
-  readyForCollapse(49999999, 600);
+  readyForCollapse(99999999, 600);
   assert.equal(meta.collapse.available(), false);
   assert.equal(meta.collapse.preview().coreDustGain, 0);
   assert.equal(meta.collapse.do().ok, false);
   assert.equal(s().gold, 777, 'nothing changed');
   readyForCollapse(2e8, 499);
   assert.equal(meta.collapse.available(), false);
-  readyForCollapse(5e7, 500);
+  readyForCollapse(1e8, 500);
   assert.equal(meta.collapse.available(), true);
-  assert.equal(meta.collapse.preview().coreDustGain, 2); // sqrt(5e7 / 2.5e7) * 1.5 = 2.1
+  assert.equal(meta.collapse.preview().coreDustGain, 2); // sqrt(1e8 / 5e7) * 1.5 = 2.1
 });
 
 test('Collapse preview equals the real gain', () => {
   fresh();
-  readyForCollapse(1e8, 600);
+  readyForCollapse(2e8, 600);
   const preview = meta.collapse.preview();
   assert.equal(preview.coreDustGain, Math.floor(Math.sqrt(4) * 1.6));
   const before = meta.coreDust();

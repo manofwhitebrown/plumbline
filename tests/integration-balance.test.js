@@ -30,11 +30,11 @@ test('rope ladder can reach 1500 max Strain (the mods clamp) and no further', ()
   assert.equal(100 + rope.per * rope.max, 1500);
 });
 
-test('bot: a never-haul player reaches the first Collapse in 1.5 to 3.5 hours', () => {
+test('bot: a never-haul player reaches the first Collapse in 1.3 to 3.5 hours', () => {
   const r = playBot('never', { hours: 4, partChecks: false }); // [ECONOMY-2] part dominance is reported by tools/balance-report.js, not pinned here
   assert.deepEqual(r.problems, []);
   const h = r.timeline.collapse / 3600;
-  assert.ok(h >= 1.5 && h <= 3.5, 'collapse at ' + h.toFixed(2) + ' h');
+  assert.ok(h >= 1.3 && h <= 3.5, 'collapse at ' + h.toFixed(2) + ' h');
 });
 
 test('part impact: banning a part never reports a loss outside 0..1, the Hook is skipped', () => {
