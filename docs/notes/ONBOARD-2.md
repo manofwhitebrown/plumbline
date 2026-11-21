@@ -22,4 +22,9 @@ STATUS: NOT DONE (work in progress)
 - FIXED: Results note gave up after 40 s on a slow screen (now waits up to 60 s / 120 s). Rig step: the new Part was below the visible area and the ring landed on the Crew tab; the guide now scrolls it into view once. Tests added in tests/onboard-place.test.js.
 - NOT SEEN: second Drop, Crew and Workshop closing notes, 320x568, 430x932, Large text, Reduce motion.
 - OPEN: a stray tall ring beside the Magnet on the Rig step; PLAY.md recheck against Contracts, Daily Dive, Mastery, Relic Wall, Looks.
-STATUS: NOT DONE (second Drop to end not seen on screen; sizes, Large text and PLAY.md recheck still to do)
+
+## Pass 3
+- DONE: PLAY.md now covers Contracts, Daily Dive, Mastery, Relic Wall, Looks (594 words, test passes).
+- SEEN: Home at 320x568 and 430x932 with Large text: no sideways overflow, hint line wraps to two lines and fits. The Home "i" tip was not opened this pass (ONBOARD-1 saw tips open at all sizes).
+- NOT SEEN: second Drop, Crew and Workshop closing notes; stray ring beside the Magnet on the Rig step.
+STATUS: NOT DONE (second Drop to end not seen on screen)
