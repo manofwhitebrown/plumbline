@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const css = (f) => readFileSync(new URL('../src/ui/styles/' + f, import.meta.url), 'utf8');
+const css = (f) => readFileSync(new URL('../src/ui/styles/' + f, import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 const rule = (text, selector) => {
   const out = [];
   const re = /([^{}]+)\{([^{}]*)\}/g;
