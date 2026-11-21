@@ -18,6 +18,7 @@ let PLAY;                       // [ECONOMY-2] The real game has the play layer 
 const DROP_PAUSE_S = 3;          // time the player spends on the results and rig screens
 const STUCK_S = 20 * 60;         // 20 simulated minutes without any way forward
 const DEPTH_MARKS = [100, 250, 500, 1000];
+const SAVE_S = 20 * 60;          // [ECONOMY-3] save for rope when it is at most 20 minutes of Crew income away
 
 // Counts every boon card offered and every boon picked, so pick rates can be checked.
 export function tallyBoons(stats, events) {
@@ -27,6 +28,15 @@ export function tallyBoons(stats, events) {
   }
 }
 export const newBoonStats = () => ({ offers: 0, picks: 0, offered: {}, picked: {} });
+
+// [ECONOMY-3] Gold kept per beat of a rig over a few seeds (the bot's own haul style). Used to choose between two rigs.
+function goldPerBeat(rig, mods, policy, seeds = 16) {
+  let g = 0, b = 0;
+  for (let i = 0; i < seeds; i++) {
+    try { const r = simulateRun({ rig, mods: { ...mods, cheat: null }, seed: 9000 + i, policy, play: PLAY }); g += r.kept; b += r.beats; } catch (e) { /* counted as nothing */ }
+  }
+  return b > 0 ? g / b : 0;
+}
 
 function bad(x) { return typeof x === 'number' && (!Number.isFinite(x) || x < 0); }
 
@@ -46,7 +56,7 @@ export function playBot(style = '70', opts = {}) {
   setTimeSource(() => t, 0);
   meta.init();
 
-  const tl = { firstPart: null, depth: {}, collapse: null, goldPerHour: null };
+  const tl = { firstPart: null, depth: {}, collapse: null, post1000: null, goldPerHour: null }; // [ECONOMY-3] post1000 = seconds after the Collapse until a single drop reaches 1000 m (only with opts.collapse)
   const rigsBuilt = [];           // part ids of each rig the bot built
   const boughtPartAt = {};
   let simS = 0, drops = 0, lastEarnS = 0, lastGoldEarned = 0, rig = null, rigKey = '';
@@ -62,12 +72,22 @@ export function playBot(style = '70', opts = {}) {
     for (const k of ['maxStrain', 'keepOnSnap', 'goldMult', 'strainMult', 'luck', 'startDepth']) if (!Number.isFinite(m[k]) || m[k] < 0) fail(`bad mod: ${k} = ${m[k]}`);
   };
 
+  const policy = frac === null || frac === undefined ? undefined
+    : ({ run }) => (run.state.strain >= frac * run.state.maxStrain ? 'haul' : 'continue');
+
   const rebuild = () => {
     const mods = meta.getMods(), owned = meta.ownedParts();
     const key = JSON.stringify([mods.cols, mods.rows, owned]);
     if (key === rigKey && rig) return;
     rigKey = key;
     rig = suggest.bestRig(mods, owned, { maxEvals: 60, budgetMs: 5000 });
+    // [ECONOMY-3] The rig finder may stack duplicate copies (Extra Copy) that make Strain pile up and drops shallow.
+    // A player would try both and keep the one that pays more per beat, so the bot does too.
+    const single = {}; for (const id of Object.keys(owned)) single[id] = 1;
+    if (Object.keys(owned).some((id) => owned[id] > 1)) {
+      const alt = suggest.bestRig(mods, single, { maxEvals: 60, budgetMs: 5000 });
+      if (goldPerBeat(alt, mods, policy) > goldPerBeat(rig, mods, policy)) rig = alt;
+    }
     rigsBuilt.push(rig.cells.flat().filter(Boolean));
   };
 
@@ -79,10 +99,15 @@ export function playBot(style = '70', opts = {}) {
       const opts2 = [];
       for (const p of meta.workshop.list()) if (p.state === 'buyable') opts2.push({ g: 0, cost: p.cost, run: () => meta.buyPart(p.id), what: 'part ' + p.id, part: p.id });
       for (const u of meta.upgrades.list()) if (u.canBuy) {
-        const own = u.currency === 'gold' ? u.cost <= gold : u.currency === 'shards' ? u.cost <= shards : false;
+        const own = u.currency === 'gold' ? u.cost <= gold : u.currency === 'shards' ? u.cost <= shards : u.currency === 'core' ? u.cost <= meta.coreDust() : false; // [ECONOMY-3] Core Dust upgrades after a Collapse
         if (own) opts2.push({ g: u.id === 'tools' ? 2 : 1, cost: u.cost, run: () => meta.upgrades.buy(u.id), what: 'upgrade ' + u.id });
       }
-      for (const c of meta.crew.list()) if (c.canBuy && c.cost <= gold) opts2.push({ g: 2, cost: c.cost, run: () => meta.crew.buy(c.id, 1), what: 'crew ' + c.id });
+      // [ECONOMY-3] A real player saves for the next rope level instead of spending every coin on Crew.
+      // Crew is skipped while the next rope level is out of reach but less than SAVE_S seconds of Crew income away.
+      const rope = meta.upgrades.list().find((u) => u.id === 'rope');
+      const gps = meta.crew.perSecond();
+      const saving = !!(rope && !rope.maxed && !rope.reason && rope.cost > gold && (rope.cost - gold) / Math.max(gps, 0.001) < SAVE_S);
+      for (const c of meta.crew.list()) if (!saving && c.canBuy && c.cost <= gold) opts2.push({ g: 2, cost: c.cost, run: () => meta.crew.buy(c.id, 1), what: 'crew ' + c.id });
       opts2.sort((a, b) => a.g - b.g || a.cost - b.cost);
       const pick = opts2[0];
       if (!pick) break;
@@ -95,8 +120,6 @@ export function playBot(style = '70', opts = {}) {
     return bought;
   };
 
-  const policy = frac === null || frac === undefined ? undefined
-    : ({ run }) => (run.state.strain >= frac * run.state.maxStrain ? 'haul' : 'continue');
 
   const endAt = hours * 3600;
   let seed = Number.isFinite(opts.seed) ? Math.floor(opts.seed) : 1000, snapStreak = 0; // [ECONOMY-2] --seed=N repeats the same player with other luck
@@ -123,8 +146,14 @@ export function playBot(style = '70', opts = {}) {
 
     if (opts.onDrop) opts.onDrop({ simS, drops, res, mods, rig, gold: meta.gold(), gps: meta.crew.perSecond() });
     // Collapse is only noted, not taken: the run goes on so we can see if 1000 m is reachable.
-    if (tl.collapse === null && meta.collapse.available()) tl.collapse = simS;
-    if (tl.collapse !== null && tl.depth[1000] !== undefined) break;
+    if (tl.collapse === null && meta.collapse.available()) {
+      tl.collapse = simS;
+      if (opts.collapse) { const c = meta.collapse.do(); if (c && c.ok) { tl.coreDustGain = c.coreDustGain; rigKey = ''; rig = null; } }
+    }
+    if (opts.collapse) {
+      if (tl.collapse !== null && tl.post1000 === null && res.depth >= 1000 && simS > tl.collapse) tl.post1000 = simS - tl.collapse;
+      if (tl.post1000 !== null) break;
+    } else if (tl.collapse !== null && tl.depth[1000] !== undefined) break;
 
     // Stuck check: gold must grow, or something must be buyable, within 20 minutes.
     const earned = meta.stats.get().goldEarned;
@@ -163,7 +192,7 @@ export function playBot(style = '70', opts = {}) {
     }
   }
 
-  return { style, hours: simS / 3600, drops, timeline: tl, problems, owned, usage, impacts, rigs: rigsBuilt.length, boonStats, goldEarned: earnedTotal, bestDepth: meta.stats.get().bestDepth };
+  return { style, tookCollapse: !!opts.collapse, hours: simS / 3600, drops, timeline: tl, problems, owned, usage, impacts, rigs: rigsBuilt.length, boonStats, goldEarned: earnedTotal, bestDepth: meta.stats.get().bestDepth };
 }
 
 
@@ -213,6 +242,7 @@ export function printResult(r) {
   console.log('  first part bought : ' + fmtT(tl.firstPart));
   for (const d of DEPTH_MARKS) console.log(`  reached ${String(d).padStart(4)} m    : ` + fmtT(tl.depth[d] === undefined ? null : tl.depth[d]));
   console.log('  first Collapse    : ' + fmtT(tl.collapse));
+  if (tl.post1000 !== undefined && tl.post1000 !== null || r.tookCollapse) console.log('  1000 m after it   : ' + fmtT(tl.post1000));
   console.log('  gold per hour     : ' + Math.round(tl.goldPerHour));
   console.log('  parts owned       : ' + Object.keys(r.owned).join(', '));
   const imp = Object.entries(r.impacts || {}).sort((a, b) => b[1] - a[1]);
@@ -239,7 +269,7 @@ if (isMain) {
   let failed = 0;
   for (const s of styles) {
     if (!(s in STYLES)) { console.log('FAIL unknown style ' + s); failed++; continue; }
-    const r = playBot(s, { hours, play: playOn, seed: Number(arg('seed', NaN)), partChecks: arg('parts', 'on') !== 'off' });
+    const r = playBot(s, { hours, play: playOn, seed: Number(arg('seed', NaN)), partChecks: arg('parts', 'on') !== 'off', collapse: arg('collapse', 'off') === 'on' });
     printResult(r);
     if (r.problems.length) failed++;
   }
