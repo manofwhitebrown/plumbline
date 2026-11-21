@@ -104,7 +104,6 @@ export function begin() {
   try {
     const stt = state();
     if (!stt.canPlay) return { ok: false, error: stt.why };
-    if (s().cheated) return { ok: false, error: 'Not while cheats are on.' };
     const d = st();
     d.restoreTwist = !!s().daily.twistOn;
     setTwistSafe(true);

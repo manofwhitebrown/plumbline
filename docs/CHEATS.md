@@ -65,6 +65,10 @@ These go into the Drop through `mods.cheat.play`. They mark the save as **Cheats
 - **Show every relic on the Wall**: all 36 appear on the Relic Wall so you can look at them. They do not count for the Wall bonus or for Looks.
 - **Unlock every Look**: you can wear any bucket, rope or well Look. Looks are only colours, so nothing else changes.
 
+- **Finish one Contract**: then claim it in Rewards.
+- **Add 1 Mastery to every owned Part** and **Reset all Mastery**.
+- **Reset the Daily Dive (new try)**: gives the free try back. A cheated save can start the Dive, but it earns no chest and no streak.
+
 ## Tools
 
 - **Show FPS and particle count**: sends `cheats:debug`.

@@ -138,7 +138,12 @@ test('cheats: reset gives the try back; cheated Dives do not count', () => {
   assert.equal(D.state().canPlay, true);
   assert.equal(D.state().chest.state, 'none');
   s().cheated = true;
-  assert.equal(D.begin().ok, false);
+  const b = D.begin();            // a cheated save may still try the Dive (to test it)...
+  assert.equal(b.ok, true);
+  bus.emit('run:started', { seed: b.seed });
+  bus.emit('run:ended', { seed: b.seed, depth: 900, outcome: 'hauled' });
+  assert.equal(D.state().chest.state, 'none'); // ...but it earns nothing
+  assert.equal(D.state().best, 0);
 });
 
 test('clock moved back never gives a second try', () => {

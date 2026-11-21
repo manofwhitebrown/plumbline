@@ -9,9 +9,10 @@ import { createGate } from './gate.js';
 import { ALL_MONEY_GROUPS } from './catalog-money.js';
 import { RUN, PLAY, TIME, PROGRESS } from './catalog-game.js';
 import { TOOLS } from './catalog-tools.js';
+import { HOOK2 } from './catalog-hook2.js'; // [HOOK-2]
 import { LOOKS_CHEATS } from './catalog-looks.js'; // [HOOK-3]
 
-const CATALOG = [...ALL_MONEY_GROUPS, ...RUN, ...PLAY, ...TIME, ...PROGRESS, ...LOOKS_CHEATS, ...TOOLS];
+const CATALOG = [...ALL_MONEY_GROUPS, ...RUN, ...PLAY, ...TIME, ...PROGRESS, ...HOOK2, ...LOOKS_CHEATS, ...TOOLS];
 const GROUP_ORDER = ['Money', 'Parts and Rig', 'Upgrades', 'Run helpers', 'Time', 'Progress', 'Tools'];
 const CONFIRM_WINDOW_MS = 8000;
 

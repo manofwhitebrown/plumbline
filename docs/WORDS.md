@@ -47,3 +47,9 @@ Words: Relic Wall (also just "the Wall"), Look, Looks, Wear, Worn, Locked, New.
 - Hints for hidden relics: "Hides in the Clay Biome" (and the other five Biomes).
 - Ways to get a Look: "Find 6 relics", "Earn an achievement", "Buy with Shards", "Free".
 - Counts read "12 of 36 found".
+
+## Contracts, Mastery, Daily Dive (HOOK-2)
+- **Contracts**: three small jobs at a time, for example "Collect 20 gems in one Drop". Finish one, claim it, and a new one appears. Fresh ones every day.
+- **Mastery**: a Part gets better the more you use it. Five levels, written "Mastery 3 of 5". A small row of 5 diamonds shows it. Never say "XP", "tier" or "proficiency".
+- **Daily Dive**: one special Drop each day, the same for everyone. One free try, your best Depth for the day, a streak in days, and a chest at the end. "Today's twist" is the rule that changes that day.
+- Chest names: Small chest, Good chest, Rich chest.
