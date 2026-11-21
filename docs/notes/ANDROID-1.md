@@ -7,3 +7,5 @@
 ## Next
 - Android project steps (Back button, portrait, app name and version, status bar) in tools/android-assets.sh.
 - Docs: "Install on Android" in docs/PLAY.md, signed release steps.
+- tools/android-native.sh (called from android-assets.sh, never fatal): portrait lock, version name/code from package.json, dark status and gesture bars, Back button hook in MainActivity. Checked on a scratch project made with `npx cap add android` (ran twice: safe). Not compiled here (no Android SDK), so android.yml retries with the stock MainActivity if it fails to compile.
+- Status bar no longer overlaps the game (overlaysWebView false) so nothing hides under the clock or notch.

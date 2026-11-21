@@ -2,9 +2,10 @@
 # Puts the Plumbline icon and a dark launch screen into the generated Android project.
 # Run after "npx cap add android". Needs ImageMagick (present on GitHub runners).
 # Cosmetic only: if anything here fails, the build must still go on.
-command -v convert >/dev/null 2>&1 && command -v identify >/dev/null 2>&1 || { echo "ImageMagick missing: keeping default Android icons"; exit 0; }
 RES=android/app/src/main/res
 [ -d "$RES" ] || { echo "no android project yet"; exit 0; }
+sh "$(dirname "$0")/android-native.sh" || echo "native steps had a problem (ignored)"
+command -v convert >/dev/null 2>&1 && command -v identify >/dev/null 2>&1 || { echo "ImageMagick missing: keeping default Android icons"; exit 0; }
 ICON=public/icon-512.png
 for pair in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
   d=${pair%%:*}; px=${pair##*:}
