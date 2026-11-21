@@ -61,7 +61,7 @@ function buildCollapse() {
 
   const body = h('div', { class: 'stack collapse' });
   if (available) {
-    body.append(
+    body.append(...[
       h('p', { class: 'sub', text: WHAT }),
       h('div', { class: 'card stack center collapse-gain' },
         h('p', { class: 'num big-core', text: '+' + fmt(v.gain) + ' Core Dust' }),
@@ -69,7 +69,8 @@ function buildCollapse() {
         v.bonusText ? h('p', { class: 'sub', text: v.bonusText }) : null),
       h('div', { class: 'row collapse-cols' }, list('Resets', v.resets, 'resets'), list('Stays', v.keeps, 'keeps')),
       v.crewText ? h('p', { class: 'sub', text: v.crewText }) : null,
-      v.startText ? h('p', { class: 'sub', text: v.startText }) : null);
+      v.startText ? h('p', { class: 'sub', text: v.startText }) : null,
+    ].filter(Boolean)); // [QA-2] append(null) wrote the word "null" on screen
   } else {
     body.append(
       h('p', { class: 'title', text: 'Collapse is not ready yet.' }),
