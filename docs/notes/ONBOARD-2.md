@@ -16,3 +16,10 @@ Job: play the tutorial on a brand-new save in a real browser, fix every step, mo
 
 - DONE (tests pass, NOT yet seen in browser): src/tutorial: note on the free side per step, compact one-row box, hides while a pop-up shows, waits for buttons to hold still, Results steps merged into one, new way-outs (Workshop with no Gold, dropping again). tests/onboard-place.test.js.
 STATUS: NOT DONE (work in progress)
+
+## Real-browser pass 2 (headless Chromium, 360x640, 21 Nov 2026)
+- SEEN on screen: Tap Drop, Gems rise, Rope tighter, Tap Haul Up, That is your Gold (Results), Open the Workshop, Buy your first part, Now open the Rig, Put your new part on the bucket.
+- FIXED: Results note gave up after 40 s on a slow screen (now waits up to 60 s / 120 s). Rig step: the new Part was below the visible area and the ring landed on the Crew tab; the guide now scrolls it into view once. Tests added in tests/onboard-place.test.js.
+- NOT SEEN: second Drop, Crew and Workshop closing notes, 320x568, 430x932, Large text, Reduce motion.
+- OPEN: a stray tall ring beside the Magnet on the Rig step; PLAY.md recheck against Contracts, Daily Dive, Mastery, Relic Wall, Looks.
+STATUS: NOT DONE (second Drop to end not seen on screen; sizes, Large text and PLAY.md recheck still to do)
