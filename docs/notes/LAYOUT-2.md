@@ -28,3 +28,4 @@ Not mine, seen again: the achievement pop-up covers the top of every screen (QA-
 Tap-size and 8 px gap checks on my screens were not re-run beyond the existing static tests.
 
 STATUS: DONE for the four problems (2, 5, 6, 7). npm run check: see the last line below.
+Last full npm run check: all 1020 tests pass, build and secret scan green (commit 6a0b412).
