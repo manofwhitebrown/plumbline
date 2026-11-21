@@ -16,3 +16,5 @@ Asked by the owner to verify waves 1 and 2 and finish DEPTH-1 and HOOK-1 wave 2.
 ## Found
 - Biome title card stacked on the boon picker at 100 m: fixed (card waits until the picker closes).
 - Goal pills at the top are truncated ("Reach a ...", "Collect 18 ge...") and the "m to the next Biome" chase pill overlaps the rig frame corner. Not fixed yet (owners: NEW-1 and HOOK-1 wave 2).
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.

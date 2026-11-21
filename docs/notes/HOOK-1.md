@@ -22,3 +22,5 @@
 - PUSHED: picker seated low on screens under 760 px tall, so the shell's Achievement banner (top layer) no longer covers the title and timer. Seen in a real browser at 320x568 plain. Still to look at: 360x640, 430x932, 1440x900, Large text, Reduce motion, skill buttons.
 - PUSHED: play cheats (all boons, early first pick, free skills, force a surprise, force a guardian) in src/cheats/catalog-game.js + src/engine/play/cheats.js, docs/CHEATS.md; fixed a bug where a forced guardian was lost on step 0-1. Tests: tests/hook-cheats.test.js. NEXT: first-hour script, picker sizes, wave 2 check.
 - PUSHED: first-hour script (src/data/play.js FIRST_HOUR, src/engine/play/firstHour.js, wired in session.start with mercy), docs/design/FIRST_HOUR.md, tests/hook-firsthour.test.js. NEXT: picker sizes with Large text + Reduce motion, wave 2 check.
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.

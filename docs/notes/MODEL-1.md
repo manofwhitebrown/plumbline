@@ -21,3 +21,5 @@ Keys: gem:1..6, ore, chest, hook, hazard:rock, hazard:void, bucket, bucket:trim.
 
 ## Notes
 Deterministic: same seed gives the same pixels (tested). The prism and chest/hook swing instead of spinning. Hazard void orb is violet-rimmed; the old red warning glow is still drawn under it.
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.

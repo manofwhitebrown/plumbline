@@ -26,3 +26,5 @@ SCAFFOLD READY: cb4c686
   `{ registerSlice, getSlice, markDirty, saveNow, resetAll, exportSave, importSave }` from `core/save.js`, `{ createLoop }`, `{ buzz }` from `platform/haptics.js`.
 - `makeRng(seed).int(a, b)` includes both ends. `weighted()` always uses exactly one random number.
 - `bus` handlers that throw are logged, never thrown to the emitter. `log.setConsole(true)` prints to the console (on with `?debug=1`).
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.

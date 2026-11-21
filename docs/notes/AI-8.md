@@ -16,3 +16,5 @@
 - `audio.init()` must be called from a real tap or key press.
 - All audio calls are safe: bad input is ignored and nothing throws.
 - `suggest.bestRig` currently returns an empty rig of the right size.
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.

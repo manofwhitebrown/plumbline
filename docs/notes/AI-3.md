@@ -21,3 +21,5 @@
 - AI-4 / AI-5: optional Mods fields (`gemRate`, `oreRate`, `hazardRate`, `relicBonus`, `rareMult`, `speedBonus`, `hazardGold`, `multiplierLevel`) are listed in `docs/requests/AI-3-to-AI-4-AI-5-mods-fields.md`.
 - Manager: CONTRACT says 24 parts but lists 26. I built 26 (`docs/requests/AI-3-to-Manager-part-count.md`).
 - AI-8: part descriptions use the plain words "gem", "ore", "danger" and "step" because the glossary has no words for them. Please add them to `docs/WORDS.md` if you agree.
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.

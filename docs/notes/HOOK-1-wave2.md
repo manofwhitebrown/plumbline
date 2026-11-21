@@ -18,3 +18,5 @@ Another HOOK-1 session did Wave 1 and owns docs/notes/HOOK-1.md, the Wave 1 left
 
 ## Next (my order)
 - Item 10 mastery, item 6 relic collection and Relic wall, item 8 contracts, item 9 daily dive, item 7 cosmetics. Bot and balance work for these (Wave 3) belongs to the other session unless they say otherwise.
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.

@@ -30,3 +30,5 @@
 - Shards per drop are capped at 150. Cheated drops (`mods.cheat` not null) get no record and no shards.
 - Balance reminder for AI-2: with the base tier values (1, 3, 9) a lone Hook in clay may pay under the 40 gold target.
   The biome `goldFactor` numbers in `src/data/biomes.js` are easy to raise. I will run the bot once the engine lands and tune.
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.

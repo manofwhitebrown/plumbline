@@ -16,3 +16,5 @@ src/render/homeScene.js, src/render/art/{homeArt,homeSky,homeGround,homeWell,cre
 - Previews were checked headless only (360x640, 430x932, 1440x900); not yet seen on a real phone.
 - Crates and barrels can hide behind outer crew at 8 crew.
 - Best flag / Drop button positions are unchanged but not re-checked on device.
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.

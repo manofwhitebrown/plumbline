@@ -16,3 +16,5 @@
 - Items rise for 2 beats (RISE_BEATS in layout.js) before they reach the bucket. Outcome events (COLLECT, MISS, HAZARD, FIRE, CHAIN) play when the item arrives, so floaters show about 0.9 s after the gold changes. SNAP, HAUL, STRAIN, BIOME play at once.
 - Extra renderer methods: setReduceMotion(bool), debugStats(). Call setRun(view, rig) after the rig changes.
 - Call renderer.resize(w, h, dpr) whenever the canvas parent changes size.
+
+STATUS: written by FINAL-3. The author did not leave a status line, so this is not a claim that the work was finished. Check the repo and docs/AUDIT.md for what is verified.
