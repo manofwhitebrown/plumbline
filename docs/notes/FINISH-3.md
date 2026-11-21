@@ -9,6 +9,7 @@
 - Bug fixed: relicBook only started listening when the Codex was opened, so relics found in a Drop before that were lost. cosmeticsHook.js (loaded with Home and Drop) now imports it.
 - Speed: AFTER table in docs/perf/PERF-2.md; added looks/reduce options to dev/perf-run.js and perf-lab.js; tests/perf-idle.test.js.
 
-STATUS: DONE (gaps: 6x AFTER run, memory run at 430x932, browser look at Looks in Drop and Home, real-phone speed).
 - Full check showed 1 flaky failure (integration-flow-real, 'a snap pays exactly once'), also seen without my changes; request note docs/requests/FINISH-3-to-Manager-red.md. My last push went out before I had read that result; I should have waited.
-- Helped others: fixed the button release bug ONBOARD-2 found (src/ui/motion/micro.js and results.js used scale(-0.03) etc. with composite add, which really shrinks buttons to about 0 so taps missed). Real sizes now; guard test tests/motion-scale-add.test.js. My own browser tap check was inconclusive (could not catch the animation), so this rests on the WAAPI rule, ONBOARD-2's report and the source test: please confirm with a real touch tap. Made 'a snap pays exactly once' deterministic (weak rope), 12 of 12 passes.
+- Helped others: found the button release bug (scale(-0.03) with composite add shrinks buttons to about 0), but LAYOUT-2 pushed the same fix first (fa16c89, with tests/motion-scale-real.test.js); I kept theirs and dropped my duplicate. Made 'a snap pays exactly once' deterministic (weak rope), 12 of 12 passes. My own browser tap check was inconclusive.
+
+STATUS: DONE (gaps: 6x AFTER run, memory run at 430x932, browser look at Looks in Drop and Home, real-phone speed).
