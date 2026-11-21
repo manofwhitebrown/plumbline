@@ -141,7 +141,7 @@ test('tutorial: not shown without a page, and nothing breaks', () => {
   assert.equal(getSlice('tutorial').skipped, true);
 });
 
-test('tutorial: runs in a page, gives first-drop options, can be skipped, never returns', () => {
+test('tutorial: runs in a page, gives first-drop options, can be skipped, never returns', async () => {
   resetAll();
   bus.clear();
   const page = makeFakePage();
@@ -158,6 +158,7 @@ test('tutorial: runs in a page, gives first-drop options, can be skipped, never 
     assert.equal(opts.rig.cells[2][1], 'hook');
     assert.equal(opts.rig.cells.flat().filter(Boolean).length, 1);
     const layers = () => page.body.children.filter((e) => e.className === 'tut-layer').length;
+    await new Promise((r) => setTimeout(r, 700)); // the guide waits until the target has held still
     assert.equal(layers(), 1);
     tutorial.skip();
     assert.equal(tutorial.isActive(), false);

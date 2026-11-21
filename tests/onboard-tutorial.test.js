@@ -26,7 +26,7 @@ function setup(initial = {}) {
   return { flow, timers, present, state, last: () => last, hist, note, seen };
 }
 
-test('tutorial runs start to end in order: first drop, Haul Up, Results, Workshop buy, Rig, second Drop, Crew, Workshop', () => {
+test('tutorial runs start to end in order: first drop, Haul Up, Results (one note), Workshop buy, Rig, second Drop, Crew, Workshop', () => {
   const t = setup();
   let done = 0;
   bus.on('tutorial:done', () => { done++; });
@@ -37,7 +37,7 @@ test('tutorial runs start to end in order: first drop, Haul Up, Results, Worksho
   step(14000); step(14000);               // two info steps run on a timer
   t.present.add('results-gold');
   bus.emit('run:ended', { outcome: 'hauled' }); step();
-  t.timers.advance(9000); t.present.add('results-home'); step(); // Results note ends, then Home
+  t.present.add('results-home'); step();  // one Results note: the Gold and "Tap Home"
   t.present.add('tab-workshop'); step();
   t.present.add('workshop-part'); step();
   bus.emit('meta:changed', { what: 'part bought' }); t.present.add('tab-rig'); step();
@@ -49,7 +49,7 @@ test('tutorial runs start to end in order: first drop, Haul Up, Results, Worksho
   t.last().onButton(); step();
   t.timers.advance(5000);
   assert.deepEqual(t.hist.filter((id, i, a) => a.indexOf(id) === i), [
-    'home-drop', 'drop-gems', 'drop-strain', 'drop-haul', 'results-gold', 'results-home', 'tab-workshop', 'workshop-buy',
+    'home-drop', 'drop-gems', 'drop-strain', 'drop-haul', 'results-gold', 'tab-workshop', 'workshop-buy',
     'tab-rig', 'rig-place', 'second-drop', 'crew-intro', 'workshop-intro', 'final']);
   assert.equal(t.flow.isActive(), false);
   assert.equal(t.state.done, true);

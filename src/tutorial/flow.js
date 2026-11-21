@@ -119,6 +119,7 @@ export function createFlow(deps) {
     overlay.show({
       rects,
       text: step.text,
+      side: step.side,
       button: step.mode === 'info' ? 'Got it' : '',
       onButton: () => advance(),
       onSkip: () => skip(),

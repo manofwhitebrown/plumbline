@@ -56,15 +56,15 @@ test('happy path: every step in order, then done', () => {
   t.timers.advance(60000);
   assert.equal(t.flow.currentId(), 'drop-haul');
 
-  t.present.add('results-gold');
+  t.present.add('results-gold').add('results-home');
   bus.emit('run:ended', { outcome: 'hauled' });
   assert.equal(t.flow.currentId(), 'results-gold');
-  t.last().onButton();
-  // The Results screen has no tab bar: the player is sent Home first.
-  assert.equal(t.flow.currentId(), 'results-home');
-  t.present.add('results-home');
+  // One note shows the Gold and points at Home. The Results screen has no tab bar, so it waits for the player to tap Home.
+  assert.equal(t.last().text, 'That is your Gold. Tap Home.');
+  assert.equal(t.last().rects.length, 2);
+  assert.equal(t.last().button, '');
   t.timers.advance(300);
-  assert.equal(t.flow.currentId(), 'results-home', 'waits while the tab bar is hidden');
+  assert.equal(t.flow.currentId(), 'results-gold', 'waits while the tab bar is hidden');
   t.present.add('tab-workshop'); // the player tapped Home, the tab bar is back
   t.timers.advance(300);
   assert.equal(t.flow.currentId(), 'tab-workshop');

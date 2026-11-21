@@ -14,4 +14,5 @@ Job: play the tutorial on a brand-new save in a real browser, fix every step, mo
 2. NEXT: src/tutorial: wait for a target that is visible and still; box on the free side per step; one row layout; merge the two Results steps; let steps move on when the player takes another path.
 3. NEXT: replay at 360x640, 320x568, 430x932; help tips with Large text; PLAY.md; tests.
 
+- DONE (tests pass, NOT yet seen in browser): src/tutorial: note on the free side per step, compact one-row box, hides while a pop-up shows, waits for buttons to hold still, Results steps merged into one, new way-outs (Workshop with no Gold, dropping again). tests/onboard-place.test.js.
 STATUS: NOT DONE (work in progress)

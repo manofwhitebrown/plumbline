@@ -58,7 +58,7 @@ export const tutorial = {
       flow = createFlow({
         bus,
         overlay,
-        find: makeFinder(document),
+        find: makeFinder(document, { stable: true }),
         store,
         log,
         timers: { setTimeout: (f, ms) => { const h = setTimeout(f, ms); if (h && h.unref) h.unref(); return h; }, clearTimeout: (t) => clearTimeout(t), now: () => Date.now() },

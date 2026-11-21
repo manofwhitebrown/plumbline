@@ -42,8 +42,52 @@ function attr(el, name) {
   }
 }
 
+// True when the element can be seen and tapped: not hidden, and not faded out (it may be fading in).
+export function isShown(el) {
+  try {
+    const win = el && el.ownerDocument && el.ownerDocument.defaultView;
+    if (!win || !win.getComputedStyle) return true;
+    let e = el;
+    for (let i = 0; e && i < 8; i++, e = e.parentElement) {
+      const cs = win.getComputedStyle(e);
+      if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) < 0.9) return false;
+    }
+    return true;
+  } catch (err) {
+    return true;
+  }
+}
+
+function same(a, b, tol) {
+  return Math.abs(a.left - b.left) <= tol && Math.abs(a.top - b.top) <= tol && Math.abs(a.width - b.width) <= tol && Math.abs(a.height - b.height) <= tol;
+}
+
 // Returns find(name) -> { el, rect } | null.
-export function makeFinder(doc) {
+// opts.stable: only report a target that is shown and has stopped moving (a button that slides in is not found until it lands).
+//   A target that never holds still is accepted after 1.5 s, so a pulsing button can never hide the guide for good.
+// opts.now: a clock, for tests.
+export function makeFinder(doc, opts) {
+  const o = opts || {};
+  const now = typeof o.now === 'function' ? o.now : () => Date.now();
+  const samples = new Map();
+
+  function settled(name, el, rect) {
+    if (!o.stable) return true;
+    if (!isShown(el)) {
+      samples.delete(name);
+      return false;
+    }
+    const t = now();
+    const prev = samples.get(name);
+    if (!prev || prev.el !== el || !same(prev.rect, rect, 1.5)) {
+      samples.set(name, { el, rect, since: prev && prev.el === el ? prev.since : t, still: t });
+      const cur = samples.get(name);
+      return t - cur.since >= 1500;
+    }
+    prev.rect = rect;
+    return t - prev.still >= 200 || t - prev.since >= 1500;
+  }
+
   return function find(name) {
     try {
       if (!doc || typeof name !== 'string') return null;
@@ -56,11 +100,17 @@ export function makeFinder(doc) {
         }
         const pick = pickGoodCell(cells);
         const rect = pick ? readRect(pick.ref) : null;
-        return rect ? { el: pick.ref, rect } : null;
+        return rect && settled(name, pick.ref, rect) ? { el: pick.ref, rect } : null;
       }
-      const el = doc.querySelector('[data-tut~="' + name + '"]');
+      if (name === 'workshop-screen') {
+        const sc = doc.querySelector('.screen-workshop');
+        const r = sc ? readRect(sc) : null;
+        return r ? { el: sc, rect: r } : null;
+      }
+      let el = doc.querySelector('[data-tut~="' + name + '"]');
+      if (el && name === 'results-gold' && el.closest) el = el.closest('.res-gold') || el; // ring the whole row, not the counting number
       const rect = el ? readRect(el) : null;
-      return rect ? { el, rect } : null;
+      return rect && settled(name, el, rect) ? { el, rect } : null;
     } catch (e) {
       return null;
     }
