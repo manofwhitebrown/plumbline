@@ -47,3 +47,18 @@ Tried and dropped, no effect or worse: shorter rope-saving window of 10 min (sty
 - Only one seed per cell. Next session should run 3 seeds per cell before accepting any number.
 
 STATUS: NOT DONE (style 50 and after-Collapse 1000 m miss targets; part, boon and reward checks not run)
+
+## Session 2 (Saturday 21 Nov 2026): measurements, nothing applied yet
+Plain words: I measured what limits a careful player (style 50). No game numbers changed in this push. The best number set so far is saved in docs/notes/ECONOMY-3-wip-numbers-v2.patch. It is NOT applied because pinned tests have not been updated and re-run.
+
+Findings (bot, --collapse=on, --parts=off, 2 seeds):
+- Style 50 earns almost all its Gold from Crew late. Its drops pay only 20k to 45k each at about 300 m. Collapse is ready at 6.1 h (limit 5 h).
+- Crew unlock depths are not the limit for style 50 (Assay 300 m and Foundry 400 m gave identical Collapse times).
+- Lowering only the Collapse gate (40M) is not enough: style 50 gets 5.1 to 5.3 h but style 85 falls to 1.5 to 1.9 h.
+- Crew output x1.4 alone: style 50 5.5 to 5.7 h, style 85 barely changes.
+- Patch v2 = Crew output x1.4 + Gold factor Quartz 1.8, Amber 2.2, Magma 2.4 + gentler hazards in Quartz, Amber, Magma. Result: style 50 Collapse 5.0 / 4.85 h (borderline), style 70 2.2 to 2.3 h, style 85 1.7 to 1.8 h, style 100 1.2 to 1.5 h. All first part, 100 m and 250 m targets still met.
+- Still open with patch v2: style 85 "1000 m after Collapse" is 1.8 h (target under 1.5 h). Collapse resets Gold, Crew, Parts and Gold upgrades, so the time after is a rebuild of the first hour; an earlier Collapse made it worse, not better.
+
+Not done: balance-report (part and boon rates), reward-source share, 8-character check, final table, updating pinned tests for patch v2.
+
+STATUS: NOT DONE (style 50 borderline at 5 h, after-Collapse 1000 m for style 85 over target; part, boon and reward checks not run)
