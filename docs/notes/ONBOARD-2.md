@@ -34,4 +34,6 @@ STATUS: NOT DONE (work in progress)
 - SEEN: the Home notes sit above the well and no longer cover the hint lines (QA-1 problem 11 is fixed). The stray tall ring beside the Magnet was this bug.
 - NOTE: on "That is your Gold. Tap Home." the ring is on the Gold row, the words say Home; a tap on Home works. Left as is.
 - NOT SEEN: tutorial with Large text on, tutorial with Reduce motion on.
-STATUS: NOT DONE (tutorial with Large text and with Reduce motion not seen; everything else seen)
+- SEEN later the same day: the whole tutorial (13 steps) with Large text on and with Reduce motion on, at 360x640 and 320x568, no errors. In Large text the Crew note is three lines high and still clears the hint lines and the Drop button.
+- SEEN: "+1 Shard" and "+2 Shards" on Results (plural words are right).
+STATUS: DONE

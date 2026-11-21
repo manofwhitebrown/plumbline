@@ -16,8 +16,8 @@ Exception: the Collapse box showed the word "null" (found by reading the text, t
 | Results card peeking behind Drop again | FIXED (seen) at 360x640 | A divider line now separates the scroll area from the pinned buttons. |
 | Achievement pop-up | STILL OPEN (low-medium) | Name now correct ("Gear Head"). It stays about 4 s (measured, 8 samples 0.5 s apart), not 2.5 s, and still covers the Workshop title and the top of the well (seen). |
 | Drop goal chips cut with "..." | FIXED (seen) at 320, 360, and with Large text | Chips wrap to full text ("Collect 26 level 3+ gems"). |
-| Tutorial box covers things | NOT RE-CHECKED | Needs a brand-new save; not done in the time. |
-| "+1 Shards" plural | NOT CHECKED | Not seen. |
+| Tutorial box covers things | FIXED (seen) | Brand-new save at 360, 320, 430, and with Large text and Reduce motion: notes sit clear of the hint lines. Also fixed a Rig-step ring that was off-screen (ONBOARD-2). |
+| "+1 Shards" plural | FIXED (seen) | Results shows "+1 Shard" and "+2 Shards". |
 | Scripted click opened Settings (QA-1 #14) | NOT REPRODUCED | Note: scripted `element.click()` does not work on Loadout chips (they need real pointer events); real mouse and touch work. Not a game bug. |
 
 ## Unseen parts now covered
