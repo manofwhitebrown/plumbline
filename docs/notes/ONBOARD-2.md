@@ -37,3 +37,7 @@ STATUS: NOT DONE (work in progress)
 - SEEN later the same day: the whole tutorial (13 steps) with Large text on and with Reduce motion on, at 360x640 and 320x568, no errors. In Large text the Crew note is three lines high and still clears the hint lines and the Drop button.
 - SEEN: "+1 Shard" and "+2 Shards" on Results (plural words are right).
 STATUS: DONE
+
+## Pass 6 (code fix, tests pass; seen in a browser in an earlier full run)
+- FIXED: a step's own timer now starts when its note first shows (before, the Crew and Workshop notes were skipped while the second Drop ran). The Crew note waits for the Home screen (findMs 15 min; Skip always works). Test added. I replayed the full tutorial after this fix at 360x640 and saw the Crew note, the Workshop note and the closing line.
+STATUS: DONE

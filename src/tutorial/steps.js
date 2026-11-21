@@ -52,7 +52,7 @@ export const STEPS = [
     on: [{ bus: 'run:started' }], skipTo: 'crew-intro', maxMs: 60000, maxTo: 'crew-intro' },
   // Two short, skippable notes. They wait (findMs) until a screen with the tab bar is showing again after the second drop.
   { id: 'crew-intro', targets: ['tab-crew'], text: 'Crew earn Gold while you rest. Open Crew any time.', mode: 'info', side: 'top',
-    on: [{ afterMs: 60000 }], skipTo: 'final', findMs: 180000 },
+    on: [{ afterMs: 60000 }], skipTo: 'final', findMs: 900000 },
   { id: 'workshop-intro', targets: ['tab-workshop'], text: 'The Workshop sells new Parts and upgrades.', mode: 'info', side: 'top',
     on: [{ afterMs: 30000 }], skipTo: 'final', findMs: 20000 },
   { id: 'final', targets: [], text: 'Go deeper. One more meter.', mode: 'info', side: 'top',

@@ -127,3 +127,21 @@ test('Rig step shows the part first, the square only after the part is picked', 
   const after = run(true);
   assert.ok(!after.part && after.cell, 'square ring only');
 });
+
+test('a note timer starts when the note first shows, not while its screen is missing', async () => {
+  const { createFlow } = await import('../src/tutorial/flow.js');
+  let now = 0; const q = [];
+  const timers = { setTimeout: (f, ms) => { const t = { f, at: now + ms }; q.push(t); return t; }, clearTimeout: (t) => { const i = q.indexOf(t); if (i >= 0) q.splice(i, 1); }, now: () => now };
+  const step = { id: 'a', targets: ['x'], text: 't', mode: 'info', on: [{ afterMs: 1000 }], findMs: 100000 };
+  const last = { id: 'b', targets: [], text: 'u', mode: 'info', on: [] };
+  let visible = false; const shown = [];
+  const flow = createFlow({ bus: { on: () => () => {}, emit() {} }, overlay: { show: (o) => shown.push(o.text), hide() {} }, find: () => (visible ? { rect: { left: 0, top: 0, width: 5, height: 5 } } : null), store: { get: () => ({}), set() {} }, timers, log: { warn() {} }, steps: [step, last] });
+  const run = (ms) => { const end = now + ms; for (;;) { q.sort((a, b) => a.at - b.at); const t = q[0]; if (!t || t.at > end) break; q.shift(); now = t.at; t.f(); } now = end; };
+  flow.start();
+  run(5000);
+  assert.equal(flow.currentId(), 'a', 'still waiting for its screen');
+  visible = true; run(300);
+  assert.equal(flow.currentId(), 'a');
+  run(1500);
+  assert.equal(flow.currentId(), 'b');
+});

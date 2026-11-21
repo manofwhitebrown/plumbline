@@ -22,6 +22,7 @@ export function createFlow(deps) {
   let idx = -1;
   let token = 0;
   let everFound = false;
+  let timed = false;
   let enteredAt = 0;
   let pollTimer = null;
   let stepTimers = [];
@@ -115,7 +116,18 @@ export function createFlow(deps) {
     pollTimer = timers.setTimeout(() => poll(myToken), POLL_MS);
   }
 
+  // A step's own timer starts when the note is first on screen, not while the player is still on another screen.
+  function startShownTimers(step) {
+    if (timed) return;
+    timed = true;
+    const my = token;
+    for (const c of step.on || []) {
+      if (typeof c.afterMs === 'number') stepTimers.push(timers.setTimeout(() => my === token && advance(c.goto), c.afterMs));
+    }
+  }
+
   function show(step, rects) {
+    startShownTimers(step);
     overlay.show({
       rects,
       text: step.text,
@@ -136,9 +148,7 @@ export function createFlow(deps) {
     everFound = false;
     enteredAt = timers.now();
     store.set({ stepId: step.id });
-    for (const c of step.on || []) {
-      if (typeof c.afterMs === 'number') stepTimers.push(timers.setTimeout(() => my === token && advance(c.goto), c.afterMs));
-    }
+    timed = false;
     if (typeof step.maxMs === 'number') stepTimers.push(timers.setTimeout(() => my === token && advance(step.maxTo), step.maxMs));
     poll(my);
   }
