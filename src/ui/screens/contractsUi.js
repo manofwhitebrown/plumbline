@@ -6,6 +6,7 @@ import { progress } from '../components/progress.js';
 import { fmt } from '../soft.js';
 import * as C from '../../meta/contracts.js';
 import { announce } from './rewardsDaily.js';
+import { countText } from '../../core/plural.js';
 
 const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0);
 
@@ -47,7 +48,7 @@ function itemEl(c, onClaim, scope) {
   const bar = progress(c.fraction, c.text);
   const right = c.state === 'ready'
     ? button({ label: 'Claim', kind: 'primary', onPress: () => onClaim(c.id), aria: 'Claim ' + c.text }, scope)
-    : h('span', { class: 'pill ' + (c.rewardType === 'gold' ? 'gold' : 'shard'), 'aria-label': fmt(c.rewardAmount) + (c.rewardType === 'gold' ? ' Gold' : ' Shards') },
+    : h('span', { class: 'pill ' + (c.rewardType === 'gold' ? 'gold' : 'shard'), 'aria-label': (c.rewardType === 'gold' ? fmt(c.rewardAmount) + ' Gold' : countText(c.rewardAmount, 'Shard')) },
       svg(iconHtml(c.rewardType === 'gold' ? 'gold' : 'shard')), h('span', { class: 'num', text: rewardPillText(c) }));
   if (c.state === 'ready') bar.classList.add('ok');
   return h('li', { class: 'rw-quest ' + c.state, 'data-contract': c.id },

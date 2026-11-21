@@ -53,3 +53,9 @@ Words: Relic Wall (also just "the Wall"), Look, Looks, Wear, Worn, Locked, New.
 - **Mastery**: a Part gets better the more you use it. Five levels, written "Mastery 3 of 5". A small row of 5 diamonds shows it. Never say "XP", "tier" or "proficiency".
 - **Daily Dive**: one special Drop each day, the same for everyone. One free try, your best Depth for the day, a streak in days, and a chest at the end. "Today's twist" is the rule that changes that day.
 - Chest names: Small chest, Good chest, Rich chest.
+
+## One and many (HUD-2)
+A count of exactly 1 uses the single word: "+1 Shard", "1 relic", "1 gem", "max 1 hit". Every other count (0, 2, 3 ...) uses the plural: "+3 Shards", "0 gems".
+- Words that change: Shard, gem, relic, hit, piece, combo.
+- Words that never change: **Gold** and **Core Dust** ("+1 Core Dust", "+5 Core Dust", "1 Gold", "5 Gold").
+- In code, never write the word next to a number by hand. Use `countText(n, 'Shard')` or `plural(n, 'relic')` from `src/core/plural.js`. A test (tests/plural.test.js) scans the screens and fails on a hard-coded "Shards", "gems", "relics", "combos" or "hits" glued to a number.

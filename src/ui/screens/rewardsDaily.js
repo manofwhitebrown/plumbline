@@ -3,6 +3,7 @@ import { h, svg } from '../dom.js';
 import { iconHtml } from '../icons.js';
 import { button } from '../components/button.js';
 import { fmt, fmtTime, buzz, ui } from '../soft.js';
+import { countText } from '../../core/plural.js';
 
 export const ALREADY_TEXT = 'You already claimed today. Come back tomorrow.';
 export const CLAIM_FAIL_TEXT = "Couldn't claim your reward. Try again.";
@@ -39,7 +40,7 @@ export function dailyView(state) {
 // Pure: what the Claim button says.
 export function claimButtonView(view) {
   if (view.canClaim) {
-    return { label: 'Claim Day ' + view.day, sub: '+' + fmt(view.reward.shards) + ' Shards, +' + fmt(view.reward.gold) + ' Gold', disabled: false, reason: '' };
+    return { label: 'Claim Day ' + view.day, sub: '+' + countText(view.reward.shards, 'Shard') + ', +' + fmt(view.reward.gold) + ' Gold', disabled: false, reason: '' };
   }
   const wait = view.nextInMs > 0 ? 'Come back tomorrow · ' + fmtTime(view.nextInMs) : 'Come back tomorrow';
   return { label: 'Claimed', sub: wait, disabled: true, reason: ALREADY_TEXT };
@@ -50,7 +51,7 @@ export function claimMessage(res) {
   if (res && res.ok) {
     const day = Math.floor(num(res.day));
     const parts = [];
-    if (num(res.shards) > 0) parts.push('+' + fmt(res.shards) + ' Shards');
+    if (num(res.shards) > 0) parts.push('+' + countText(res.shards, 'Shard'));
     if (num(res.gold) > 0) parts.push('+' + fmt(res.gold) + ' Gold');
     return { ok: true, kind: 'ok', text: (day > 0 ? 'Day ' + day + ' claimed: ' : 'Claimed: ') + (parts.join(', ') || 'a reward') };
   }
@@ -69,7 +70,7 @@ export function announce(toast, msg, successSound) {
 
 function slotEl(s) {
   const cls = 'rw-slot ' + s.status + (s.isToday ? ' today' : '') + (s.day === 7 ? ' big' : '');
-  const el = h('div', { class: cls, role: 'listitem', 'aria-label': 'Day ' + s.day + ', ' + fmt(s.shards) + ' Shards, ' + fmt(s.gold) + ' Gold' + (s.status === 'claimed' ? ', claimed' : '') });
+  const el = h('div', { class: cls, role: 'listitem', 'aria-label': 'Day ' + s.day + ', ' + countText(s.shards, 'Shard') + ', ' + fmt(s.gold) + ' Gold' + (s.status === 'claimed' ? ', claimed' : '') });
   el.append(h('span', { class: 'rw-day', text: 'Day ' + s.day }));
   if (s.status === 'claimed') el.append(svg(iconHtml('check'), 'rw-check'));
   el.append(h('span', { class: 'rw-amt shard' }, svg(iconHtml('shard')), h('span', { class: 'num', text: fmt(s.shards) })));

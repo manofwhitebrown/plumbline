@@ -7,6 +7,7 @@ import { api } from '../api.js';
 import { go } from '../shell.js';
 import * as D from '../../meta/dive.js';
 import { announce } from './rewardsDaily.js';
+import { countText } from '../../core/plural.js';
 
 const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0);
 
@@ -35,7 +36,7 @@ export function diveView(state) {
 export function chestMessage(res) {
   if (res && res.ok) {
     const parts = [];
-    if (num(res.shards) > 0) parts.push('+' + fmt(res.shards) + ' Shards');
+    if (num(res.shards) > 0) parts.push('+' + countText(res.shards, 'Shard'));
     if (num(res.gold) > 0) parts.push('+' + fmt(res.gold) + ' Gold');
     return { ok: true, kind: 'ok', text: 'Chest opened: ' + parts.join(', ') };
   }
@@ -106,7 +107,7 @@ export function buildDive(ctx) {
     startBtn.classList.toggle('pulse', !v.btn.disabled);
     chestRow.hidden = v.chest.state === 'none';
     chestTitle.textContent = v.chest.state === 'claimed' ? 'Chest opened' : v.chest.name;
-    chestSub.textContent = v.chest.state === 'claimed' ? 'Come back tomorrow.' : '+' + fmt(v.chest.shards) + ' Shards, +' + fmt(v.chest.gold) + ' Gold';
+    chestSub.textContent = v.chest.state === 'claimed' ? 'Come back tomorrow.' : '+' + countText(v.chest.shards, 'Shard') + ', +' + fmt(v.chest.gold) + ' Gold';
     chestBtn.hidden = v.chest.state !== 'ready';
   }
   update();

@@ -1,0 +1,16 @@
+# HUD-2 notes (Drop HUD, pop-ups, plural words)
+
+## Done
+- Plural words: new helper src/core/plural.js (`plural`, `countText`), test tests/plural.test.js (helper, real texts, and a scan that fails on a hard-coded "Shards", "gems", "relics", "combos" or "hits" next to a number). WORDS.md has the rule.
+- Fixed "+1 Shards" and the same pattern in Results, Rewards (daily, quests, achievements), Contracts, Dive, Wall chips, goal text ("Collect 1 gem", "max 1 hit"), the cheats menu.
+- Files outside my list that I touched, one line each, because the task said "everywhere a count is shown": src/ui/screens/results.js, diveUi.js, rewards*.js, contractsUi.js, codexWall.js, wallModel.js, src/meta/contracts.js, src/data/goals.js, src/cheats/catalog-looks.js.
+
+## Next
+- Goal chips wrap to two lines; HUD stack (banner, guardian, chase pills) in one column under the goals.
+- Pop-up: 2.5 s, tap to dismiss, queue, hold during the boon picker, never over the HUD.
+- Real browser screenshots at 320x568, 360x640, 430x932, 1440x900.
+
+## Honest status
+- Two tests fail now and then on clean main too (hook3 render heap check, "a snap pays exactly once"). Not caused by this work.
+
+STATUS: NOT DONE (in progress)

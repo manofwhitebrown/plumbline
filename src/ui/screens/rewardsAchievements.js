@@ -3,6 +3,7 @@ import { h, svg } from '../dom.js';
 import { iconHtml } from '../icons.js';
 import { progress } from '../components/progress.js';
 import { fmt, ui } from '../soft.js';
+import { countText } from '../../core/plural.js';
 
 function num(x) {
   const n = Number(x);
@@ -35,7 +36,7 @@ function itemEl(a) {
       h('p', { class: 'rw-qtext', text: a.name }),
       h('p', { class: 'sub', text: a.desc }),
       a.done ? null : h('div', { class: 'rw-ach-bar' }, progress(a.fraction, a.name), h('span', { class: 'sub num', text: a.label }))),
-    h('span', { class: 'pill shard', 'aria-label': fmt(a.shards) + ' Shards' }, svg(iconHtml('shard')), h('span', { class: 'num', text: fmt(a.shards) })));
+    h('span', { class: 'pill shard', 'aria-label': countText(a.shards, 'Shard') }, svg(iconHtml('shard')), h('span', { class: 'num', text: fmt(a.shards) })));
   return el;
 }
 

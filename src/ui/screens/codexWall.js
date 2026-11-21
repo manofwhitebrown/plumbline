@@ -10,6 +10,7 @@ import * as book from '../../meta/relicBook.js';
 import * as looks from '../../meta/cosmetics.js';
 import { wallModel, looksModel } from './wallModel.js';
 import '../styles/wall.css';
+import { countText } from '../../core/plural.js';
 
 const safe = (fn, fallback) => { try { return fn(); } catch (e) { return fallback; } };
 export { wallModel, looksModel, wallBadge, looksBadge } from './wallModel.js';
@@ -41,7 +42,7 @@ export function wallPanel(scope) {
       progress(m.total ? m.found / m.total : 0, 'Relic Wall'));
     const bon = h('ul', { class: 'wl-bonus' });
     for (const b of m.bonuses) {
-      bon.append(h('li', { class: 'wl-chip' + (b.reached ? ' on' : ''), 'aria-label': b.at + ' relics: ' + b.text + (b.reached ? ', reached' : ', not yet') },
+      bon.append(h('li', { class: 'wl-chip' + (b.reached ? ' on' : ''), 'aria-label': countText(b.at, 'relic') + ': ' + b.text + (b.reached ? ', reached' : ', not yet') },
         h('span', { class: 'wl-chip-n num', text: String(b.at) }), h('span', { class: 'wl-chip-t', text: b.text })));
     }
     head.append(bon, h('p', { class: 'sub wl-next', text: m.nextLine }));

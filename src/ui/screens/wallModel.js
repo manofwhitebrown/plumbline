@@ -3,6 +3,7 @@ import * as book from '../../meta/relicBook.js';
 import * as looks from '../../meta/cosmetics.js';
 import { KIND_LABEL, LOOK_KINDS, WALL_TOTAL } from '../../data/cosmetics.js';
 import { s as metaState } from '../../meta/state.js';
+import { plural } from '../../core/plural.js';
 
 const safe = (fn, fallback) => { try { return fn(); } catch (e) { return fallback; } };
 
@@ -16,7 +17,7 @@ export function wallModel() {
     g.cards.push(c);
   }
   const left = w.next ? Math.max(0, w.next.at - w.earned) : 0;
-  const nextLine = w.next ? left + (left === 1 ? ' more relic for ' : ' more relics for ') + w.next.text : 'Every Wall bonus is yours.';
+  const nextLine = w.next ? left + ' more ' + plural(left, 'relic') + ' for ' + w.next.text : 'Every Wall bonus is yours.';
   return { found: w.found, total: w.total, bonuses: w.bonuses, nextLine, groups, unseen: safe(() => book.unseenCount(), 0) };
 }
 

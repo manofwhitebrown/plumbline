@@ -5,6 +5,7 @@ import { button } from '../components/button.js';
 import { progress } from '../components/progress.js';
 import { fmt } from '../soft.js';
 import { announce } from './rewardsDaily.js';
+import { countText } from '../../core/plural.js';
 
 function num(x) {
   const n = Number(x);
@@ -35,7 +36,7 @@ export function questsView(list) {
 
 // Pure: toast for a quest claim.
 export function questClaimMessage(res) {
-  if (res && res.ok) return { ok: true, kind: 'ok', text: 'Quest done: +' + fmt(num(res.shards)) + ' Shards' };
+  if (res && res.ok) return { ok: true, kind: 'ok', text: 'Quest done: +' + countText(num(res.shards), 'Shard') };
   const err = res && typeof res.error === 'string' ? res.error : '';
   if (/already/i.test(err)) return { ok: false, kind: 'warn', text: 'You already claimed that quest.' };
   if (/not finished/i.test(err)) return { ok: false, kind: 'warn', text: 'Not finished yet. Keep going.' };
@@ -49,7 +50,7 @@ function questEl(q, onClaim, scope) {
     ? button({ label: 'Claim', kind: 'primary', onPress: () => onClaim(q.id), aria: 'Claim ' + q.text }, scope)
     : q.state === 'claimed'
       ? h('span', { class: 'rw-done' }, svg(iconHtml('check')), h('span', { text: 'Claimed' }))
-      : h('span', { class: 'pill shard', 'aria-label': fmt(q.shards) + ' Shards' }, svg(iconHtml('shard')), h('span', { class: 'num', text: '+' + fmt(q.shards) }));
+      : h('span', { class: 'pill shard', 'aria-label': countText(q.shards, 'Shard') }, svg(iconHtml('shard')), h('span', { class: 'num', text: '+' + fmt(q.shards) }));
   const el = h('li', { class: 'rw-quest ' + q.state },
     h('div', { class: 'rw-quest-top' },
       h('div', { class: 'grow' }, h('p', { class: 'rw-qtext', text: q.text }), h('p', { class: 'sub num', text: q.label })),

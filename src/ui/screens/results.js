@@ -17,6 +17,7 @@ import { normalizeResult, titleText, snapText, comboText, revealPlan } from '../
 import { createReveal } from './resultsReveal.js';
 import { recordBanner, relicBanner, chaseBlock, withPreviewExtras } from './resultsBanners.js'; // [SCREENS-1]
 import { backdropUrl } from '../theme/textures.js';
+import { countText } from '../../core/plural.js';
 
 let scope = null;
 
@@ -59,7 +60,7 @@ registerScreen('results', {
     add('gold', h('div', { class: 'res-gold', 'aria-label': 'Gold' }, svg(iconHtml('gold'), 'res-icon'), goldNum));
     add('snap', h('div', { class: 'res-snap' + (r.snapped ? ' snapped' : ''), text: snapText(r) }));
 
-    const shardNum = counter(0, { format: (v) => '+' + fmt(Math.floor(v)) + ' Shards' }, scope); // [SCREENS-1] counts up
+    const shardNum = counter(0, { format: (v) => '+' + countText(Math.floor(v), 'Shard') }, scope); // [SCREENS-1] counts up
     if (has('shards')) add('shards', h('div', { class: 'res-shards' }, svg(iconHtml('shard'), 'res-icon sm'), shardNum));
 
     if (relics) add('relic', relics); // [SCREENS-1] right under the Shards: the exciting part

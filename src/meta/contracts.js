@@ -12,6 +12,7 @@ import { money, num } from './safe.js';
 import { addGold, addShards } from './wallet.js';
 import { perSecond } from './crew.js';
 import { detectCombos } from './partsApi.js';
+import { countText } from '../core/plural.js';
 
 const BY_ID = new Map(CONTRACTS.map((c) => [c.id, c]));
 const keyOf = (c) => c.scope + ':' + c.stat;
@@ -86,7 +87,7 @@ export function ensureToday() {
 
 export function rewardLabel(c) {
   const r = c.reward;
-  if (r.shards) return Math.min(CONTRACT_SHARD_CAP, r.shards) + ' Shards';
+  if (r.shards) return countText(Math.min(CONTRACT_SHARD_CAP, r.shards), 'Shard');
   return 'Gold';
 }
 
@@ -102,7 +103,7 @@ function view(e) {
   return {
     id: c.id, text: c.text, target: c.target, progress: Math.min(c.target, e.progress),
     fraction: Math.min(1, e.progress / c.target), done: isDone(e), claimed: false,
-    reward: rw, rewardLabel: rw.type === 'shards' ? rw.amount + ' Shards' : 'Gold',
+    reward: rw, rewardLabel: rw.type === 'shards' ? countText(rw.amount, 'Shard') : 'Gold',
   };
 }
 

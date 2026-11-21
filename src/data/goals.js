@@ -1,6 +1,7 @@
 // Goal templates for each drop. Targets scale with the player's best depth,
 // so a goal is always possible but never too easy. Rewards are shards.
 
+import { plural } from '../core/plural.js';
 export const MAX_GOALS = 3;
 export const GOAL_SHARD_CAP = 12; // goals can never pay more than this per drop
 
@@ -37,7 +38,7 @@ export const TEMPLATES = [
     make(best, level) {
       const tier = tierFor(best);
       const target = [5, 10, 18][level] + Math.floor(best / 100) * 2;
-      const label = tier > 1 ? `Collect ${target} level ${tier}+ gems` : `Collect ${target} gems`;
+      const label = tier > 1 ? `Collect ${target} level ${tier}+ ${plural(target, 'gem')}` : `Collect ${target} ${plural(target, 'gem')}`;
       return { target, tier, text: label, reward: 1 + level };
     },
   },
@@ -61,7 +62,7 @@ export const TEMPLATES = [
     make(best, level) {
       const maxHits = [4, 3, 2][level];
       const target = roundTo(best * [0.4, 0.5, 0.6][level], 10);
-      return { target, maxHits, text: `Reach ${target} m, max ${maxHits} hits`, reward: 2 + level };
+      return { target, maxHits, text: `Reach ${target} m, max ${maxHits} ${plural(maxHits, 'hit')}`, reward: 2 + level };
     },
   },
 ];
