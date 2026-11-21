@@ -67,7 +67,7 @@ test('getMods includes owned parts and the daily twist only when switched on', (
 test('upgrades: buy, gate, currency, max level', () => {
   fresh();
   assert.equal(meta.upgrades.buy('rope').ok, false, 'no gold yet');
-  meta.addGold(1e9);
+  meta.addGold(1e11); // [ECONOMY-2] the full rope ladder now costs about 9e9
   const r = meta.upgrades.buy('rope');
   assert.equal(r.ok, true);
   assert.equal(meta.getMods().maxStrain, 145);
@@ -96,7 +96,7 @@ test('auto-haul needs the upgrade, then keeps a safe percent', () => {
   assert.equal(meta.upgrades.setAutoHaul(0).pct, 0);
 });
 
-function readyForCollapse(gold = 4e6, depth = 600) {
+function readyForCollapse(gold = 8e7, depth = 600) {
   const st = s();
   st.bestDepth = depth; st.goldThisCollapse = gold; st.gold = 777;
   st.crew = { winch: 30, smithy: 12 }; st.managers = { winch: 1 };
@@ -105,23 +105,23 @@ function readyForCollapse(gold = 4e6, depth = 600) {
   st.shards = 42;
 }
 
-test('Collapse is locked until 500 m and 1M gold', () => {
+test('Collapse is locked until 500 m and 20M gold', () => {
   fresh();
-  readyForCollapse(999999, 600);
+  readyForCollapse(19999999, 600);
   assert.equal(meta.collapse.available(), false);
   assert.equal(meta.collapse.preview().coreDustGain, 0);
   assert.equal(meta.collapse.do().ok, false);
   assert.equal(s().gold, 777, 'nothing changed');
-  readyForCollapse(4e6, 499);
+  readyForCollapse(8e7, 499);
   assert.equal(meta.collapse.available(), false);
-  readyForCollapse(1e6, 500);
+  readyForCollapse(2e7, 500);
   assert.equal(meta.collapse.available(), true);
-  assert.equal(meta.collapse.preview().coreDustGain, 1);
+  assert.equal(meta.collapse.preview().coreDustGain, 2); // sqrt(2e7 / 1e7) * 1.5 = 2.1
 });
 
 test('Collapse preview equals the real gain', () => {
   fresh();
-  readyForCollapse(4e6, 600);
+  readyForCollapse(4e7, 600);
   const preview = meta.collapse.preview();
   assert.equal(preview.coreDustGain, Math.floor(Math.sqrt(4) * 1.6));
   const before = meta.coreDust();

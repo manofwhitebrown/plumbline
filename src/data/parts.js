@@ -78,7 +78,7 @@ export const PART_DATA = {
   oilcan: {
     name: 'Oil Can', family: 'defense', tags: ['strain', 'steady'],
     desc: 'Lowers Strain a little every step.',
-    cost: 170, unlock: { type: 'depth', value: 70 }, tune: { strain: 0.5 },
+    cost: 170, unlock: { type: 'depth', value: 70 }, tune: { strain: 0.4 },
   },
   spikeguard: {
     name: 'Spike Guard', family: 'defense', tags: ['danger', 'ore'],
@@ -87,8 +87,8 @@ export const PART_DATA = {
   },
   cooler: {
     name: 'Cooler', family: 'defense', tags: ['strain', 'gem'],
-    desc: 'Lowers Strain by 2 when a gem is grabbed in its column.',
-    cost: 1300, unlock: { type: 'depth', value: 140 }, tune: { strain: 2 },
+    desc: 'Lowers Strain by 1.5 when a gem is grabbed in its column.',
+    cost: 1300, unlock: { type: 'depth', value: 140 }, tune: { strain: 1.5 },
   },
   shield: {
     name: 'Shield', family: 'defense', tags: ['block', 'area'],

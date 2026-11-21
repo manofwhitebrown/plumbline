@@ -58,7 +58,7 @@ test('Brace eases the rope and has a cooldown; bad ids do nothing', () => {
 
 test('a guardian appears, can be hit, and never snaps the rope in one step', () => {
   let met = 0;
-  for (const seed of [3, 4, 9]) {
+  for (const seed of [3, 4, 9, 11, 14, 21, 25, 30]) {
     const r = sim(seed);
     let prev = 0;
     for (const e of r.events) if (e.t === 'STRAIN') { if (prev < 0.8 * e.max) assert.ok(e.value <= 0.97 * e.max + 1e-6 || e.delta <= 0, 'one step jump'); prev = e.value; }

@@ -105,9 +105,9 @@ test('shield blocks hazards in a 3x3 area, 3 charges', () => {
 });
 
 test('oil can lowers strain every beat, cooler lowers it per gem in its column', () => {
-  assert.equal(beatWith(run1([['oilcan']]), []).fx.strainDelta, -0.5);
+  assert.equal(beatWith(run1([['oilcan']]), []).fx.strainDelta, -0.4);
   const out = beatWith(run1([['cooler'], ['hook']]), [gem(1, 1)]);
-  assert.equal(out.fx.strainDelta, -2);
+  assert.equal(out.fx.strainDelta, -1.5);
   assert.equal(beatWith(run1([['cooler', 'hook']]), [null, gem(1, 1)]).fx.strainDelta, 0);
 });
 

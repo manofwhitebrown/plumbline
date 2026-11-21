@@ -3,10 +3,10 @@
 export const ABILITIES = Object.freeze({
   brace: Object.freeze({
     id: 'brace', name: 'Brace', key: '1', desc: 'Eases the rope and slows the descent for a moment.',
-    strainPct: -0.12,          // takes 12% of the max off the strain
+    strainPct: -0.06,          // takes 6% of the max off the strain
     effectSteps: 4,            // about 3 s of slow descent
     slowMult: 0.6,             // metres per step while braced
-    cooldownSteps: 31,         // about 25 s
+    cooldownSteps: 38,         // about 30 s
     charges: 1,
     scaresWeevil: true,
   }),

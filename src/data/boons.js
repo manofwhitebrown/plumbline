@@ -29,7 +29,7 @@ export const OFFER = Object.freeze({
   biomeEdges: [250, 450, 700],
   legendaryFrom: 300,      // no Legendary before this depth
   rareBoostPerCentury: 0.04, // Rare gets this much more weight every 100 m
-  guardianWeights: { common: 0, rare: 70, legendary: 30 }, // the boon after a guardian
+  guardianWeights: { common: 0, rare: 82, legendary: 18 }, // the boon after a guardian
   affinityBias: 0.35,      // weight bonus for each matching part in the rig (up to 3 parts)
   maxPerRun: 40,
 });
@@ -66,9 +66,9 @@ export const SYNERGIES = Object.freeze({
 
 // Nothing can stack past these.
 export const CAPS = Object.freeze({
-  gold: 0.8, gem: 1, ore: 2, big: 1, strain: 0.3, hazard: 0.4, luck: 0.6, speed: 1, combo: 0.1, comboGrace: 40,
+  gold: 0.8, gem: 1, ore: 2, big: 1, strain: 0.25, hazard: 0.4, luck: 0.6, speed: 1, combo: 0.1, comboGrace: 40,
   second: 1, ward: 2, hazGold: 8, cd: 0.6, braceCharges: 2, surgeCharges: 2, maxStrain: 0.25, keep: 0.25,
-  relic: 0.2, chainGold: 0.4, famGold: 0.8, coolPerGem: 0.006,
+  relic: 0.2, chainGold: 0.4, famGold: 0.8, coolPerGem: 0.0012,
 });
 
 const b = (id, name, rarity, tags, desc, fx) => Object.freeze({ id, name, rarity, tags: Object.freeze(tags), desc, fx: Object.freeze(fx) });
@@ -81,7 +81,7 @@ export const BOONS = Object.freeze([
   b('thick_hide', 'Thick Hide', 'common', ['guard'], 'Dangers cost 25% less strain.', { hazard: 0.25 }),
   b('lucky_lamp', 'Lucky Lamp', 'common', ['luck'], 'Better gems rise more often.', { luck: 0.12 }),
   b('coin_purse', 'Coin Purse', 'common', ['value'], 'All gold is worth 10% more.', { gold: 0.1 }),
-  b('cool_head', 'Cool Head', 'common', ['guard'], 'Each gem you grab eases the rope a little.', { coolPerGem: 0.0015 }),
+  b('cool_head', 'Cool Head', 'common', ['guard'], 'Each gem you grab eases the rope a little.', { coolPerGem: 0.0006 }),
   b('quick_hands', 'Quick Hands', 'common', ['speed'], 'Skills come back 20% sooner.', { cd: 0.2 }),
   b('good_grease', 'Good Grease', 'common', ['guard'], 'Less strain and a little more gold.', { strain: 0.08, gold: 0.05 }),
   b('tough_rope', 'Tough Rope', 'common', ['guard'], 'The rope can take 10% more strain.', { maxStrain: 0.1 }),

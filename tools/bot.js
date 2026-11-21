@@ -10,10 +10,11 @@ import { ENGINE } from '../src/data/engine.js';
 import { computePayout } from '../src/run/payout.js';
 import { suggest } from '../src/tutorial/suggest.js';
 import { allParts, allCombos } from '../src/engine/parts/index.js';
+import { startOptions } from '../src/engine/play/firstHour.js';
 
 export const STYLES = { 50: 0.5, 70: 0.7, 85: 0.85, 100: null, never: null }; // number = haul at that % of Strain; 100 and never = never haul
 const START = 1_700_000_000_000;
-let PLAY;                       // undefined = old behaviour. The real game uses {} (boons on): pass opts.play = true or --play=on. Becomes the default once the numbers are retuned.
+let PLAY;                       // [ECONOMY-2] The real game has the play layer (boons, skills) on, so the bot does too. Pass opts.play = false or --play=off for the old plain engine.
 const DROP_PAUSE_S = 3;          // time the player spends on the results and rig screens
 const STUCK_S = 20 * 60;         // 20 simulated minutes without any way forward
 const DEPTH_MARKS = [100, 250, 500, 1000];
@@ -32,8 +33,9 @@ function bad(x) { return typeof x === 'number' && (!Number.isFinite(x) || x < 0)
 // Plays one style. Returns { style, problems, timeline, ... }. Never throws.
 export function playBot(style = '70', opts = {}) {
   const hours = Number.isFinite(opts.hours) ? opts.hours : 6;
-  PLAY = opts.play === true ? {} : undefined;
-  const boonStats = opts.boonStats || (opts.play === true ? newBoonStats() : null); // [ECONOMY-1] pick rates are always counted when the play layer is on
+  const playOn = opts.play !== false;
+  PLAY = playOn ? {} : undefined;
+  const boonStats = opts.boonStats || (playOn ? newBoonStats() : null); // [ECONOMY-1] pick rates are always counted when the play layer is on
   const maxDrops = Number.isFinite(opts.maxDrops) ? opts.maxDrops : 4000;
   const frac = STYLES[style];
   const problems = [];
@@ -97,15 +99,17 @@ export function playBot(style = '70', opts = {}) {
     : ({ run }) => (run.state.strain >= frac * run.state.maxStrain ? 'haul' : 'continue');
 
   const endAt = hours * 3600;
-  let seed = 1000;
+  let seed = Number.isFinite(opts.seed) ? Math.floor(opts.seed) : 1000, snapStreak = 0; // [ECONOMY-2] --seed=N repeats the same player with other luck
   while (simS < endAt && drops < maxDrops && problems.length === 0) {
     shop();
     rebuild();
     const mods = meta.getMods();
     const bestBefore = meta.stats.get ? (meta.stats.get().bestDepth || 0) : 0;
     let res;
-    try { res = simulateRun({ rig, mods, seed: seed++, policy, play: opts.play === true ? {} : undefined, withEvents: !!boonStats }); } catch (e) { fail('engine threw: ' + (e && e.message)); break; }
+    const playOpt = playOn && drops > 0 ? startOptions(drops, snapStreak) : undefined; // drop 0 is the tutorial drop (no play layer); then the first-hour script and mercy, like the real game
+    try { res = simulateRun({ rig, mods, seed: seed++, policy, play: playOpt, withEvents: !!boonStats }); } catch (e) { fail('engine threw: ' + (e && e.message)); break; }
     drops++;
+    snapStreak = res.outcome === 'snapped' ? snapStreak + 1 : 0;
     if (boonStats && res.events) tallyBoons(boonStats, res.events);
     wait(res.beats * ENGINE.baseBeatMs / 1000 + DROP_PAUSE_S);
     for (const k of ['gold', 'kept', 'depth', 'strain']) if (bad(res[k])) fail(`bad run number: ${k} = ${res[k]} (drop ${drops})`);
@@ -151,7 +155,7 @@ export function playBot(style = '70', opts = {}) {
     if (id !== 'hook' && !rigsBuilt.some((r) => r.indexOf(id) !== -1)) unused.push(id);
   }
   let impacts = {};
-  if (problems.length === 0) {
+  if (problems.length === 0 && opts.partChecks !== false) { // [ECONOMY-2] --parts=off skips the slow part checks while tuning
     for (const id of unused) fail(`part never worth buying: ${id}`);
     if (rig) {
       impacts = partImpacts(meta.getMods(), owned, rig);
@@ -229,13 +233,13 @@ const isMain = typeof process !== 'undefined' && process.argv[1] && import.meta.
 if (isMain) {
   const arg = (k, d) => { const a = process.argv.find((x) => x.startsWith('--' + k + '=')); return a ? a.split('=')[1] : d; };
   const which = arg('style', 'all');
-  const playOn = arg('play', 'off') === 'on';
+  const playOn = arg('play', 'on') !== 'off';
   const hours = Number(arg('hours', 6));
   const styles = which === 'all' ? ['70', '85', 'never'] : [which];
   let failed = 0;
   for (const s of styles) {
     if (!(s in STYLES)) { console.log('FAIL unknown style ' + s); failed++; continue; }
-    const r = playBot(s, { hours, play: playOn });
+    const r = playBot(s, { hours, play: playOn, seed: Number(arg('seed', NaN)), partChecks: arg('parts', 'on') !== 'off' });
     printResult(r);
     if (r.problems.length) failed++;
   }
