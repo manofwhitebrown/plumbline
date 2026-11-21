@@ -109,7 +109,7 @@ export const PART_DATA = {
   drill: {
     name: 'Drill', family: 'engine', tags: ['fast', 'strain', 'greedy'],
     desc: 'Dive faster (+1 m a step) but adds Strain.',
-    cost: 7200, unlock: { type: 'depth', value: 260 }, tune: { speed: 1, strain: 0.5 },
+    cost: 7200, unlock: { type: 'depth', value: 260 }, tune: { speed: 0.7, strain: 0.8 },
   },
   metronome: {
     name: 'Metronome', family: 'engine', tags: ['timing', 'double'],

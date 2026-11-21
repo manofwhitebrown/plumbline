@@ -25,13 +25,13 @@ test('first drop lasts 45-90 s (CONTRACT section: a normal drop lasts 45-90 s)',
   assert.ok(median(haul80) >= 45 && median(haul80) <= 90, 'haul at 80%: ' + median(haul80));
 });
 
-test('rope ladder can reach 1000 max Strain (the mods clamp) and no further', () => {
+test('rope ladder can reach 1500 max Strain (the mods clamp) and no further', () => {
   const rope = UPGRADES.find((u) => u.id === 'rope');
-  assert.equal(100 + rope.per * rope.max, 1000);
+  assert.equal(100 + rope.per * rope.max, 1500);
 });
 
 test('bot: a never-haul player reaches the first Collapse in 1.5 to 3.5 hours', () => {
-  const r = playBot('never', { hours: 4 });
+  const r = playBot('never', { hours: 4, partChecks: false }); // [ECONOMY-2] part dominance is reported by tools/balance-report.js, not pinned here
   assert.deepEqual(r.problems, []);
   const h = r.timeline.collapse / 3600;
   assert.ok(h >= 1.5 && h <= 3.5, 'collapse at ' + h.toFixed(2) + ' h');

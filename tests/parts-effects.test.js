@@ -123,7 +123,7 @@ test('spare rope adds 20 max strain, only once', () => {
 
 test('drill and anchor change speed and strain', () => {
   const d = beatWith(run1([['drill']]), []).fx;
-  assert.equal(d.speedAdd, 1); assert.ok(d.strainDelta > 0);
+  assert.equal(d.speedAdd, 0.7); assert.ok(d.strainDelta > 0); // [ECONOMY-2] Drill 0.7 speed, 0.8 strain (was 1 and 0.5)
   const a = beatWith(run1([['anchor']]), []).fx;
   assert.equal(a.speedAdd, -0.3); assert.ok(a.strainDelta < 0);
 });

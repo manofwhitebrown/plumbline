@@ -70,7 +70,7 @@ test('upgrades: buy, gate, currency, max level', () => {
   meta.addGold(1e11); // [ECONOMY-2] the full rope ladder now costs about 9e9
   const r = meta.upgrades.buy('rope');
   assert.equal(r.ok, true);
-  assert.equal(meta.getMods().maxStrain, 145);
+  assert.equal(meta.getMods().maxStrain, 170);
   assert.equal(meta.upgrades.buy('mender').ok, false, 'needs depth');
   assert.match(meta.upgrades.buy('mender').error, /Depth/);
   for (let i = 0; i < 20; i++) meta.upgrades.buy('rope');
@@ -105,23 +105,23 @@ function readyForCollapse(gold = 8e7, depth = 600) {
   st.shards = 42;
 }
 
-test('Collapse is locked until 500 m and 20M gold', () => {
+test('Collapse is locked until 500 m and 50M gold', () => {
   fresh();
-  readyForCollapse(19999999, 600);
+  readyForCollapse(49999999, 600);
   assert.equal(meta.collapse.available(), false);
   assert.equal(meta.collapse.preview().coreDustGain, 0);
   assert.equal(meta.collapse.do().ok, false);
   assert.equal(s().gold, 777, 'nothing changed');
-  readyForCollapse(8e7, 499);
+  readyForCollapse(2e8, 499);
   assert.equal(meta.collapse.available(), false);
-  readyForCollapse(2e7, 500);
+  readyForCollapse(5e7, 500);
   assert.equal(meta.collapse.available(), true);
-  assert.equal(meta.collapse.preview().coreDustGain, 2); // sqrt(2e7 / 1e7) * 1.5 = 2.1
+  assert.equal(meta.collapse.preview().coreDustGain, 2); // sqrt(5e7 / 2.5e7) * 1.5 = 2.1
 });
 
 test('Collapse preview equals the real gain', () => {
   fresh();
-  readyForCollapse(4e7, 600);
+  readyForCollapse(1e8, 600);
   const preview = meta.collapse.preview();
   assert.equal(preview.coreDustGain, Math.floor(Math.sqrt(4) * 1.6));
   const before = meta.coreDust();
