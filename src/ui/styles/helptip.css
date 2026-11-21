@@ -23,3 +23,7 @@
 .next-step { margin: 0; text-align: center; color: var(--gold-soft, #ffd77a); overflow-wrap: anywhere; }
 .home-income { justify-content: center; min-width: 0; }
 .banner-slot { display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+/* Rig: the three tips share one line on a 320 px phone. The tap area stays 44 px; only the space it takes shrinks. */
+.rig-helps { flex-wrap: nowrap; justify-content: space-between; column-gap: 0; }
+.rig-helps .helptip { margin-inline: -10px; }
