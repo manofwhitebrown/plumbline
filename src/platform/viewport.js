@@ -3,6 +3,7 @@
 //   --app-h (real visible height), --safe-top / --safe-right / --safe-bottom / --safe-left,
 // and data-wide="true" when the screen is a laptop-sized window.
 import { log } from '../core/log.js';
+import { installNative } from './native.js';
 
 const WIDE_MIN = 900;
 const DEFAULT = { w: 360, h: 640, dpr: 1 };
@@ -51,6 +52,7 @@ export function isLandscapeWide() {
 
 export function applyViewportVars() {
   if (!hasDom()) return;
+  installNative(); // phone glue (Back button, keep-awake, save on background); runs once
   try {
     const v = getViewport();
     const s = document.documentElement.style;
@@ -59,6 +61,8 @@ export function applyViewportVars() {
     s.setProperty('--safe-right', `${v.safe.right}px`);
     s.setProperty('--safe-bottom', `${v.safe.bottom}px`);
     s.setProperty('--safe-left', `${v.safe.left}px`);
+    s.setProperty('--sat', `${v.safe.top}px`);      // the names the screens' CSS reads
+    s.setProperty('--sab', `${v.safe.bottom}px`);
     document.documentElement.dataset.wide = v.wide ? 'true' : 'false';
   } catch (err) { log.warn('applyViewportVars failed', err); }
 }
