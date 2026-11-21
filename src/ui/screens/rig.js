@@ -174,13 +174,16 @@ registerScreen('rig', {
     scope.sub(bus, 'rig:changed', () => repaint());
 
     const bar = topbar({}, scope);
+    // The content scrolls inside .rig-scroll. The Suggest / Clear / Drop bar is a separate row under it,
+    // so no content can ever sit under the bar (at any size, with Large text or a notch).
     const screen = h('section', { class: 'screen screen-rig' },
-      bar,
-      gridHost, hint,
-      h('div', { class: 'card stack power' },
-        h('div', { class: 'row' }, h('span', { class: 'sub', text: 'Rig power' }), h('span', { class: 'grow' }), powerNum),
-        powerBar, combos, warns),
-      loadRow, h('div', { class: 'row rig-helps' }, titleWithTip('Loadouts', 'loadout', scope), titleWithTip('Suggest', 'suggest', scope), titleWithTip('Combo', 'combo', scope)), tray.el,
+      h('div', { class: 'rig-scroll' },
+        bar,
+        gridHost, hint,
+        h('div', { class: 'card stack power' },
+          h('div', { class: 'row' }, h('span', { class: 'sub', text: 'Rig power' }), h('span', { class: 'grow' }), powerNum),
+          powerBar, combos, warns),
+        loadRow, h('div', { class: 'row rig-helps' }, titleWithTip('Loadouts', 'loadout', scope), titleWithTip('Suggest', 'suggest', scope), titleWithTip('Combo', 'combo', scope)), tray.el),
       h('div', { class: 'actionbar' }, suggest, clearBtn, dropBtn));
     el.append(screen);
     repaint();

@@ -28,7 +28,7 @@
 #app[data-reduce="1"] .scene * { animation: none !important; }
 
 /* ---- rig ---- */
-.screen-rig { padding-top: 0; gap: var(--space-3); }
+.screen-rig { gap: var(--space-3); }
 .screen-rig .topbar { padding-left: 0; padding-right: 0; }
 .rig-host { display: flex; justify-content: center; }
 .rig-grid { display: grid; grid-template-columns: repeat(var(--cols), minmax(44px, 76px)); gap: 6px; padding: 10px; border-radius: var(--radius-card);
@@ -51,8 +51,15 @@
 .loadouts .chip { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tray { display: flex; gap: var(--space-2); overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: var(--space-2); }
 .tray .partcard { touch-action: pan-x; } .tray-empty { padding: var(--space-3); }
-.actionbar { position: sticky; bottom: calc(-1 * var(--space-4)); margin-top: auto; display: flex; gap: var(--space-2); padding: var(--space-3) 0 var(--space-4);
-  background: linear-gradient(transparent, var(--ink-800) 30%); z-index: 4; }
+/* Rig: the screen itself does not scroll. .rig-scroll scrolls and the action bar is its own row under it,
+   so nothing can sit under the bar. (Before: the bar was sticky and covered the (i) help buttons at 360x640 and 1440x900.)
+   The tab bar under the screen already pads the home-bar safe area, so it is not added a second time here. */
+.screen.screen-rig { overflow: hidden; padding: 0; gap: 0; }
+.screen.screen-rig > .rig-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-3); scroll-padding-bottom: var(--space-3); -webkit-overflow-scrolling: touch; }
+.rig-scroll > * { flex-shrink: 0; }
+.actionbar { flex: 0 0 auto; display: flex; gap: var(--space-2); padding: var(--space-3) var(--space-4) var(--space-3);
+  background: var(--ink-800); border-top: 1px solid var(--line); z-index: 4; }
 .actionbar .btn:last-child { min-height: 56px; }
 .drag-ghost { position: fixed; left: 0; top: 0; width: 56px; height: 56px; pointer-events: none; z-index: 999; opacity: .92; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .6)); }
 .sheet-icon { width: 56px; height: 56px; }
