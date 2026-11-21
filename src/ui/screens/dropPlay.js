@@ -61,5 +61,6 @@ export function createPlayUi(d, scope) {
     if (SKILL_ORDER[i]) { skills.use(SKILL_ORDER[i]); }
   });
 
-  return { nodes: [banner, guardian, ...skills.nodes, picker.el], picker, skills };
+  // stack: the banner and the guardian bar. The Drop screen puts them (and the chase pills) in one column under the goals.
+  return { nodes: [banner, guardian, ...skills.nodes, picker.el], stack: [banner, guardian], picker, skills };
 }

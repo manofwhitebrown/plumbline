@@ -62,11 +62,13 @@ registerScreen('drop', {
       onPause: () => controller && controller.openPause(),
     }, scope);
 
-    let playNodes = [];
-    try { playNodes = createPlayUi({ bus, session }, scope).nodes; } catch (e) { log.warn('drop: play ui failed'); } // [HOOK-1] optional layer
+    let playNodes = [], stackNodes = [];
+    try { const play = createPlayUi({ bus, session }, scope); stackNodes = play.stack || []; playNodes = play.nodes.filter((n) => !stackNodes.includes(n)); } catch (e) { log.warn('drop: play ui failed'); } // [HOOK-1] optional layer
     let chaseNodes = [];
     try { chaseNodes = createChaseUi({ bus }, scope).nodes; } catch (e) { log.warn('drop: chase ui failed'); } // [HOOK-1] wave 2 optional pills
-    const screen = h('section', { class: 'screen no-pad screen-drop' }, stage, ...hud.nodes, ...playNodes, ...chaseNodes, pause.el);
+    // [HUD-2] banner, guardian bar and chase pills share one column right under the goals, so they can never overlap each other or the goals.
+    try { hud.top.append(h('div', { class: 'drop-stack' }, ...stackNodes, ...chaseNodes)); } catch (e) { log.warn('drop: stack failed'); }
+    const screen = h('section', { class: 'screen no-pad screen-drop' }, stage, ...hud.nodes, ...playNodes, pause.el);
     el.append(screen);
 
     // Keep the canvas sharp and the right size.

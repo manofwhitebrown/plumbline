@@ -28,7 +28,7 @@ export function createHud(cb, scope) {
   const pills = [];
   for (let i = 0; i < PILLS; i++) {
     const fill = h('i', { class: 'goal-fill' });
-    const text = h('span', { class: 'goal-text ellipsis' });
+    const text = h('span', { class: 'goal-text' });
     const check = svg(iconHtml('check'), 'goal-check');
     pills.push({ el: h('span', { class: 'goal-pill', style: 'visibility:hidden' }, fill, check, text), fill, text, t: '', p: -1, d: false, v: false });
   }
@@ -127,5 +127,5 @@ export function createHud(cb, scope) {
     if (hauling) setText(sub, '');
   }
 
-  return { nodes: [edge, top, gauge, bottom], update, setHauling, haulBtn: haul, pauseBtn, gauge, edge };
+  return { nodes: [edge, top, gauge, bottom], top, update, setHauling, haulBtn: haul, pauseBtn, gauge, edge };
 }

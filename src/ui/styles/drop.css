@@ -31,22 +31,27 @@
 .hud-pause:active { transform: scale(.94); }
 
 /* ---- goal pills and combo ---- */
-.hud-goals { min-height: 24px; gap: 6px; }
-.goal-pill { position: relative; flex: 1 1 0; min-width: 0; height: 24px; display: flex; align-items: center; gap: 4px; padding: 0 6px; overflow: hidden;
-  border-radius: var(--radius-pill); border: 1px solid var(--line); background: rgba(13, 18, 32, .78); font-size: var(--fs-1); font-weight: 600; color: var(--text); }
+.hud-goals { min-height: 24px; gap: 4px; align-items: flex-start; }
+/* [HUD-2] banner, guardian bar and chase pills: one column under the goals, clear of the strain gauge on the left. */
+.drop-stack { display: flex; flex-direction: column; align-items: stretch; gap: 6px; margin: 2px 0 0 24px; min-width: 0; pointer-events: none; }
+.drop-stack:empty { display: none; }
+/* [HUD-2] a chip wraps to two lines (three at most) so the goal can be read; it never ends in "...". */
+.goal-pill { position: relative; flex: 1 1 0; min-width: 0; min-height: 24px; display: flex; align-items: center; gap: 2px; padding: 2px 5px; overflow: hidden;
+  border-radius: 12px; border: 1px solid var(--line); background: rgba(13, 18, 32, .78); font-size: var(--fs-1); line-height: 1.15; font-weight: 600; color: var(--text); }
 .goal-fill { position: absolute; inset: 0; transform-origin: left; transform: scaleX(0); background: rgba(70, 227, 163, .28); transition: transform var(--dur-slow) var(--ease); }
-.goal-text { position: relative; flex: 1 1 auto; min-width: 0; }
-.goal-check { position: relative; display: none; width: 12px; height: 12px; flex: none; color: var(--ok); }
+.goal-text { position: relative; flex: 1 1 auto; min-width: 0; white-space: normal; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.goal-check { position: relative; display: none; width: 10px; height: 10px; flex: none; color: var(--ok); }
 .goal-check svg { width: 100%; height: 100%; }
 .goal-pill.done { border-color: var(--ok); color: var(--ok); }
 .goal-pill.done .goal-check { display: inline-flex; }
-.hud-combo { flex: none; min-width: 44px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.hud-combo { flex: none; min-width: 0; height: 24px; display: none; align-items: center; justify-content: center; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   border-radius: var(--radius-pill); background: var(--gold); color: var(--ink-900); font-size: var(--fs-1); font-weight: 800; opacity: 0; transform: scale(.9);
   transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
-.hud-combo.on { opacity: 1; transform: none; }
+.hud-combo.on { display: inline-flex; opacity: 1; transform: none; animation: comboIn var(--dur-fast) var(--ease); }
+@keyframes comboIn { from { opacity: 0; transform: scale(.9); } }
 
 /* ---- strain gauge (left edge) ---- */
-.drop-gauge { position: absolute; left: 4px; top: 100px; bottom: calc(100px + var(--sab, env(safe-area-inset-bottom, 0px))); z-index: 3; width: 12px; overflow: hidden;
+.drop-gauge { position: absolute; left: 4px; top: 112px; bottom: calc(100px + var(--sab, env(safe-area-inset-bottom, 0px))); z-index: 3; width: 12px; overflow: hidden;
   border-radius: var(--radius-pill); border: 1px solid var(--line); background: rgba(7, 10, 18, .65); pointer-events: none; }
 .gauge-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 100%; transform-origin: bottom; transform: scaleY(0); background: var(--ok);
   transition: transform var(--dur-slow) var(--ease), background-color var(--dur-slow); }
