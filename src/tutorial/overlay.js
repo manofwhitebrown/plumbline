@@ -30,7 +30,7 @@ export function createOverlay(doc, win) {
   let gotBtn = null;
   let skipBtn = null;
   let handlers = { onButton: null, onSkip: null };
-  let last = { text: '', button: '', rects: [] };
+  let last = { text: '', button: null, rects: [] };
   let visible = false;
   let resizeOff = null;
 
