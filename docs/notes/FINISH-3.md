@@ -7,3 +7,6 @@
 - Saw it work in a real headless Chromium at 320x568, 360x640, 430x932: Wall at 0, 12, 36 found, Looks with preview, no sideways scroll, no console errors.
 - Wall bonus now reaches real Drops: guarded block in src/meta/mods.js getMods (request note docs/requests/FINISH-3-to-AI5-wall-hooks.md); test tests/hook3-wallmods.test.js.
 - Bug fixed: relicBook only started listening when the Codex was opened, so relics found in a Drop before that were lost. cosmeticsHook.js (loaded with Home and Drop) now imports it.
+- Speed: AFTER table in docs/perf/PERF-2.md; added looks/reduce options to dev/perf-run.js and perf-lab.js; tests/perf-idle.test.js.
+
+STATUS: DONE (gaps: 6x AFTER run, memory run at 430x932, browser look at Looks in Drop and Home, real-phone speed).

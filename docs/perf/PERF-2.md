@@ -51,3 +51,32 @@
 - High costs about 100 ms more per frame than low at 4x (gap median about 225 vs 133). Depth layer (CPU canvas, 1x, clay, high) alone: median 22.6 ms; the camera blit is 10.7 of that, foreground silhouettes 3.5, lights 2.9, fog 2.0, everything else under 1.5 each. Medium: 10.5 ms total (blit 5.4, foreground 3.6).
 - Auto mode did not help: it ended on 'high' (or fell straight to low) in every biome. Cause: quality.js drops layers after 2 s of slow frames and then jumps to low, while the governor needs 45 frames (about 11 s at these speeds) before it moves at all, and nothing ever raises quality again after quality.js went to low.
 - Sandbox artifact: with `--canvas gpu` (Chromium's software GPU) single frames stall for 9 to 27 s inside one raster flush; not a game problem.
+
+## AFTER (FINISH-3, main with PERF-2 fixes, rich Looks worn), 4x slowdown, 360x640 dpr 2, 10 s counted, all numbers in ms
+Same sandbox limits as above (1 core, no GPU): compare with BEFORE, do not read as phone speed. In auto, the governor now steps down within about 3 s and ends on minimal/low in every biome (before: stayed on high or fell straight to low).
+| quality | biome | gap median | gap p95 | gap worst | draw median |
+|---|---|---|---|---|---|
+| low | clay | 100 | 150 | 150 | 0.5 |
+| low | quartz | 116.6 | 166.6 | 166.7 | 0.6 |
+| low | amber | 116.7 | 166.7 | 183.3 | 0.6 |
+| low | magma | 116.6 | 166.6 | 183.3 | 0.5 |
+| low | void | 100.1 | 133.4 | 166.7 | 0.5 |
+| low | abyss | 100 | 149.9 | 166.6 | 0.5 |
+| high | clay | 183.4 | 250 | 250.1 | 42.5 |
+| high | quartz | 200 | 250.1 | 300 | 52.2 |
+| high | amber | 199.9 | 266.7 | 283.4 | 44 |
+| high | magma | 183.3 | 216.7 | 233.4 | 38.8 |
+| high | void | 166.7 | 200 | 233.4 | 39.6 |
+| high | abyss | 183.4 | 300.1 | 366.6 | 49.4 |
+| auto | clay | 116.7 | 183.3 | 233.3 | 0.6 |
+| auto | quartz | 116.7 | 183.3 | 183.4 | 0.7 |
+| auto | amber | 116.7 | 216.6 | 233.3 | 0.7 |
+| auto | magma | 116.7 | 183.4 | 283.3 | 0.6 |
+| auto | void | 116.7 | 183.3 | 233.4 | 0.6 |
+| auto | abyss | 133.3 | 183.4 | 266.7 | 0.6 |
+
+## What changed (4x, median of gap)
+- low: about 133 before, 100 to 117 now. high: 217-233 before, 167-200 now (draw median clay 53.8 -> 42.5, quartz 58.3 -> 52.2). auto: 200-250 before, 117-133 now.
+- Equipped Looks: 1x high, clay and abyss, draw median 10.9/11.2 without Looks and 11.0/12.1 with them: inside the noise of this box. Looks add no textures and no per-frame allocation (tests/hook3-render.test.js).
+- Not reached: the target (p95 under 16.7 ms at 4x on low) cannot be judged in this sandbox (floor about 100 ms even on low). Only 4x was re-run; 6x AFTER and the memory test at 430x932 were not done.
+- Pause when hidden and Reduce motion idle: tests/perf-idle.test.js. Repeat everything with dev/perf-run.js (new options --looks 1, --reduce 1). 24 MB texture test: tests/perf-texture-budget.test.js (still passing).

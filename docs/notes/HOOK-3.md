@@ -17,3 +17,6 @@
 ## Next
 - Wall and Looks panels (own files), request notes, browser check.
 - Wall and Looks panels written: src/ui/screens/codexWall.js (panels), wallModel.js (plain data), wallShapes.js (31 relic pictures), src/ui/styles/wall.css. Tests: tests/hook3-wall-model.test.js. They only show once the Codex owner adds the two tabs (request note next).
+
+- FINISH-3 check: Wall and Looks tabs now in the Codex, Looks live preview, Wall bonus in getMods, relic book always listening, cheats/words/tests present, seen in headless Chromium at 320x568, 360x640, 430x932. Gap: equipped Looks in the Drop and Home not looked at in a browser (tests cover the pixels).
+STATUS: DONE (gap named above).

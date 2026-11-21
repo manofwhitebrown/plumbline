@@ -1,5 +1,5 @@
 // Plumbline speed lab (PERF-2). Plays one scripted Drop on the real renderer and records every frame.
-// Query: biome (clay..abyss), quality (auto | high | low), seconds, w, h, dpr, particles (held at this many).
+// Query: biome (clay..abyss), quality (auto | high | low), seconds, w, h, dpr, particles (held at this many), looks=1 (wear rich Looks), reduce=1.
 // The Drop is a worst case on purpose: a full rig, a full row of gems and dangers every step, chains and
 // hits every step, high strain, and the particle count held at the cap. This stands in for a boss or
 // encounter (the renderer has no boss picture of its own; it only draws events).
@@ -7,6 +7,8 @@
 import { createRenderer } from '../src/render/index.js';
 import { PART_KEYS } from '../src/render/partIcon.js';
 import { BIOME_IDS } from '../src/render/palette.js';
+import * as looksHook from '../src/render/cosmeticsHook.js';
+import { cosmeticById } from '../src/data/cosmetics.js';
 
 const q = new URLSearchParams(location.search);
 const P = {
@@ -50,6 +52,8 @@ const S = { depth: BIOME_START[P.biome] + 20, beat: 0, strain: 82, max: 100, gol
 const view = () => ({ status: 'running', depth: S.depth, strain: S.strain, maxStrain: S.max, biomeId: P.biome, combo: S.combo, gold: S.gold });
 
 const r = createRenderer(cv, { reduceMotion: P.reduce, quality: P.quality === 'low' ? 'low' : 'high' });
+// ?looks=1 wears the three richest Looks (gradient well wash, star rope, gilded bucket) to prove they cost nothing. [FINISH-3]
+if (q.get('looks') === '1') looksHook.setLooks({ bucket: cosmeticById('bkt_gilded'), rope: cosmeticById('rp_star'), well: cosmeticById('wl_rose') });
 r.resize(P.w, P.h, P.dpr);
 if (P.quality !== 'auto') r.setQuality(P.quality); else r.setQuality('auto');
 r.setRun(view(), rig);

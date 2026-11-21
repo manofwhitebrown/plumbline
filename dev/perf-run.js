@@ -24,6 +24,8 @@ const PORT = 5173, BASE = 'http://localhost:' + PORT;
 const throttles = list(arg('throttle', '4,6')).map(Number);
 const qualities = list(arg('quality', 'low,high,auto'));
 const biomes = list(arg('biomes', 'clay,quartz,amber,magma,void,abyss'));
+const looksOn = arg('looks', '0') === '1'; // --looks 1 wears the richest Looks
+const reduceOn = arg('reduce', '0') === '1'; // --reduce 1 = Reduce motion on
 const bench = arg('bench', ''); // 'depth' = time the depth layer alone, stage by stage
 const seconds = Number(arg('seconds', 20)), warm = Number(arg('warm', 6)), dpr = Number(arg('dpr', 2)), particles = Number(arg('particles', 300));
 const canvasMode = arg('canvas', 'cpu'); // cpu = canvas drawn by the CPU (like a weak phone); gpu = Chromium's software GPU emulator (SwiftShader, slow and spiky)
@@ -53,7 +55,7 @@ try {
     const cdp = await page.createCDPSession();
     await cdp.send('Emulation.setCPUThrottlingRate', { rate });
     page.on('pageerror', (e) => console.error('page error:', e.message));
-    await page.goto(`${BASE}/dev/perf-lab.html?biome=${biome}&quality=${quality}&seconds=${seconds}&warm=${warm}&w=${vw}&h=${vh}&dpr=${dpr}&particles=${particles}${bench ? '&bench=' + bench + '&level=' + quality : ''}`, { waitUntil: 'load' });
+    await page.goto(`${BASE}/dev/perf-lab.html?biome=${biome}&quality=${quality}&seconds=${seconds}&warm=${warm}&w=${vw}&h=${vh}&dpr=${dpr}&particles=${particles}${looksOn ? '&looks=1' : ''}${reduceOn ? '&reduce=1' : ''}${bench ? '&bench=' + bench + '&level=' + quality : ''}`, { waitUntil: 'load' });
     await page.waitForFunction('window.__perf', { timeout: (seconds + warm + 60) * 1000 * Math.max(1, rate / 2), polling: 500 });
     const res = await page.evaluate('window.__perf'); res.throttle = rate; rows.push(res);
     if (res.bench) { console.log(`${rate}x depth ${res.level.padEnd(6)} ${biome.padEnd(6)} median ${res.medianMs} p95 ${res.p95Ms} ms | ${JSON.stringify(res.meanStageMs)}`); await page.close(); continue; }
