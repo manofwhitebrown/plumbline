@@ -87,7 +87,7 @@ export function info(partId) {
   const from = lv === 0 ? 0 : MASTERY_USES[lv - 1];
   const to = maxed ? from : MASTERY_USES[lv];
   return {
-    id: String(partId), level: lv, max: MASTERY_MAX, uses: u, maxed,
+    id: String(partId), level: lv, max: MASTERY_MAX, uses: u, maxed, toNext: maxed ? 0 : Math.max(0, to - u),
     fraction: maxed ? 1 : Math.min(1, Math.max(0, (u - from) / Math.max(1, to - from))),
     goldPct: pct(MASTERY_GOLD_PER_LEVEL * lv), sentence: sentenceFor(lv),
   };

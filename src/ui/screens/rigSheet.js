@@ -3,6 +3,7 @@ import { h } from '../dom.js';
 import { button } from '../components/button.js';
 import { sheet } from '../shell.js';
 import { api } from '../api.js';
+import { masteryBlock } from './masteryUi.js'; // [HOOK-2]
 
 export function openPartSheet(r, c, partId, actions) {
   const part = api.getPart(partId);
@@ -13,6 +14,7 @@ export function openPartSheet(r, c, partId, actions) {
     h('p', { class: 'sub grow', text: part && part.desc ? part.desc : 'A part for your rig.' })));
   const tags = (part && Array.isArray(part.tags) ? part.tags : []).slice(0, 6);
   if (tags.length) body.append(h('div', { class: 'row wrap' }, ...tags.map((t) => h('span', { class: 'pill', text: String(t) }))));
+  try { body.append(masteryBlock(partId)); } catch (e) { /* no mastery */ } // [HOOK-2]
   let s = null;
   const row = h('div', { class: 'row' });
   row.append(button({ label: 'Move', onPress: () => { s.close(); actions.onMove(r, c); } }));

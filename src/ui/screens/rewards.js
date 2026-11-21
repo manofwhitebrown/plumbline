@@ -8,8 +8,13 @@ import { bus } from '../soft.js';
 import { buildDaily } from './rewardsDaily.js';
 import { buildQuests } from './rewardsQuests.js';
 import { buildAchievements } from './rewardsAchievements.js';
+import { buildDive } from './diveUi.js'; // [HOOK-2]
+import { buildContracts } from './contractsUi.js'; // [HOOK-2]
+import * as hook2Dive from '../../meta/dive.js'; // [HOOK-2]
+import * as hook2Contracts from '../../meta/contracts.js'; // [HOOK-2]
 import '../styles/rewards.css';
 import { titleWithTip, helpTip } from '../components/helpTip.js';
+import '../styles/hook2.css'; // [HOOK-2] Mastery, Contracts, Daily Dive
 
 let scope = null;
 
@@ -22,13 +27,16 @@ registerScreen('rewards', {
     const refreshBadge = () => {
       let can = false;
       try { can = !!meta.daily.state().canClaim; } catch (e) { /* no dot */ }
+      try { const d = hook2Dive.state(); can = can || d.canPlay || d.chest.state === 'ready' || hook2Contracts.unclaimed() > 0; } catch (e) { /* no dot */ } // [HOOK-2]
       setBadge('rewards', can);
     };
     const ctx = { meta, toast, scope, onChange: () => { refreshBadge(); parts.forEach((p) => p.update()); } };
     const daily = buildDaily(ctx);
     const quests = buildQuests(ctx);
     const achs = buildAchievements(ctx);
-    parts.push(daily, quests, achs);
+    const dive = buildDive(ctx); // [HOOK-2]
+    const contracts = buildContracts(ctx); // [HOOK-2]
+    parts.push(dive, daily, contracts, quests, achs);
 
     const more = h('div', { class: 'rw-more' },
       button({ label: 'How to play', onPress: () => go('guide') }, scope),
@@ -38,9 +46,10 @@ registerScreen('rewards', {
       bar,
       h('div', { class: 'rw-body' },
         h('div', { class: 'row rw-tips' }, h('h1', { class: 'rw-title', text: 'Rewards' }), helpTip('daily', { scope }), titleWithTip('Goals', 'goals', scope)),
-        daily.el, quests.el, achs.el, more));
+        dive.el, daily.el, contracts.el, quests.el, achs.el, more));
     el.append(screen);
 
+    scope.sub(bus, 'dive:done', () => { parts.forEach((p) => p.update()); refreshBadge(); }); // [HOOK-2]
     scope.sub(bus, 'meta:changed', () => { parts.forEach((p) => p.update()); refreshBadge(); });
     scope.sub(bus, 'achievement:unlocked', () => achs.update());
     // Keeps the countdown fresh and notices a new day.

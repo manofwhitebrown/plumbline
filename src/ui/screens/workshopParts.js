@@ -6,6 +6,7 @@ import { button } from '../components/button.js';
 import { api } from '../api.js';
 import { affordText } from '../logic/afford.js';
 import { fmt } from '../soft.js';
+import { masteryCardRow, masteryBlock } from './masteryUi.js'; // [HOOK-2]
 
 export const FAMILIES = ['collector', 'processor', 'defense', 'engine', 'special'];
 export const FAMILY_NAMES = { all: 'All', collector: 'Collectors', processor: 'Processors', defense: 'Defense', engine: 'Engines', special: 'Special' };
@@ -75,7 +76,8 @@ export function partCardEl(row, handlers, scope) {
   const id = String(row && row.id);
   const name = h('div', { class: 'ws-name ellipsis' });
   const line = h('div', { class: 'sub ws-line' });
-  const main = h('button', { type: 'button', class: 'ws-main', 'aria-label': 'Details' }, icon(id, 48), name, line);
+  let mast = null; try { mast = masteryCardRow(id); } catch (e) { mast = null; } // [HOOK-2]
+  const main = h('button', { type: 'button', class: 'ws-main', 'aria-label': 'Details' }, icon(id, 48), name, line, mast ? mast.el : null);
   scope.on(main, 'click', () => hd.open && hd.open(id));
   const buy = button({ label: 'Buy', kind: 'primary', onPress: () => hd.buy && hd.buy(id, el), onDeny: (why) => hd.deny && hd.deny(id, why, el) }, scope);
   buy.classList.add('ws-buy');
@@ -89,6 +91,7 @@ export function partCardEl(row, handlers, scope) {
     el.classList.toggle('locked', st.state === 'locked');
     el.classList.toggle('owned', st.state === 'owned');
     lockIcon.hidden = st.state !== 'locked';
+    if (mast) { try { mast.update(st.state !== 'locked'); } catch (e) { /* no pips */ } } // [HOOK-2]
     // The tutorial points at the Buy button itself (tapping the card would only open its details).
     if (st.canBuy) buy.setAttribute('data-tut', 'workshop-part'); else buy.removeAttribute('data-tut');
     buy.setState({ label: st.buyLabel, disabled: !st.canBuy, reason: st.reason || st.line });
@@ -112,6 +115,7 @@ export function partSheetBody(row, gold, combos, handlers) {
   kids.push(h('div', { class: 'sub', text: cs.length ? 'Combos it joins' : 'No Combos found yet' }));
   if (cs.length) kids.push(h('ul', { class: 'ws-combos' }, ...cs.map((c) => h('li', {}, h('strong', { text: c.name }), h('div', { class: 'sub', text: c.desc })))));
   kids.push(h('div', { class: 'sub', text: st.line }));
+  if (st.state !== 'locked') { try { kids.push(masteryBlock(st.id)); } catch (e) { /* no mastery */ } } // [HOOK-2]
   const b = button({ label: st.buyLabel, sub: st.canBuy ? fmt(st.cost) + ' Gold' : '', kind: 'primary', disabled: !st.canBuy, reason: st.reason || st.line,
     onPress: () => handlers && handlers.buy && handlers.buy(st.id, null), onDeny: (why) => handlers && handlers.deny && handlers.deny(st.id, why, null) });
   kids.push(b);

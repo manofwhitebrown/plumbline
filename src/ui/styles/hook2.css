@@ -1,0 +1,29 @@
+/* Mastery, Contracts and Daily Dive. Mobile first, nothing here has a fixed width. */
+
+/* ---- Mastery pips ---- */
+.mast-pips { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+.mast-pip { width: 10px; height: 10px; border-radius: 3px; transform: rotate(45deg); border: 1.5px solid var(--muted); background: transparent; flex: 0 0 auto; }
+.mast-pip.on { background: var(--gold); border-color: var(--gold); }
+.mast-pips.big .mast-pip { width: 14px; height: 14px; }
+.mast-card-row { display: flex; align-items: center; justify-content: center; min-height: 14px; margin-top: 2px; }
+.mast-block { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-btn); background: var(--ink-800); border: 1px solid var(--line); min-width: 0; }
+.mast-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-width: 0; }
+.mast-title { font-size: var(--fs-2); font-weight: 700; }
+.mast-sentence { font-size: var(--fs-2); overflow-wrap: anywhere; }
+.mast-recent { font-size: var(--fs-2); color: var(--gold-soft); overflow-wrap: anywhere; }
+
+/* ---- Contracts (reuses the .rw-quest look from Rewards) ---- */
+.rw-contracts { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.rw-contracts .sub { overflow-wrap: anywhere; }
+
+/* ---- Daily Dive ---- */
+.dv-card { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; border-color: var(--gold); }
+.dv-twist { display: flex; flex-direction: column; gap: 2px; padding: var(--space-3); border-radius: var(--radius-btn); background: var(--ink-800); border: 1px solid var(--line); min-width: 0; }
+.dv-twist-name { font-size: var(--fs-3); font-weight: 800; color: var(--gold-soft); }
+.dv-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.dv-stat { display: flex; flex-direction: column; gap: 2px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-btn); background: var(--ink-800); border: 1px solid var(--line); min-width: 0; }
+.dv-stat .num { font-size: var(--fs-4); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dv-chest { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.dv-chest .grow { min-width: 0; }
+.dv-chest .btn { flex: 0 0 auto; }
+.dv-card .btn-big { width: 100%; }
