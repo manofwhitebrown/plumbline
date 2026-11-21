@@ -43,7 +43,12 @@ export const STEPS = [
   { id: 'rig-place', targets: ['rig-new-part', 'rig-good-cell'], text: 'Put your new part on the bucket.', mode: 'action',
     on: [{ bus: 'rig:changed' }], skipTo: 'final', maxMs: 40000, maxTo: 'final' },
   { id: 'second-drop', targets: ['home-drop', 'rig-drop', 'tab-home'], text: 'Drop again.', mode: 'action',
-    on: [{ bus: 'run:started' }], skipTo: 'final', maxMs: 60000, maxTo: 'final' },
+    on: [{ bus: 'run:started' }], skipTo: 'crew-intro', maxMs: 60000, maxTo: 'crew-intro' },
+  // Two short, skippable notes. They wait (findMs) until a screen with the tab bar is showing again after the second drop.
+  { id: 'crew-intro', targets: ['tab-crew'], text: 'Crew earn Gold while you rest. Open Crew any time.', mode: 'info',
+    on: [{ afterMs: 60000 }], skipTo: 'final', findMs: 180000 },
+  { id: 'workshop-intro', targets: ['tab-workshop'], text: 'The Workshop sells new Parts and upgrades.', mode: 'info',
+    on: [{ afterMs: 30000 }], skipTo: 'final', findMs: 20000 },
   { id: 'final', targets: [], text: 'Go deeper. One more meter.', mode: 'info',
     on: [{ afterMs: 4500 }] },
 ];

@@ -86,6 +86,14 @@ test('happy path: every step in order, then done', () => {
   bus.emit('rig:changed', {});
   assert.equal(t.flow.currentId(), 'second-drop');
   bus.emit('run:started', {});
+  assert.equal(t.flow.currentId(), 'crew-intro');
+  t.present.add('tab-crew').add('tab-workshop');
+  t.timers.advance(300);
+  assert.match(t.last().text, /Crew earn Gold/);
+  t.last().onButton();
+  assert.equal(t.flow.currentId(), 'workshop-intro');
+  t.timers.advance(300);
+  t.last().onButton();
   assert.equal(t.flow.currentId(), 'final');
   assert.equal(t.last().text, 'Go deeper. One more meter.');
   t.timers.advance(4500);
