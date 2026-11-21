@@ -27,4 +27,11 @@ STATUS: NOT DONE (work in progress)
 - DONE: PLAY.md now covers Contracts, Daily Dive, Mastery, Relic Wall, Looks (594 words, test passes).
 - SEEN: Home at 320x568 and 430x932 with Large text: no sideways overflow, hint line wraps to two lines and fits. The Home "i" tip was not opened this pass (ONBOARD-1 saw tips open at all sizes).
 - NOT SEEN: second Drop, Crew and Workshop closing notes; stray ring beside the Magnet on the Rig step.
-STATUS: NOT DONE (second Drop to end not seen on screen)
+
+## Pass 4 (finish, 21 Nov 2026)
+- SEEN (headless Chromium, real touch taps, brand-new save, 360x640, 320x568, 430x932): the whole tutorial from Tap Drop to "Go deeper": Drop, Gems rise, Rope tighter, Haul Up, Gold and Home, Workshop, Buy, Rig, place the part, second Drop, Crew note, Workshop note, final. 13 steps, no console errors, no NaN text.
+- FOUND AND FIXED: on the Rig step the guide scrolls the new part into view, which pushed the grid square off the top; its ring was drawn out of sight, and at 320x568 the step timed out and skipped to the end. Now the part ring shows first and the square ring only after the part is picked (src/tutorial/target.js, test added in tests/onboard-place.test.js). Seen: Magnet ringed at 320, then the next step.
+- SEEN: the Home notes sit above the well and no longer cover the hint lines (QA-1 problem 11 is fixed). The stray tall ring beside the Magnet was this bug.
+- NOTE: on "That is your Gold. Tap Home." the ring is on the Gold row, the words say Home; a tap on Home works. Left as is.
+- NOT SEEN: tutorial with Large text on, tutorial with Reduce motion on.
+STATUS: NOT DONE (tutorial with Large text and with Reduce motion not seen; everything else seen)

@@ -112,6 +112,11 @@ export function makeFinder(doc, opts) {
   return function find(name) {
     try {
       if (!doc || typeof name !== 'string') return null;
+      // [ONBOARD-2] One ring at a time on a small screen: the part first, the square only after a part is picked (both never fit; the square scrolled out of sight).
+      const partEl = doc.querySelector('[data-tut~="rig-new-part"]');
+      const picked = !!(partEl && partEl.classList && partEl.classList.contains('sel'));
+      if (name === 'rig-good-cell' && partEl && partEl.classList && !picked) return null;
+      if (name === 'rig-new-part' && picked) return null;
       if (name === 'rig-good-cell') {
         const list = doc.querySelectorAll('[data-tut~="rig-cell"]');
         const cells = [];

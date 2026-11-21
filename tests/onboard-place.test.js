@@ -112,3 +112,18 @@ test('Results step is patient (slow phones) but never endless', () => {
   const s = STEPS.find((x) => x.id === 'results-gold');
   assert.ok(s.findMs >= 30000 && s.maxMs <= 180000);
 });
+
+test('Rig step shows the part first, the square only after the part is picked', () => {
+  const mk = (sel) => ({ classList: { contains: (c) => sel && c === 'sel' }, getBoundingClientRect: () => ({ left: 10, top: 300, width: 80, height: 90 }) });
+  const cell = { getAttribute: (a) => ({ 'data-r': '0', 'data-c': '1', 'data-part': 'empty' })[a] || null, getBoundingClientRect: () => ({ left: 50, top: 200, width: 58, height: 58 }) };
+  const run = (sel) => {
+    const part = mk(sel);
+    const doc = { defaultView: { innerHeight: 640 }, querySelector: (q) => (q.indexOf('rig-new-part') >= 0 ? part : null), querySelectorAll: () => [cell] };
+    const find = makeFinder(doc, {});
+    return { part: find('rig-new-part'), cell: find('rig-good-cell') };
+  };
+  const before = run(false);
+  assert.ok(before.part && !before.cell, 'part ring only');
+  const after = run(true);
+  assert.ok(!after.part && after.cell, 'square ring only');
+});
