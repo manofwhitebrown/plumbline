@@ -52,3 +52,8 @@ Boon share of picks: highest 9% (Miser, style 100); per offer, rare boons are no
 4. Contracts, Mastery and Daily Dive pay on top: Mastery is capped at 15% of a drop's Gold, so headroom is about 15%. Not re-run with them separately.
 
 STATUS: NOT DONE (style 50 slow after 250 m, Net still mandatory, see above)
+
+## Last try (not applied)
+Better Grease +6% per level (was 4%): style 50 unchanged (250 m at 14.8 min, no 500 m in 6 h), style 85 and 100 only a little faster. So Grease is not the lever for style 50. The blocker is the rig itself: hazards plus a growing rig cost about 4 strain per metre, and a half-rope hauler runs out of room near 250 m. Next idea for the owner of src/engine/parts: a cheap second wide collector, or a part that cuts hazard strain early, so careful rigs stay light.
+
+STATUS: NOT DONE (style 50 slow after 250 m, Net still mandatory; everything else meets targets)
