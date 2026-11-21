@@ -15,6 +15,7 @@ import { buildGrid } from './rigGrid.js';
 import { buildTray } from './rigTray.js';
 import { enableDrag } from './rigDrag.js';
 import { openPartSheet } from './rigSheet.js';
+import { titleWithTip } from '../components/helpTip.js';
 
 let scope = null;
 
@@ -179,7 +180,7 @@ registerScreen('rig', {
       h('div', { class: 'card stack power' },
         h('div', { class: 'row' }, h('span', { class: 'sub', text: 'Rig power' }), h('span', { class: 'grow' }), powerNum),
         powerBar, combos, warns),
-      loadRow, tray.el,
+      loadRow, h('div', { class: 'row rig-helps' }, titleWithTip('Loadouts', 'loadout', scope), titleWithTip('Suggest', 'suggest', scope), titleWithTip('Combo', 'combo', scope)), tray.el,
       h('div', { class: 'actionbar' }, suggest, clearBtn, dropBtn));
     el.append(screen);
     repaint();

@@ -7,6 +7,7 @@ import { api } from '../api.js';
 import { bus, ui, fmtDepth } from '../soft.js';
 import { TABS, buildModel, markSeen } from './codexTabs.js';
 import '../styles/codex.css';
+import { helpTip } from '../components/helpTip.js';
 
 let scope = null;
 let activeTab = 'part'; // remembered while the app is open
@@ -87,7 +88,7 @@ registerScreen('codex', {
       tabsEl.append(b);
     }
     const screen = h('section', { class: 'screen screen-codex' },
-      h('div', { class: 'cx-head' }, h('h1', { class: 'cx-title', text: 'Codex' }), count),
+      h('div', { class: 'cx-head' }, h('div', { class: 'row' }, h('h1', { class: 'cx-title', text: 'Codex' }), helpTip('codex', { scope })), count),
       bar, tabsEl, list);
     el.append(screen);
 

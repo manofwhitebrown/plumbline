@@ -11,8 +11,8 @@ import { fmt, fmtDepth } from '../src/core/format.js';
 const text = (sections) => sections.map((s) => s.lines.join(' ')).join(' ');
 const BANNED = /\b(beat|lane|tick|entity|null|undefined|NaN|Infinity|seed|slice|bus|payload|debug)\b/i;
 
-test('guide has the five sections in order', () => {
-  assert.deepEqual(guideSections().map((s) => s.id), ['goal', 'parts', 'strain', 'crew', 'collapse']);
+test('guide has the six sections in order', () => {
+  assert.deepEqual(guideSections().map((s) => s.id), ['goal', 'parts', 'strain', 'crew', 'collapse', 'words']);
 });
 
 test('every number in the text comes from the data files', () => {

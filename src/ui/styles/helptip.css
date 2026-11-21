@@ -18,3 +18,8 @@
 .helptip-text { font-size: 14px; }
 @keyframes helptipIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .reduce-motion .helptip-body, [data-reduce="1"] .helptip-body { animation: none; }
+.rig-helps, .crew-tips, .ws-tips, .rw-tips { flex-wrap: wrap; column-gap: 8px; row-gap: 0; }
+.helptip-row.center { justify-content: center; }
+.next-step { margin: 0; text-align: center; color: var(--gold-soft, #ffd77a); overflow-wrap: anywhere; }
+.home-income { justify-content: center; min-width: 0; }
+.banner-slot { display: flex; align-items: center; justify-content: center; gap: 4px; }

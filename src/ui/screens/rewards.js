@@ -9,6 +9,7 @@ import { buildDaily } from './rewardsDaily.js';
 import { buildQuests } from './rewardsQuests.js';
 import { buildAchievements } from './rewardsAchievements.js';
 import '../styles/rewards.css';
+import { titleWithTip, helpTip } from '../components/helpTip.js';
 
 let scope = null;
 
@@ -36,7 +37,7 @@ registerScreen('rewards', {
     const screen = h('section', { class: 'screen screen-rewards no-pad' },
       bar,
       h('div', { class: 'rw-body' },
-        h('h1', { class: 'rw-title', text: 'Rewards' }),
+        h('div', { class: 'row rw-tips' }, h('h1', { class: 'rw-title', text: 'Rewards' }), helpTip('daily', { scope }), titleWithTip('Goals', 'goals', scope)),
         daily.el, quests.el, achs.el, more));
     el.append(screen);
 

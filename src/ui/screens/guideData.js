@@ -7,6 +7,10 @@ import { DAILY } from '../../data/rewards.js';
 import { PART_DATA, FAMILIES } from '../../data/parts.js';
 import { biomes } from '../../data/biomes.js';
 import { fmt, fmtDepth } from '../../core/format.js';
+import { HELP } from '../../data/help.js';
+
+// Words that have no screen title of their own. Same plain lines as the "i" tips.
+const WORD_IDS = ['combo', 'loadout', 'suggest', 'boon', 'brace', 'surge', 'flare', 'guardian', 'relic', 'shards', 'goals', 'codex', 'manager', 'milestone', 'daily'];
 
 const FAMILY_TITLE = {
   collector: 'Collectors', processor: 'Processors', defense: 'Defense', engine: 'Engines', special: 'Specials',
@@ -113,5 +117,6 @@ export function guideSections(sizes, collapseInfo) {
         'You get Core Dust. Each piece of Core Dust adds ' + dust + '% to all the Gold you earn.',
       ],
     },
+    { id: 'words', title: 'Words to know', lines: WORD_IDS.map((id) => HELP[id].text) },
   ];
 }

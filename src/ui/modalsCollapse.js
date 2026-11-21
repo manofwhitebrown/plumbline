@@ -3,6 +3,7 @@
 import * as shell from './shell.js';
 import { h, createScope } from './dom.js';
 import { holdButton } from './components/holdButton.js';
+import { titleWithTip } from './components/helpTip.js';
 import { openFrame } from './modalsWelcome.js';
 import { api } from './api.js';
 import { fmt, fmtDepth, ui, log } from './soft.js';
@@ -64,6 +65,7 @@ function buildCollapse() {
       h('p', { class: 'sub', text: WHAT }),
       h('div', { class: 'card stack center collapse-gain' },
         h('p', { class: 'num big-core', text: '+' + fmt(v.gain) + ' Core Dust' }),
+        titleWithTip('What is Core Dust?', 'coreDust', null, 'center'),
         v.bonusText ? h('p', { class: 'sub', text: v.bonusText }) : null),
       h('div', { class: 'row collapse-cols' }, list('Resets', v.resets, 'resets'), list('Stays', v.keeps, 'keeps')),
       v.crewText ? h('p', { class: 'sub', text: v.crewText }) : null,

@@ -4,6 +4,7 @@ import * as shell from '../shell.js';
 import { h, svg, createScope } from '../dom.js';
 import { iconHtml } from '../icons.js';
 import { counter } from '../components/counter.js';
+import { titleWithTip } from '../components/helpTip.js';
 import { api } from '../api.js';
 import { bus, fmt, ui, buzz, log } from '../soft.js';
 import { crewCard, CREW_MODES, getMode, setMode, modeLabel } from './crewCard.js';
@@ -29,6 +30,7 @@ registerScreen('crew', {
     const header = h('div', { class: 'card crew-top' },
       h('div', { class: 'sub', text: 'Your Crew earns' }),
       h('div', { class: 'row crew-total' }, svg(iconHtml('gold')), total, h('span', { class: 'sub', text: 'Gold per second' })),
+      h('div', { class: 'row crew-tips' }, titleWithTip('Manager', 'manager', scope), titleWithTip('Milestone', 'milestone', scope)),
       h('p', { class: 'sub crew-help', text: 'Crew earn Gold every second, even when you are away. Buy more to earn faster. Each milestone doubles a Crew\'s output. A Manager triples it.' }));
     const toggle = h('div', { class: 'crew-toggle', role: 'group', 'aria-label': 'How many to buy' });
     const modeBtns = CREW_MODES.map((m) => {
@@ -38,6 +40,7 @@ registerScreen('crew', {
       return { m, b };
     });
     const list = h('div', { class: 'crew-list' });
+    const emptyCrew = h('p', { class: 'sub center crew-empty', text: 'No crew here yet. Earn some Gold first.', hidden: true });
 
     const handlers = {
       buy(id, card) {
@@ -80,6 +83,7 @@ registerScreen('crew', {
         }
         entry.update(c, mode, gold);
       }
+      emptyCrew.hidden = items.length > 0;
       for (const mb of modeBtns) {
         const on = mb.m === mode;
         mb.b.classList.toggle('on', on);
@@ -90,7 +94,7 @@ registerScreen('crew', {
 
     scope.sub(bus, 'meta:changed', refresh);
     scope.add(() => { live = false; });
-    el.append(h('section', { class: 'screen screen-crew' }, header, toggle, list));
+    el.append(h('section', { class: 'screen screen-crew' }, header, toggle, list, emptyCrew));
     refresh();
   },
   unmount() {

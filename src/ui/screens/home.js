@@ -10,6 +10,8 @@ import { startDrop, bestDepth } from '../flow.js';
 import { canvasScene } from './homeScene.js';
 import { openCollapse } from '../modalsCollapse.js';
 import { maybeWelcomeBack } from '../modalsWelcome.js';
+import { helpTip } from '../components/helpTip.js';
+import { nextStepLine, readProgress } from '../../tutorial/nextStep.js';
 
 let scope = null;
 
@@ -32,6 +34,7 @@ registerScreen('home', {
     dropBtn.setAttribute('data-tut', 'home-drop');
     const banner = h('div', { class: 'banner-slot' });
     const income = h('div', { class: 'income sub' });
+    const nextLine = h('p', { class: 'sub next-step', 'aria-live': 'polite' });
     const gift = h('button', { class: 'btn ghost iconbtn gift', type: 'button', 'aria-label': 'Daily reward' }, svg(iconHtml('gift')), h('span', { class: 'dot', hidden: true }));
     scope.on(gift, 'click', () => go('rewards'));
 
@@ -46,11 +49,12 @@ registerScreen('home', {
           const gain = api.meta.collapse.preview().coreDustGain || 0;
           const b = button({ label: 'Collapse ready: +' + fmt(gain) + ' Core Dust', kind: 'secondary', onPress: () => openCollapse() }, scope);
           b.classList.add('collapse-banner');
-          banner.append(b);
+          banner.append(b, helpTip('collapse', { scope }));
         }
       } catch (e) { /* hide the banner */ }
       let ps = 0;
       try { ps = api.meta.crew.perSecond(); } catch (e) { /* 0 */ }
+      nextLine.textContent = nextStepLine(readProgress(api, bestDepth()));
       income.textContent = ps > 0 ? 'Crew earns ' + fmt(ps) + ' Gold per second' : 'Buy Crew to earn Gold while you rest';
     }
     scope.sub(bus, 'meta:changed', () => { refresh(); sceneHost.setCrew(crewCount()); });
@@ -59,7 +63,7 @@ registerScreen('home', {
     const screen = h('section', { class: 'screen no-pad screen-home' },
       h('div', { class: 'home-top' }, bar, gift),
       scene,
-      h('div', { class: 'home-bottom' }, income, banner, dropBtn));
+      h('div', { class: 'home-bottom' }, h('div', { class: 'row home-income' }, income, helpTip('crew', { scope })), nextLine, banner, dropBtn));
     el.append(screen);
     maybeWelcomeBack();
   },

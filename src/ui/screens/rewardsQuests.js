@@ -87,7 +87,7 @@ export function buildQuests(ctx) {
     count.textContent = v.doneCount + ' / ' + v.total + ' done';
     sub.textContent = v.sub;
     list.textContent = '';
-    if (!v.items.length) list.append(h('li', { class: 'sub', text: 'Check back soon.' }));
+    if (!v.items.length) list.append(h('li', { class: 'sub', text: 'No quests here yet. Check back tomorrow.' }));
     for (const q of v.items) list.append(questEl(q, claim, scope));
   }
   update();

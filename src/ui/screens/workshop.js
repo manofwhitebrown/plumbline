@@ -9,6 +9,7 @@ import { allCombos as allComboData } from '../../engine/parts/combos.js';
 import { FAMILIES, FAMILY_NAMES, partCardEl, partSheetBody, failText } from './workshopParts.js';
 import { upgradeCardEl } from './workshopUpgrades.js';
 import '../styles/workshop.css';
+import { titleWithTip } from '../components/helpTip.js';
 
 let scope = null;
 
@@ -55,7 +56,8 @@ registerScreen('workshop', {
     });
     const grid = h('div', { class: 'ws-grid' });
     const upList = h('div', { class: 'ws-uplist' });
-    const empty = h('div', { class: 'sub center ws-empty', text: 'Nothing here yet.', hidden: true });
+    const empty = h('div', { class: 'sub center ws-empty', text: 'No upgrades here yet. Keep digging for Gold.', hidden: true });
+    const emptyParts = h('div', { class: 'sub center ws-empty', text: 'No parts here yet. Check another group.', hidden: true });
 
     function rows() {
       try {
@@ -143,12 +145,14 @@ registerScreen('workshop', {
       upList.hidden = tab !== 'upgrades';
       for (const c of chipBtns) { const on = c.f === family; c.b.classList.toggle('on', on); c.b.setAttribute('aria-pressed', on ? 'true' : 'false'); }
       refresh();
-      for (const [id, c] of cards) { const fam = c.el.getAttribute('data-family'); c.el.hidden = !(family === 'all' || fam === family || (family === 'special' && !FAMILIES.includes(fam))); }
+      let shownParts = 0;
+      for (const [id, c] of cards) { const fam = c.el.getAttribute('data-family'); c.el.hidden = !(family === 'all' || fam === family || (family === 'special' && !FAMILIES.includes(fam))); if (!c.el.hidden) shownParts++; }
+      emptyParts.hidden = tab !== 'parts' || shownParts > 0;
     }
 
     scope.sub(bus, 'meta:changed', () => { refresh(); });
     scope.add(() => { live = false; if (sheet) { try { sheet.close(); } catch (e) { /* closed */ } } });
-    el.append(h('section', { class: 'screen screen-workshop' }, wallet, tabs, chips, grid, upList, empty));
+    el.append(h('section', { class: 'screen screen-workshop' }, wallet, h('div', { class: 'row ws-tips' }, titleWithTip('Workshop', 'workshop', scope), titleWithTip('Shards', 'shards', scope)), tabs, chips, grid, emptyParts, upList, empty));
     render();
   },
   unmount() {
