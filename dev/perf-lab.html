@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumbline speed lab</title>
+<style>
+  html, body { margin: 0; background: #070a12; color: #eef2ff; font: 13px system-ui, sans-serif; }
+  #stage { width: 360px; height: 640px; position: relative; }
+  canvas { display: block; }
+  #out { padding: 8px; white-space: pre; font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<!-- Speed lab. Used by dev/perf-run.js, or open by hand:
+     /dev/perf-lab.html?biome=clay&quality=high&seconds=20&w=360&h=640&dpr=2&particles=300 -->
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="out">starting...</div>
+<script type="module" src="./perf-lab.js"></script>
+</body>
+</html>

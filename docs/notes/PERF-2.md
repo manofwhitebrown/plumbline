@@ -1,0 +1,4 @@
+# PERF-2 notes (real-browser speed measurement and fixes)
+
+- Push 1: dev/perf-lab.html + dev/perf-lab.js (scripted worst-case Drop on the real renderer, records every frame; `?bench=depth` times the depth layer stage by stage) and dev/perf-run.js (runs the matrix in headless Chromium with CPU slowdown; setup lines at its top). A real headless Chromium DOES work in this sandbox (puppeteer-core + @sparticuz/chromium, installed outside the repo). Depth layer got an optional dev-only timing hook (`prof`, null in the game).
+- Found: this sandbox has ONE CPU core and no GPU. Two canvas modes were tried: Chromium's software GPU (SwiftShader) shows random multi-second stalls inside one raster flush (a sandbox artifact, seen even with nothing but the game idling at 1x), so the CPU-canvas mode (`--canvas cpu`, the default of perf-run.js) is the main measure. Absolute numbers are NOT phone numbers; compare before and after.

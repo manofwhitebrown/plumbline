@@ -27,7 +27,7 @@ export function createDepth(opts) {
   const now = typeof o.now === 'function' ? o.now : (typeof performance !== 'undefined' && performance.now ? () => performance.now() : () => Date.now());
   const artTex = typeof o.wallTexture === 'function' ? o.wallTexture : (typeof artKit['wallTexture'] === 'function' ? artKit['wallTexture'] : null);
   const assets = createAssets({ mk, now, wallTexture: artTex });
-  const light = createLight(), cam = createDepthCam({ reduceMotion: reduce }), walls = createWalls({ mk, assets, light }), fg = createForeground({ mk });
+  const light = createLight(), cam = createDepthCam({ reduceMotion: reduce }), walls = createWalls({ mk, assets, light, prof: o.prof }), fg = createForeground({ mk });
   const keep = [0, 0, 0];
   light.setReduceMotion(reduce); walls.setLevel(level === 'low' ? 'medium' : level);
 
@@ -102,6 +102,7 @@ export function createDepth(opts) {
         walls.ensureMask(margin);
         if (!walls.render(depthNow, { forced, time, bucketY, danger })) return false;
         walls.blit(ctx, cam, fade, level === 'medium');
+        if (o.prof) o.prof('blit', ctx); // [PERF-2] dev timing only
         drawnThisFrame = true;
         costFrame += now() - t0;
         return true;
@@ -112,6 +113,7 @@ export function createDepth(opts) {
       return safe(() => {
         const t0 = now();
         fg.draw(ctx, assets, depthNow, W, H, margin, laneTop, vel, cam, level === 'high', forced);
+        if (o.prof) o.prof('foreground', ctx); // [PERF-2] dev timing only
         costFrame += now() - t0;
         return true;
       }) === true;

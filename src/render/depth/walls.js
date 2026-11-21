@@ -11,6 +11,7 @@ const RIB_SPACING = 20, FAR_PX = 12;
 
 export function createWalls(env) {
   const { mk, assets, light } = env;
+  const prof = typeof env.prof === 'function' ? env.prof : null; // [PERF-2] dev only: prof(stageName, layerCtx) lets dev/perf-lab.js time each stage (null in the game)
   const table = makeSliceTable();
   let W = 360, H = 640, dpr = 1, level = 'high', ls = 1, layer = null, g = null, geo = shaftGeom(W, H), mask = null, maskKey = '', dirty = true;
   const backG = [], fogG = [], edgeCss = [];
@@ -55,11 +56,13 @@ export function createWalls(env) {
       const useB = tb > 0.003 && bi1 !== bi0 && assets.ready(bi1);
       g.setTransform(ls, 0, 0, ls, OV * ls, OV * ls);
       g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+      if (prof) prof('start', g);
       if (!backG[bi0]) palCss(bi0); if (useB && !backG[bi1]) palCss(bi1);
       // 1. backdrop, with flat dark strips under the overscan on both sides
       g.fillStyle = backG[bi0]; g.fillRect(-OV, -OV, W + OV * 2, H + OV * 2);
       if (useB) { g.globalAlpha = tb; g.fillStyle = backG[bi1]; g.fillRect(-OV, -OV, W + OV * 2, H + OV * 2); g.globalAlpha = 1; }
       g.fillStyle = edgeCss[bi0]; g.fillRect(-OV, -OV, OV, H + OV * 2); g.fillRect(W, -OV, OV, H + OV * 2);
+      if (prof) prof('backdrop', g);
       // 2. far wall: the back of the shaft, slow (parallax 0.2), very dark, only a hint
       const tex0 = assets.tex(bi0);
       if (tex0 && level === 'high') {
@@ -68,6 +71,7 @@ export function createWalls(env) {
         for (let y = y0; y < H + OV; y += per) g.drawImage(c2, 0, 0, c2.width, TEX_H / 4, W * 0.08, y, W * 0.84, per + 1);
         g.globalAlpha = 1;
       }
+      if (prof) prof('far wall', g);
       // 3. wall slices (the mode-7 part)
       let n = 0;
       const forcedOnly = frame.forced >= 0;
@@ -95,20 +99,25 @@ export function createWalls(env) {
         }
       }
       slicesDrawn = n;
+      if (prof) prof('slices', g);
       // 4. ribs and door rings (they cut across the walls and the shaft; centre is see-through in the sprite)
       this.rings(d, bi0, forcedOnly);
+      if (prof) prof('rings', g);
       // 5. shade mask (inner wall edge, HUD dim)
       if (mask) { // only the two wall strips carry any ink, so only those are drawn
         const sw = maxW + OV, srcW = Math.min(mask.width, Math.round(sw * ls)), dH = H + OV * 2;
         g.drawImage(mask, 0, 0, srcW, mask.height, -OV, -OV, srcW / ls, dH);
         g.drawImage(mask, mask.width - srcW, 0, srcW, mask.height, W + OV - srcW / ls, -OV, srcW / ls, dH);
       }
+      if (prof) prof('mask', g);
       // 6. fog: thicker toward the vanishing row, tinted per biome
       const breath = 1 + (light.exposure - 0.04) * 3; // slow breathing: fog density and lantern strength move a few percent
       g.globalAlpha = clamp(breath, 0.85, 1); g.fillStyle = fogG[bi0]; g.fillRect(-OV, H * 0.2, W + OV * 2, H * 0.8 + OV);
       if (useB) { g.globalAlpha = tb * clamp(breath, 0.85, 1); g.fillStyle = fogG[bi1]; g.fillRect(-OV, H * 0.2, W + OV * 2, H * 0.8 + OV); g.globalAlpha = 1; }
+      if (prof) prof('fog', g);
       // 7. light: lantern lobes on the near walls, warmer with danger, pulses on collects
       this.lights(bi0, bi1, useB ? tb : 0, frame);
+      if (prof) prof('lights', g);
       return true;
     },
     rings(d, bi0, forcedOnly) {
