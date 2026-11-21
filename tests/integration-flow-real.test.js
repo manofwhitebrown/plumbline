@@ -61,7 +61,9 @@ test('a snap pays exactly once', () => {
   const weak = { ...meta, getMods: () => ({ ...meta.getMods(), maxStrain: 10, strainMult: 100 }) };
   const t = setup({ meta: weak });
   const g0 = meta.gold();
-  session.start();
+  // [FIX-1] Flaky before: the seed came from the clock, and in about 1 of 4 seeds the drop stopped to wait for a boon
+  // pick (nobody picks in this test), so it never snapped. Fixed seed, boon offers off: every seed snaps (300 checked).
+  session.start({ seed: 1, play: false });
   loop.tick(2000);
   assert.equal(t.count('run:ended'), 1);
   const e = t.seen.find((x) => x[0] === 'run:ended')[1];
@@ -118,7 +120,7 @@ test('seed and safeUntilDepth: the first tutorial drop cannot snap before 40 m',
 test('auto-haul: the session hauls at the chosen strain level', () => {
   const t = setup();
   setDeps({ meta: { ...meta, upgrades: { ...meta.upgrades, autoHaul: () => 30 } } });
-  session.start();
+  session.start({ seed: 1, play: false }); // [FIX-1] same reason as the snap test above: no waiting for a boon pick
   loop.tick(2000);
   const e = t.seen.find((x) => x[0] === 'run:ended')[1];
   assert.equal(e.outcome, 'hauled');
