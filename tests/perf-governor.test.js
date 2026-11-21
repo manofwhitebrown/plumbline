@@ -44,3 +44,9 @@ test('governor: tiers only ever remove work as they go down', () => {
   }
   assert.equal(TIERS[0].depth, 'high'); assert.equal(TIERS[0].particles, 1); assert.equal(TIERS[0].bake, true);
 });
+
+test('governor: a very slow phone steps down fast (6 very slow frames in a row), a lone spike does not', () => {
+  const g = createGovernor(); run(g, 100, GOV.fastRun); assert.equal(g.step, 1);
+  run(g, 100, GOV.fastRun); assert.equal(g.step, 2);
+  const h = createGovernor(); for (let k = 0; k < 4; k++) { run(h, 16, 60); h.sample(120); } run(h, 16, 60); assert.equal(h.step, 0, 'single spikes spaced apart do nothing');
+});

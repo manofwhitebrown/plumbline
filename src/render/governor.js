@@ -17,6 +17,8 @@ export const GOV = {
   upWaitMs: 8000,    // calm time needed before trying one tier up
   maxUpWaitMs: 120000,
   probationMs: 30000, // an up-step that lasts this long counts as safe: the wait goes back to the start
+  fastMs: 40,        // [PERF-2] a frame over this is very slow (under 25 fps)
+  fastRun: 6,        // [PERF-2] this many very slow frames IN A ROW step down at once (on a slow phone 45 frames take 10 s or more)
   hiddenMs: 250,     // longer than this is a hidden tab, not a slow game: ignored
 };
 
@@ -25,9 +27,9 @@ export function createGovernor(opts = {}) {
   const cfg = Object.assign({}, GOV, o.config || {});
   const tiers = o.tiers || TIERS, max = tiers.length - 1, onChange = typeof o.onChange === 'function' ? o.onChange : null;
   const ring = new Float64Array(cfg.window);
-  let n = 0, head = 0, sum = 0, step = 0, calm = 0, upWait = cfg.upWaitMs, sinceUp = Infinity, enabled = true;
+  let n = 0, head = 0, sum = 0, run = 0, step = 0, calm = 0, upWait = cfg.upWaitMs, sinceUp = Infinity, enabled = true;
 
-  function clearWindow() { n = 0; head = 0; sum = 0; }
+  function clearWindow() { n = 0; head = 0; sum = 0; run = 0; }
   function change(to) {
     if (to === step) return;
     step = to; clearWindow(); calm = 0;
@@ -49,7 +51,8 @@ export function createGovernor(opts = {}) {
       if (sinceUp < Infinity) { sinceUp += dtMs; if (sinceUp >= cfg.probationMs) { upWait = cfg.upWaitMs; sinceUp = Infinity; } }
       if (n === cfg.window) sum -= ring[head]; else n++;
       ring[head] = dtMs; sum += dtMs; head = (head + 1) % cfg.window;
-      if (n === cfg.window && sum / n > cfg.slowMs && step < max) {
+      run = dtMs > cfg.fastMs ? run + 1 : 0;
+      if (((n === cfg.window && sum / n > cfg.slowMs) || run >= cfg.fastRun) && step < max) {
         if (sinceUp < Infinity) { upWait = Math.min(cfg.maxUpWaitMs, upWait * 2); sinceUp = Infinity; } // the last raise did not hold
         change(step + 1); return step;
       }

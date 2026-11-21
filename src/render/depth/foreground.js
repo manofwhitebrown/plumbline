@@ -55,10 +55,14 @@ export function createForeground(env) {
   const mk = env && env.mk;
   const pl = { x: 0, y: 0, w: 0, h: 0, intrude: 0, blur: 1, alpha: 0 };
   let drawn = 0, W = 0, H = 0, layer = null, lg = null, mask = null, maskKey = '';
+  // [PERF-2] Only the patch each side really used is cleared, erased and blitted (was: the whole screen, three times a frame).
+  // box[side] = { x0, y0, x1, y1 } of this frame's drawing in layer pixels (x1 <= x0 means nothing); prev[side] = last frame's, to clear.
+  const box = [{ x0: 0, y0: 0, x1: 0, y1: 0 }, { x0: 0, y0: 0, x1: 0, y1: 0 }], prev = [{ x0: 0, y0: 0, x1: 0, y1: 0 }, { x0: 0, y0: 0, x1: 0, y1: 0 }];
+  const PAD = 2;
   function ensure(w, h, margin, laneTop) {
     const iw = Math.max(1, Math.round(w)), ih = Math.max(1, Math.round(h));
     if (!layer || W !== iw || H !== ih) {
-      W = iw; H = ih; maskKey = ''; mask = null;
+      W = iw; H = ih; maskKey = ''; mask = null; prev[0].x1 = prev[0].x0 = prev[1].x1 = prev[1].x0 = 0;
       layer = mk ? mk(iw, ih) : null; lg = layer ? layer.getContext('2d') : null;
     }
     const key = Math.round(margin) + ':' + Math.round(laneTop);
@@ -87,7 +91,8 @@ export function createForeground(env) {
         for (let k = kLo; k <= kHi; k++) { const z = slotDepth(side, k), dz = z - d; if (dz >= SLOT_LO && dz <= SLOT_HI) { any = true; break; } }
       }
       if (!any || !ensure(w, h, margin, laneTop)) return 0;
-      lg.setTransform(1, 0, 0, 1, 0, 0); lg.globalCompositeOperation = 'source-over'; lg.globalAlpha = 1; lg.clearRect(0, 0, W, H);
+      lg.setTransform(1, 0, 0, 1, 0, 0); lg.globalCompositeOperation = 'source-over'; lg.globalAlpha = 1;
+      for (let side = 0; side < 2; side++) { const q = prev[side]; if (q.x1 > q.x0) { lg.clearRect(q.x0, q.y0, q.x1 - q.x0, q.y1 - q.y0); q.x1 = q.x0 = 0; } box[side].x1 = box[side].x0 = 0; }
       for (let side = 0; side < 2; side++) {
         const kLo = Math.floor((d + SLOT_LO - side * FG.spacingM * 0.5) / FG.spacingM) - 1, kHi = Math.ceil((d + SLOT_HI - side * FG.spacingM * 0.5) / FG.spacingM);
         for (let k = kLo; k <= kHi; k++) {
@@ -101,12 +106,22 @@ export function createForeground(env) {
           if (side === 0) lg.drawImage(spr.canvas, pl.x, pl.y, pl.w, pl.h);
           else { lg.save(); lg.translate(W, 0); lg.scale(-1, 1); lg.drawImage(spr.canvas, pl.x, pl.y, pl.w, pl.h); lg.restore(); }
           drawn++;
+          { // grow this side's patch (the right side is drawn mirrored)
+            const a = side === 0 ? pl.x : W - (pl.x + pl.w), b = a + pl.w, bx = box[side];
+            if (bx.x1 <= bx.x0) { bx.x0 = a; bx.x1 = b; bx.y0 = pl.y; bx.y1 = pl.y + pl.h; }
+            else { if (a < bx.x0) bx.x0 = a; if (b > bx.x1) bx.x1 = b; if (pl.y < bx.y0) bx.y0 = pl.y; if (pl.y + pl.h > bx.y1) bx.y1 = pl.y + pl.h; }
+          }
         }
       }
-      lg.globalAlpha = 1; lg.globalCompositeOperation = 'destination-out'; lg.drawImage(mask, 0, 0); lg.globalCompositeOperation = 'source-over';
-      if (drawn) {
-        const mul = CAM.fgSwayMul, dx = clamp(cam.dx * mul, -CAM.shakePx, CAM.shakePx), dy = clamp(cam.dy * mul, -CAM.shakePx, CAM.shakePx);
-        ctx.drawImage(layer, dx, dy, W, H);
+      lg.globalAlpha = 1;
+      const mul = CAM.fgSwayMul, dx = clamp(cam.dx * mul, -CAM.shakePx, CAM.shakePx), dy = clamp(cam.dy * mul, -CAM.shakePx, CAM.shakePx);
+      for (let side = 0; side < 2; side++) {
+        const bx = box[side]; if (bx.x1 <= bx.x0) continue;
+        const x0 = Math.max(0, Math.floor(bx.x0) - PAD), y0 = Math.max(0, Math.floor(bx.y0) - PAD), x1 = Math.min(W, Math.ceil(bx.x1) + PAD), y1 = Math.min(H, Math.ceil(bx.y1) + PAD);
+        const w = x1 - x0, h = y1 - y0; if (w <= 0 || h <= 0) { bx.x1 = bx.x0 = 0; continue; }
+        const q = prev[side]; q.x0 = x0; q.y0 = y0; q.x1 = x1; q.y1 = y1; // cleared at the start of the next frame
+        lg.globalCompositeOperation = 'destination-out'; lg.drawImage(mask, x0, y0, w, h, x0, y0, w, h); lg.globalCompositeOperation = 'source-over';
+        ctx.drawImage(layer, x0, y0, w, h, x0 + dx, y0 + dy, w, h);
       }
       return drawn;
     },

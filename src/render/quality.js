@@ -6,11 +6,14 @@ export const QUALITY = {
 };
 export const SLOW_MS = 24;
 export const SLOW_WINDOW_MS = 2000;
+// [PERF-2] After an AUTOMATIC drop to low, try high again once frames have been calm for a while. A failed try doubles the wait.
+export const RECOVER = { calmMs: 20000, maxCalmMs: 300000, goodMs: 20, holdMs: 20000 };
 
 export function createQuality(initial = 'high', onChange = null) {
   let level = initial === 'low' ? 'low' : 'high';
   let slow = 0;
   let locked = false; // true when the player or lab picked a level
+  let autoLow = false, calm = 0, wait = RECOVER.calmMs, hold = Infinity; // [PERF-2] recovery from an automatic low
   const layers = [];  // { name, importance, cost, active, off(), on() }
   const call = (fn) => { try { if (typeof fn === 'function') fn(); } catch (e) { /* a layer must never break the loop */ } };
   // Least important first; among equals the costliest goes first.
@@ -34,24 +37,34 @@ export function createQuality(initial = 'high', onChange = null) {
     layerState() { return layers.map((l) => ({ name: l.name, importance: l.importance, cost: l.cost, active: l.active })); },
     get locked() { return locked; },
     // Back to automatic: the player chose 'auto', so slow frames may lower quality again.
-    setAuto() { locked = false; slow = 0; if (level === 'low') { level = 'high'; for (const l of layers) if (!l.active) { l.active = true; call(l.on); } if (onChange) onChange(level); } },
+    setAuto() { locked = false; slow = 0; autoLow = false; calm = 0; wait = RECOVER.calmMs; hold = Infinity; if (level === 'low') { level = 'high'; for (const l of layers) if (!l.active) { l.active = true; call(l.on); } if (onChange) onChange(level); } },
     set(name, byUser = true) {
       const n = name === 'low' ? 'low' : 'high';
       if (byUser) locked = true;
-      slow = 0;
+      slow = 0; autoLow = false; calm = 0; hold = Infinity;
       if (n === 'high') for (const l of layers) if (!l.active) { l.active = true; call(l.on); } // bring every layer back
       if (n !== level) { level = n; if (onChange) onChange(level); }
     },
     // Call every frame with the real frame time.
     sample(dtMs) {
-      if (locked || level === 'low' || !Number.isFinite(dtMs)) return level;
-      if (dtMs > 250) { slow = 0; return level; } // tab was hidden: ignore
+      if (locked || !Number.isFinite(dtMs)) return level;
+      if (dtMs > 250) { slow = 0; calm = 0; return level; } // tab was hidden: ignore
+      if (level === 'low') { // [PERF-2] only an automatic low can come back; a hand-picked low (locked) returned above
+        if (!autoLow) return level;
+        calm = dtMs <= RECOVER.goodMs ? calm + dtMs : 0;
+        if (calm >= wait) { calm = 0; slow = 0; hold = 0; level = 'high'; for (const l of layers) if (!l.active) { l.active = true; call(l.on); } if (onChange) onChange(level); }
+        return level;
+      }
+      if (hold < Infinity) { hold += dtMs; if (hold >= RECOVER.holdMs) { hold = Infinity; wait = RECOVER.calmMs; } } // the raise held: the wait starts over
       if (dtMs > SLOW_MS) slow += dtMs; else slow = Math.max(0, slow - dtMs * 0.5);
       if (slow >= SLOW_WINDOW_MS) {
         slow = 0;
         const l = nextLayer();
         if (l) { l.active = false; call(l.off); } // one step at a time
-        else { level = 'low'; if (onChange) onChange(level); }
+        else {
+          if (hold < Infinity) wait = Math.min(RECOVER.maxCalmMs, wait * 2); // the last raise did not hold
+          hold = Infinity; level = 'low'; autoLow = true; calm = 0; if (onChange) onChange(level);
+        }
       }
       return level;
     },
