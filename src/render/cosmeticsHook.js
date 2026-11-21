@@ -7,6 +7,7 @@
 // The rope tint fades out as Strain rises, so the warning colours of the rope are never hidden.
 import { bus } from '../core/bus.js';
 import { equipped } from '../meta/cosmetics.js';
+import '../meta/relicBook.js'; // [FINISH-3] makes sure the Wall listens for the end of every Drop, even before the Codex is opened
 import { cosmeticById, DEFAULT_LOOKS } from '../data/cosmetics.js';
 
 const NONE = Object.freeze({ alpha: 0, tint: '#000000', rim: '#ffeeb8', top: '#000000', bottom: '#000000' });

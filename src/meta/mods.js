@@ -9,6 +9,7 @@ const per = (id) => { const u = UPGRADES.find((x) => x.id === id); return u ? u.
 const r4 = (x) => Math.round(x * 10000) / 10000;
 import { dailyTwistId } from './daily.js';
 import { applyTwist } from '../engine/twists.js';
+import { wallMods } from './relicBook.js'; // [FINISH-3] Relic Wall bonus (real finds only)
 
 export function coreDustMult() {
   return 1 + LIMITS.coreDustGoldEach * s().coreDustTotal;
@@ -41,6 +42,8 @@ export function getMods() {
       goldMult: clamp(num(c.goldMult, 1), 1, 1e6),
     };
   }
+  // Relic Wall bonus: +1% Gold at 10 relics, +1% better gems at 20, +2% Gold at 36. Cheated saves get nothing.
+  try { const w = wallMods(); if (w.gold > 0) mods.goldMult = r4(mods.goldMult * (1 + w.gold)); if (w.luck > 0) mods.luck = r4(clamp(mods.luck + w.luck, 0, 1)); } catch (e) { /* the Wall never breaks a Drop */ }
   if (st.cheated && st.cheatStartDepth > 0) mods.startDepth = Math.max(mods.startDepth, st.cheatStartDepth);
   // Daily twist: change the numbers for today. Unknown fields are kept; a bad twist id changes nothing.
   let out = mods;
