@@ -37,8 +37,9 @@ export function installMicro(opts) {
   // 1. button release: a tiny springy rebound when a finger lifts (the CSS :active press-in is polish.css, AI-2)
   const pressed = new Set();
   const down = (e) => { const b = e.target && e.target.closest ? e.target.closest('.btn:not(.disabled), .tabbar button') : null; if (b) pressed.add(b); };
+  // Real scale values (not -0.03): with composite 'add' a transform list is joined, so scale(-0.03) made the button ~0 px and flipped, and taps missed it (ONBOARD-2 request, seen in Chromium).
   const up = () => {
-    for (const b of Array.from(pressed)) { pressed.delete(b); anim(b, [{ transform: 'scale(-0.03)' }, { transform: 'scale(0.015)', offset: 0.55 }, { transform: 'scale(0)' }], 220, 'cubic-bezier(0.2, 0.9, 0.25, 1.06)'); }
+    for (const b of Array.from(pressed)) { pressed.delete(b); anim(b, [{ transform: 'scale(0.97)' }, { transform: 'scale(1.015)', offset: 0.55 }, { transform: 'scale(1)' }], 220, 'cubic-bezier(0.2, 0.9, 0.25, 1.06)'); }
   };
   root.addEventListener('pointerdown', down, { capture: true, passive: true });
   root.addEventListener('pointerup', up, { capture: true, passive: true });

@@ -2,6 +2,7 @@
 // It adds the motion; it never changes which rows show or when. It watches the rows gain their "in" class:
 //   title and depth settle with a small spring, the gold count-up ticks (rising pitch), shards fly into the shard pill,
 //   done goals get stamped, and the buttons slide up. A tap anywhere ends all of it. Reduce motion: nothing moves.
+// Transform values are REAL scales (1 = normal): with composite "add" a transform list is joined, so scale(-0.08) would be ~0 size. Opacity stays a delta.
 // Transform and opacity only (WAAPI with composite "add", so the CSS reveal underneath is untouched).
 import { ease } from './easing.js';
 
@@ -38,13 +39,13 @@ export function attachResults(screen, opts) {
   function onIn(el) {
     if (reduce || disposed) return;
     const k = snapped ? 0.5 : 1; // a snap enters calmer: half the overshoot
-    if (el.classList.contains('res-title')) add(el, [{ transform: 'scale(' + (-0.08 * k) + ')' }, { transform: 'scale(0.02)', offset: 0.7 }, { transform: 'scale(0)' }], 480);
-    else if (el.classList.contains('res-depth')) add(el, [{ transform: 'scale(' + (-0.06 * k) + ')' }, { transform: 'scale(0)' }], 420);
+    if (el.classList.contains('res-title')) add(el, [{ transform: 'scale(' + (1 - 0.08 * k) + ')' }, { transform: 'scale(1.02)', offset: 0.7 }, { transform: 'scale(1)' }], 480);
+    else if (el.classList.contains('res-depth')) add(el, [{ transform: 'scale(' + (1 - 0.06 * k) + ')' }, { transform: 'scale(1)' }], 420);
     else if (el.classList.contains('res-gold')) tickGold(el);
     else if (el.classList.contains('res-shards')) flyShards(el);
     else if (el.classList.contains('res-goals')) stampGoals(el);
     else if (el.classList.contains('res-actions')) add(el, [{ opacity: -1, transform: 'translate3d(0,28px,0)' }, { opacity: 0, transform: 'translate3d(0,0,0)' }], 460);
-    else if (el.classList.contains('res-record')) add(el, [{ transform: 'scale(-0.4)' }, { transform: 'scale(0.06)', offset: 0.6 }, { transform: 'scale(0)' }], 520);
+    else if (el.classList.contains('res-record')) add(el, [{ transform: 'scale(0.6)' }, { transform: 'scale(1.06)', offset: 0.6 }, { transform: 'scale(1)' }], 520);
   }
 
   // gold: ticks with a rising pitch while the number counts up. The pitch is a hint to the audio cue (kind 'tick', pitch 0..1).
@@ -52,13 +53,13 @@ export function attachResults(screen, opts) {
     const num = row.querySelector('.num, .big-num'); if (!num) return;
     const dur = 900;
     for (const t of tickPlan(14, dur)) later(() => cue('tick', t.pitch), t.at);
-    add(num, [{ transform: 'scale(0)' }, { transform: 'scale(0.06)', offset: 0.85 }, { transform: 'scale(0)' }], dur + 120, 'ease-out');
+    add(num, [{ transform: 'scale(1)' }, { transform: 'scale(1.06)', offset: 0.85 }, { transform: 'scale(1)' }], dur + 120, 'ease-out');
   }
-  function flyShards(row) { try { fly('shards', row); } catch (e) { /* decoration only */ } add(row, [{ transform: 'scale(-0.1)' }, { transform: 'scale(0)' }], 360); }
+  function flyShards(row) { try { fly('shards', row); } catch (e) { /* decoration only */ } add(row, [{ transform: 'scale(0.9)' }, { transform: 'scale(1)' }], 360); }
   function stampGoals(list) {
     const items = list.querySelectorAll('.res-goal.done .res-check');
     let i = 0;
-    for (const c of items) { const idx = i++; add(c, [{ transform: 'scale(1.1)', opacity: -1 }, { transform: 'scale(-0.12)', opacity: 0, offset: 0.65 }, { transform: 'scale(0)', opacity: 0 }], 360, SPRING, 180 + idx * 140); later(() => cue('stamp', 0), 180 + idx * 140); if (idx >= 7) break; }
+    for (const c of items) { const idx = i++; add(c, [{ transform: 'scale(2.1)', opacity: -1 }, { transform: 'scale(0.88)', opacity: 0, offset: 0.65 }, { transform: 'scale(1)', opacity: 0 }], 360, SPRING, 180 + idx * 140); later(() => cue('stamp', 0), 180 + idx * 140); if (idx >= 7) break; }
   }
 
   function scan() {

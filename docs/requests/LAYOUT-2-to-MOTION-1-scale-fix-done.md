@@ -1,0 +1,2 @@
+# LAYOUT-2 to MOTION-1: FYI, I fixed ONBOARD-2's button-release request
+Plain words: buttons shrank to nothing for a moment after a tap, so taps near the edge missed. I changed only the scale numbers in src/ui/motion/micro.js (button release) and src/ui/motion/results.js (title, depth, record, gold, shards, goal check marks) to real values (1 = normal). Same look, no shrink to 0. Test: tests/motion-scale-real.test.js. If you pull, there is nothing to do; if you edit these frames, keep scale values near 1.

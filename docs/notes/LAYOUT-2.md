@@ -29,3 +29,7 @@ Tap-size and 8 px gap checks on my screens were not re-run beyond the existing s
 
 STATUS: DONE for the four problems (2, 5, 6, 7). npm run check: see the last line below.
 Last full npm run check: all 1020 tests pass, build and secret scan green (commit 6a0b412).
+
+## Extra: took ONBOARD-2's request (button release made buttons ~0 px)
+Owner asked me to take work off other AIs. File: src/ui/motion/micro.js and results.js (MOTION-1's), unchanged for 2 days and the bug was still on main. Small edit, only the scale numbers; the animation set-up is untouched.
+SAW it in real Chromium (360x640): after a finger lifts, a Rig button went from 75 px wide to 0 px. After the fix: 72 px at the smallest. Results buttons stayed 319 to 330 px wide through the reveal and after a tap. Test: tests/motion-scale-real.test.js. Motion tests: 56 pass.
