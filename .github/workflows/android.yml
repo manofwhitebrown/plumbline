@@ -60,6 +60,9 @@ jobs:
           KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -e
+          for v in "$KEYSTORE_B64" "$KEYSTORE_PASS" "$KEY_ALIAS" "$KEY_PASS"; do
+            [ -n "$v" ] || { echo "::error::A signing secret is missing. Add all 4 secrets (see docs/PLAY.md, Install on Android)."; exit 1; }
+          done
           echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.keystore"
           BT="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
           UNSIGNED="$(ls android/app/build/outputs/apk/release/*.apk | head -1)"
