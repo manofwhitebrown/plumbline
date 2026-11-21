@@ -8,6 +8,8 @@ import { bus, ui, fmtDepth } from '../soft.js';
 import { TABS, buildModel, markSeen } from './codexTabs.js';
 import '../styles/codex.css';
 import { helpTip } from '../components/helpTip.js';
+import { wallPanel, looksPanel, wallBadge, looksBadge } from './codexWall.js'; // [HOOK-3] Wall and Looks tabs
+import { wallModel } from './wallModel.js';
 
 let scope = null;
 let activeTab = 'part'; // remembered while the app is open
@@ -69,6 +71,9 @@ function openDetails(e, repaint) {
   return s;
 }
 
+const safeN = (f) => { try { return Number(f()) || 0; } catch (e) { return 0; } };
+const safeWall = () => { try { return wallModel(); } catch (e) { return null; } };
+
 registerScreen('codex', {
   mount(el) {
     scope = createScope();
@@ -78,7 +83,10 @@ registerScreen('codex', {
     const tabsEl = h('div', { class: 'cx-tabs', role: 'tablist', 'aria-label': 'Codex sections' });
     const list = h('ul', { class: 'cx-list', 'aria-live': 'off' });
     const tabButtons = {};
-    for (const t of TABS) {
+    const EXTRA = [{ id: 'wall', label: 'Wall' }, { id: 'looks', label: 'Looks' }]; // [HOOK-3]
+    const panels = { wall: null, looks: null };
+    const panelHost = h('div', { class: 'wl-host', hidden: true });
+    for (const t of [...TABS, ...EXTRA]) {
       const label = h('span', { class: 'cx-tab-label', text: t.label });
       const n = h('span', { class: 'cx-tab-n num' });
       const dot = h('span', { class: 'dot', hidden: true, 'aria-label': 'New' });
@@ -89,7 +97,7 @@ registerScreen('codex', {
     }
     const screen = h('section', { class: 'screen screen-codex' },
       h('div', { class: 'cx-head' }, h('div', { class: 'row' }, h('h1', { class: 'cx-title', text: 'Codex' }), helpTip('codex', { scope })), count),
-      bar, tabsEl, list);
+      bar, tabsEl, list, panelHost);
     el.append(screen);
 
     function read() {
@@ -101,7 +109,25 @@ registerScreen('codex', {
       model = read();
       count.textContent = model.found + ' / ' + model.total + ' found';
       bar.set(model.total ? model.found / model.total : 0);
-      setBadge('codex', model.fresh > 0);
+      setBadge('codex', model.fresh > 0 || safeN(wallBadge) > 0 || safeN(looksBadge) > 0);
+      const wb = safeN(wallBadge), lb = safeN(looksBadge);
+      for (const x of EXTRA) {
+        const tb = tabButtons[x.id];
+        const w = x.id === 'wall' ? safeWall() : null;
+        tb.n.textContent = w ? w.found + '/' + w.total : '';
+        tb.dot.hidden = !((x.id === 'wall' ? wb : lb) > 0);
+        tb.b.classList.toggle('on', x.id === activeTab);
+        tb.b.setAttribute('aria-selected', x.id === activeTab ? 'true' : 'false');
+      }
+      if (activeTab === 'wall' || activeTab === 'looks') {
+        list.hidden = true; panelHost.hidden = false;
+        if (!panels[activeTab]) panels[activeTab] = (activeTab === 'wall' ? wallPanel : looksPanel)(scope);
+        panelHost.textContent = ''; panelHost.append(panels[activeTab].el); panels[activeTab].refresh();
+        setBadge('codex', model.fresh > 0 || wb > 0 || lb > 0);
+        for (const t of model.order) tabButtons[t.id].b.classList.remove('on');
+        return;
+      }
+      list.hidden = false; panelHost.hidden = true;
       for (const t of model.order) {
         const tb = tabButtons[t.id];
         tb.n.textContent = t.found + '/' + t.total;

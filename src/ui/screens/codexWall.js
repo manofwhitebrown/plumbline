@@ -9,6 +9,8 @@ import { relicSvg } from './wallShapes.js';
 import * as book from '../../meta/relicBook.js';
 import * as looks from '../../meta/cosmetics.js';
 import { wallModel, looksModel } from './wallModel.js';
+import { cosmeticById } from '../../data/cosmetics.js';
+import { paintPreview } from '../../render/cosmeticsHook.js';
 import '../styles/wall.css';
 import { countText } from '../../core/plural.js';
 
@@ -80,12 +82,33 @@ function swatch(it) {
 export function looksPanel(scope) {
   const el = h('div', { class: 'wl-panel' });
   let sig = '';
+  let trial = {}; // kind -> Look id being looked at (not worn yet)
+  const canvas = h('canvas', { class: 'lk-preview', 'aria-label': 'Preview of your Looks' });
+  const cap = h('p', { class: 'sub lk-cap' });
+  function paintTrial(m) {
+    const set = {}; let seeing = '';
+    for (const g of m.groups) {
+      const worn = g.items.find((i) => i.worn);
+      const t = trial[g.kind] && cosmeticById(trial[g.kind]);
+      set[g.kind] = t || (worn && cosmeticById(worn.id)) || null;
+      if (t) seeing = t.name;
+    }
+    cap.textContent = seeing ? 'Looking at ' + seeing + '. Tap Wear to keep it.' : 'Tap a Look to see it here.';
+    const dpr = Math.min(2, (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1), w = 160, hh = 112;
+    if (canvas.width !== w * dpr) { canvas.width = w * dpr; canvas.height = hh * dpr; }
+    const ctx = safe(() => canvas.getContext('2d'), null);
+    if (!ctx) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    safe(() => paintPreview(ctx, w, hh, set));
+  }
   function refresh() {
     const m = looksModel();
-    const next = JSON.stringify([m.shards, m.groups.map((g) => g.items.map((i) => [i.id, i.owned, i.worn, i.isNew, i.canBuy]))]);
+    const next = JSON.stringify([m.shards, trial, m.groups.map((g) => g.items.map((i) => [i.id, i.owned, i.worn, i.isNew, i.canBuy]))]);
     if (next === sig) return;
     sig = next;
     el.textContent = '';
+    paintTrial(m);
+    el.append(h('div', { class: 'lk-stage' }, canvas, cap));
     el.append(h('p', { class: 'sub lk-note', text: 'Looks change colours only. Nothing else.' }));
     for (const g of m.groups) {
       const ul = h('ul', { class: 'lk-list' });
@@ -96,13 +119,16 @@ export function looksPanel(scope) {
         else if (!it.owned) { label = 'Locked'; cls += ' lock'; disabled = true; }
         const act = h('button', { type: 'button', class: cls, 'aria-label': label + ' ' + it.name, disabled: disabled ? true : null, text: label });
         scope.on(act, 'click', () => {
-          if (it.owned) { if (looks.equip(it.id)) { ui('tap'); buzz('tap'); } }
-          else { const r = looks.buy(it.id); if (r && r.ok) { looks.equip(it.id); ui('claim'); buzz('collect'); } }
+          if (it.owned) { if (looks.equip(it.id)) { trial[it.kind] = null; ui('tap'); buzz('tap'); } }
+          else { const r = looks.buy(it.id); if (r && r.ok) { looks.equip(it.id); trial[it.kind] = null; ui('claim'); buzz('collect'); } }
           sig = ''; refresh();
         });
-        ul.append(h('li', { class: 'lk-row' + (it.owned ? '' : ' hid') + (it.isNew ? ' fresh' : '') },
+        const see = h('button', { type: 'button', class: 'lk-see', 'aria-label': 'Preview ' + it.name + '. ' + (it.owned ? it.desc : it.how) },
           swatch(it),
-          h('span', { class: 'lk-text' }, h('span', { class: 'lk-name', text: it.name }), h('span', { class: 'lk-how', text: it.owned ? it.desc : it.how })),
+          h('span', { class: 'lk-text' }, h('span', { class: 'lk-name', text: it.name }), h('span', { class: 'lk-how', text: it.owned ? it.desc : it.how })));
+        scope.on(see, 'click', () => { trial[it.kind] = trial[it.kind] === it.id ? null : it.id; if (it.owned) safe(() => looks.markSeen(it.id)); ui('tap'); sig = ''; refresh(); });
+        ul.append(h('li', { class: 'lk-row' + (it.owned ? '' : ' hid') + (it.isNew ? ' fresh' : '') + (trial[it.kind] === it.id ? ' trying' : '') },
+          see,
           it.isNew ? h('span', { class: 'dot lk-new', 'aria-hidden': 'true' }) : null,
           act));
       }
