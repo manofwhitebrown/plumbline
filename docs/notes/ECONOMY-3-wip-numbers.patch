@@ -1,0 +1,50 @@
+diff --git a/src/data/biomes.js b/src/data/biomes.js
+index b674983..c7ff279 100644
+--- a/src/data/biomes.js
++++ b/src/data/biomes.js
+@@ -12,7 +12,7 @@ const BASE = [
+     tierWeights: [88, 12, 0, 0, 0, 0],
+     mix: { empty: 30, gem: 40, ore: 22, hazard: 8 },
+     hazardWeights: { rock: 1 },
+-    hazardStrain: { rock: 2 },
++    hazardStrain: { rock: 1 },
+     relicChance: 0,
+     ambience: 'clay_warm',
+     palette: { top: '#3a2a22', bottom: '#1b1410', accent: '#d9a06b' },
+diff --git a/src/data/crew.js b/src/data/crew.js
+index ae464c2..1e83ce5 100644
+--- a/src/data/crew.js
++++ b/src/data/crew.js
+@@ -1,5 +1,5 @@
+ // Crew numbers. Data only, no logic.
+-export const CREW_GROWTH = 1.15;                    // each owned crew member makes the next cost 15% more
++export const CREW_GROWTH = 1.13;                    // each owned crew member makes the next cost 15% more
+ export const CREW_MILESTONES = [10, 25, 50, 100, 200, 300]; // each one doubles that crew's output
+ 
+ export const CREW = [
+diff --git a/src/data/play.js b/src/data/play.js
+index 988075c..9521c1c 100644
+--- a/src/data/play.js
++++ b/src/data/play.js
+@@ -18,7 +18,7 @@ export const FAIRNESS = Object.freeze({
+   streakUntilDepth: 300,        // the limit applies above this depth only up to here
+   snapLuckMetres: 30,           // how far the snap luck lasts
+   snapLuckAmount: 0.25,
+-  mercyAfterSnaps: 3,           // this many snaps in a row give a free Brace
++  mercyAfterSnaps: 2,           // this many snaps in a row give a free Brace
+   noJumpFrom: 0.8,
+   noJumpCap: 0.97,
+   secondWindStrain: 0.1,
+diff --git a/src/data/upgrades.js b/src/data/upgrades.js
+index 2bf7dd0..be2c8e8 100644
+--- a/src/data/upgrades.js
++++ b/src/data/upgrades.js
+@@ -2,7 +2,7 @@
+ // currency: 'gold' | 'shards' | 'core'.  Cost of the next level = base * growth^level (rounded up).
+ // effect: what one level gives. gate: needs this much best Depth before it shows as buyable.
+ export const UPGRADES = [
+-  { id: 'rope',     name: 'Stronger Rope',   desc: 'More room for Strain before the rope Snaps.',     currency: 'gold',   max: 20, base: 70,    growth: 2.6, per: 70,   unit: 'max Strain',      gate: 0 },
++  { id: 'rope',     name: 'Stronger Rope',   desc: 'More room for Strain before the rope Snaps.',     currency: 'gold',   max: 20, base: 50,    growth: 2.45, per: 80,   unit: 'max Strain',      gate: 0 },
+   { id: 'grease',   name: 'Better Grease',   desc: 'Strain builds up more slowly as you go down.',    currency: 'gold',   max: 8,  base: 150,   growth: 2.3, per: 4,    unit: '% less Strain',   gate: 0 },
+   { id: 'mender',   name: 'Rope Mender',     desc: 'Keep more Gold when the rope Snaps.',             currency: 'gold',   max: 6,  base: 200,   growth: 2.5, per: 5,    unit: '% kept on Snap',  gate: 50 },
+   { id: 'bucket',   name: 'Bigger Bucket',   desc: 'Adds room for more Parts. First a column, then a row.', currency: 'gold', max: 2, base: 800, growth: 40, per: 1,   unit: 'size step',       gate: 50 },

@@ -18,6 +18,7 @@ let PLAY;                       // [ECONOMY-2] The real game has the play layer 
 const DROP_PAUSE_S = 3;          // time the player spends on the results and rig screens
 const STUCK_S = 20 * 60;         // 20 simulated minutes without any way forward
 const DEPTH_MARKS = [100, 250, 500, 1000];
+const NO_CLOCK = 1e9;               // [ECONOMY-3] rig searches stop by evaluation count only, so results do not change when the machine is busy
 const SAVE_S = 20 * 60;          // [ECONOMY-3] save for rope when it is at most 20 minutes of Crew income away
 
 // Counts every boon card offered and every boon picked, so pick rates can be checked.
@@ -80,12 +81,12 @@ export function playBot(style = '70', opts = {}) {
     const key = JSON.stringify([mods.cols, mods.rows, owned]);
     if (key === rigKey && rig) return;
     rigKey = key;
-    rig = suggest.bestRig(mods, owned, { maxEvals: 60, budgetMs: 5000 });
+    rig = suggest.bestRig(mods, owned, { maxEvals: 60, budgetMs: NO_CLOCK });
     // [ECONOMY-3] The rig finder may stack duplicate copies (Extra Copy) that make Strain pile up and drops shallow.
     // A player would try both and keep the one that pays more per beat, so the bot does too.
     const single = {}; for (const id of Object.keys(owned)) single[id] = 1;
     if (Object.keys(owned).some((id) => owned[id] > 1)) {
-      const alt = suggest.bestRig(mods, single, { maxEvals: 60, budgetMs: 5000 });
+      const alt = suggest.bestRig(mods, single, { maxEvals: 60, budgetMs: NO_CLOCK });
       if (goldPerBeat(alt, mods, policy) > goldPerBeat(rig, mods, policy)) rig = alt;
     }
     rigsBuilt.push(rig.cells.flat().filter(Boolean));
@@ -215,7 +216,7 @@ function rigGold(rig, mods) {
 
 // For every part type in the rig: the share of Gold lost when it is banned (0 = no loss, 1 = everything).
 // The rig is rebuilt without the part, so the player's best way around it is allowed.
-export function partImpacts(mods, owned, rig, budgetMs = 600) {
+export function partImpacts(mods, owned, rig, budgetMs = NO_CLOCK) {
   const out = {};
   const base = rigGold(rig, mods);
   if (!(base > 0)) return out;
