@@ -29,7 +29,11 @@ uiart-textures, integration-suggest, perf-texture-budget, perf-foreground-patch,
 - 64ac5d2: both fixes plus the CI timeout. Its ci run was green (first green run with the fixes).
 - f3760af (notes only): ci green too (second in a row with the fixes).
 
-## Next
-- Poll the ci workflow for 3 green pushes in a row.
+- 6feb4c7 (notes only): ci green. Three ci runs in a row green with the fixes: 64ac5d2, f3760af, 6feb4c7.
 
-STATUS: NOT DONE (waiting for 3 green ci runs)
+## Honest limits
+- Three greens in a row is good, not proof: before the fixes about 1 in 5 recent runs failed (4 of 20), so three greens can happen by luck. If ci goes red again, look at the step "Run npm run check" and run the failing test file about 40 times alone to find the flake.
+- I saw the two flaky tests fail and then pass 40 of 40 here; I cannot read ci job logs, so I never saw the exact ci failure message. The two fixed tests are the only flaky ones I could find (604 single-file runs plus 3 full runs).
+- ci runs fa16c89 and ba19b67 failed just before my fixes; they are older than the fixes, so they were most likely the same flakes.
+
+STATUS: DONE
