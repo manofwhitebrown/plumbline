@@ -27,6 +27,7 @@ uiart-textures, integration-suggest, perf-texture-budget, perf-foreground-patch,
 
 ## Pushed
 - 64ac5d2: both fixes plus the CI timeout. Its ci run was green (first green run with the fixes).
+- f3760af (notes only): ci green too (second in a row with the fixes).
 
 ## Next
 - Poll the ci workflow for 3 green pushes in a row.
