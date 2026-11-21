@@ -23,6 +23,7 @@ import { TOKENS } from './palette.js';
 import { createPolish } from './polish/index.js'; // [AI-2] polish hook
 import { createDepth } from './depth/index.js'; // [DEPTH-1] depth hook
 import * as partIcon from './partIcon.js';
+import * as looks from './cosmeticsHook.js'; // [HOOK-3] equipped Looks: tints only
 import { models } from './models/index.js'; // [MODEL-1]
 
 export { partIcon };
@@ -58,7 +59,7 @@ export function createRenderer(canvas, opts = {}) {
     particles.setCap(Math.round((lay.trim ? baseCap * 0.6 : baseCap) * tier.particles)); // [GFX-1] lay.trim = quality step 2
     polish.setQuality(q.name === 'low' || governor.step >= 2 ? 'low' : 'high'); depthLayer.setQuality(q.name === 'low' ? 'low' : tier.depth); // [DEPTH-1]
     models.setEnabled(q.name !== 'low' && tier.bake); // [MODEL-1] baked 3D art only on high quality; pausing it also pauses baking
-    well.setLow(q.name === 'low');
+    well.setLow(q.name === 'low'); looks.setLow(q.name === 'low'); // [HOOK-3]
     items.setLow(q.name === 'low'); // [GFX-1]
     rope.low = q.name === 'low'; bucket.low = rope.low; // [GFX-1] flat rope and still lantern on low quality
     fx.state.low = q.name === 'low'; try { fxSprites.rebuild(dpr, q.name === 'low'); } catch (e) { /* flat particles stay */ } // [GFX-1]
@@ -150,10 +151,13 @@ export function createRenderer(canvas, opts = {}) {
     else if (++coveredFrames === 90) { try { well.release(); polish.releaseWalls(); } catch (e) { /* memory trim only */ } } // [PERF-1] flat well and wall strips are hidden for good: free about 6 + 5 MB at dpr 2
     depthLayer.drawWalls(ctx, pst); // [DEPTH-1] covers the flat well when active
     polish.drawBack(ctx, pst, covered); // [INTEGRATE-1] covered = depth owns the biome blend and wall detail
+    looks.well(ctx, CW, H); // [HOOK-3] well Look: soft colour wash, skipped on low quality
     drawItems(ctx, false, t);
     const oy = bucket.offY;
     rope.draw(ctx, L.cx, -20, L.cx, Math.max(0, L.attachY + oy * 0.0 + (sc.hauled ? Math.min(0, oy) : 0)), sc.strain01, t, sc.depthVis * PX_PER_M);
+    looks.rope(ctx, rope, sc.strain01); // [HOOK-3] rope Look (fades as Strain rises)
     bucket.draw(ctx, L, sc.rig, t);
+    looks.bucket(ctx, L, t, bucket.offY, bucket.tilt); // [HOOK-3] bucket Look: frame tint only
     drawItems(ctx, true, t);
     depthLayer.drawForeground(ctx, pst); // [DEPTH-1] edge silhouettes, never over lanes
     polish.drawFront(ctx, pst);

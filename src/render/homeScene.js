@@ -7,6 +7,7 @@ import { homeLayout, crewSlots, fireflyAt, dustAt, paintBack, paintFront, paintG
 import { paintBucket, drawWinchLive } from './art/homeWell.js';
 import { drawCrewMember } from './art/crewDraw.js';
 import { LOOKS } from './art/crewLooks.js';
+import * as looks from './cosmeticsHook.js'; // [HOOK-3] equipped Looks: tints only
 
 export const FIREFLIES = { high: 14, low: 4 };
 export const DUST = { high: 8, low: 2 };
@@ -40,9 +41,11 @@ export function createHomeScene(opts = {}) {
     ctx.fillStyle = '#070a12'; ctx.fillRect(0, 0, w, h);
     if (back) ctx.drawImage(back, ox, 0, w + MARGIN * 2, h);
     if (front) ctx.drawImage(front, oxf, 0, w + MARGIN * 2, h);
+    if (!low) { ctx.save(); ctx.translate(oxf + MARGIN, 0); looks.homeWell(ctx, L); ctx.restore(); } // [HOOK-3] well Look glow
     ctx.translate(oxf + MARGIN, 0); // live pieces share the front layer's drift so they stay glued to the well
     const ang = reduce || !slots.length ? 0.7 : t * 1.5, sw = reduce ? 0 : Math.sin(t * 0.9) * 1.6;
     drawWinchLive(ctx, L, ang, sw, bucket);
+    looks.homeLive(ctx, L, sw); // [HOOK-3] rope and bucket Looks
     const kx = L.crankX + Math.cos(ang) * L.crankR, ky = L.drumY + Math.sin(ang) * L.crankR, tt = reduce ? 0 : t;
     for (let k = 0; k < order.length; k++) {
       const i = order[k], c = slots[i], lk = LOOKS[c.look], lit = (L.lanternX - c.x) * c.face >= 0 ? 1 : -1;
