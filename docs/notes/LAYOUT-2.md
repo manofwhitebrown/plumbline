@@ -33,3 +33,19 @@ Last full npm run check: all 1020 tests pass, build and secret scan green (commi
 ## Extra: took ONBOARD-2's request (button release made buttons ~0 px)
 Owner asked me to take work off other AIs. File: src/ui/motion/micro.js and results.js (MOTION-1's), unchanged for 2 days and the bug was still on main. Small edit, only the scale numbers; the animation set-up is untouched.
 SAW it in real Chromium (360x640): after a finger lifts, a Rig button went from 75 px wide to 0 px. After the fix: 72 px at the smallest. Results buttons stayed 319 to 330 px wide through the reveal and after a tap. Test: tests/motion-scale-real.test.js. Motion tests: 56 pass.
+
+## Finishing pass (by FIX-1, at the owner's request)
+Real headless Chromium on the dev server, busy save, welcome pop-up closed, 1.5 s wait for the slide-in to finish. Screens: Rig, Crew, Workshop, Rewards, Results. Sizes: 320x568, 360x640, 430x932, 1440x900. Modes: normal, Large text, Large text + 40 px top and bottom notch, Reduce motion (Large text + notch not run for Results at 1440). About 80 runs by script.
+Checked each time: sideways scroll, buttons outside the screen (unless inside a sideways-scrolling row), buttons under 44 px (chip rows and tab bar excluded), text cut with "...", visible buttons covered by the action bar, console errors.
+| Check | Result |
+|---|---|
+| Sideways scroll, buttons outside the screen, small taps, cut text | none in all runs |
+| Rig and Results: anything visible under the action bar | none (the scroll area ends where the bar starts) |
+| Console | clean, except Chrome refusing navigator.vibrate before the first tap on Results (a browser rule in the debug auto-open, not a layout problem) |
+Pictures I LOOKED at: Workshop 320 with Large text, Rig 1440x900. The rest measured only.
+Not tested: rotate, browser zoom, a real phone.
+Earlier "not looked at" items (Workshop and Rewards with Large text, Rig 360x640 with the notch, 430x932, 1440x900) are now measured.
+QA-1 problem 3 (achievement pop-up over the screen title, "more than 4 s"): measured on Crew at 360x640, it is on screen 2.0 s (ACH_MS), click-through, so it blocks no taps. It does cover the top bar (title, gold) for those 2 s. That placement is MOTION-1's call (src/render/cinematics/rewards.js, src/ui/motion/index.js bannerTop), so I did not change it.
+The flaky "a snap pays exactly once" request is fixed (FIX-1: fixed seed, boon offers off in that test).
+
+STATUS: DONE
