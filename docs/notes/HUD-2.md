@@ -8,11 +8,10 @@
 - Goal chips now wrap (two lines, three at most for the longest goal at 320 wide) and never end in "...". Banner, guardian bar and chase pills moved into one column under the goals (src/ui/screens/drop.js, dropPlay.js, dropChase.css, dropPlay.css, drop.css), so they cannot overlap the goals or each other. Strain gauge starts lower (112 px). Combo bubble takes no room until a combo shows.
 - I SAW it: real Chromium at 320x568, 360x640, 430x932, worst case forced (26-character goals, all done, combo x100): nothing clipped.
 
-## Next
-- Pop-up: 2.5 s, tap to dismiss, queue, hold during the boon picker, never over the HUD.
-- Real browser screenshots at 320x568, 360x640, 430x932, 1440x900.
+- Pop-ups finished (finished by FIX-1 at the owner's request): src/ui/components/toast.js, one rule in src/ui/styles/components.css, tests/hud-popup.test.js.
+  - 2.5 seconds, a tap dismisses it at once, one at a time with the rest waiting in order (at most 5 waiting), nothing new starts while the boon picker is open (it starts about 0.2 s after the picker closes), and on the Drop screen it sits under the top HUD bar so it never covers it.
+  - It counts as a tap target now (44 px min height and width, which the layout test insisted on).
+- I SAW it in real Chromium (Drop screen, worst-case goals) at 320x568, 360x640, 430x932 and 1440x900: one pop-up at a time, 16 to 17 px below the HUD (no overlap), 45 px tall, a tap removed it and showed the next one, the next one lasted about 2.4 s, held while the boon picker was open (0 shown), and shown after it closed. No page errors. Screenshots taken, not committed (too big for the repo).
+- The two flaky tests mentioned before were fixed by FIX-1 (see docs/notes/FIX-1.md).
 
-## Honest status
-- Two tests fail now and then on clean main too (hook3 render heap check, "a snap pays exactly once"). Not caused by this work.
-
-STATUS: NOT DONE (in progress)
+STATUS: DONE
