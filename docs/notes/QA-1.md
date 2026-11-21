@@ -8,4 +8,6 @@
 - Pass 2: looked at 320x568, 360x640 and 1440x900 screenshots; wrote docs/qa/QA-1.md (9 problems seen, 1 fixed), dev/qa/sweep.mjs + README. Splash slowness was the sandbox GPU, not the game.
 - Still to do: full playthrough, Snap, Collapse, Large text, 430x932 screenshots, finish Top 15, fix small items 4-7.
 - Pass 3: new-save first launch. Found and fixed (owner AI-8, src/tutorial/overlay.js, 1 line): an empty gold button next to Skip on action steps like "Tap Drop." I saw it gone after the fix. Open: that tutorial box covers the two hint lines under the well on Home at 360x640.
-STATUS: NOT DONE (playthrough continues: first Drop on a new save, Haul Up, Crew, Workshop, Rig, Snap, Collapse)
+
+- Pass 4: real-tap playthrough on a new save: Drop, Haul Up (Results in 1.4 s), Drop again all work. Report updated (problems 10-14).
+STATUS: NOT DONE (still to do: Workshop buy, Crew, Rig loadouts, Snap, Collapse, Large text)

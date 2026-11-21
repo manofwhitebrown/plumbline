@@ -21,3 +21,12 @@ Home and Results look polished. Rig tray now shows owned parts (the old empty-tr
 
 ## Environment notes (not game bugs)
 In this sandbox the splash took 7-18 s with GPU rendering on and about 1 s with --disable-gpu, and a 1440x900 capture killed the browser with GPU on. I treat both as the sandbox. One "detached Frame" error on the Guide did not repeat in two re-runs; unexplained.
+
+## Pass 3: real playthrough on a brand-new save (360x640, real finger taps)
+Done and seen: first launch, first Drop (depth, gold, combo and gems all move; achievement "Warming Up" shows its real name), Haul Up, Results (appeared 1.4 s after the tap, no stall), Drop again.
+10. FIXED (medium) First launch: an empty gold button sat next to Skip on "Tap Drop." and similar steps (the label was never hidden on the first call). Fixed in src/tutorial/overlay.js (owner AI-8, 1 line). Saw it gone.
+11. OPEN (low-medium) The tutorial box covers things the player needs: on Home it hides the two hint lines under the well; on the first Drop it sits on top of the achievement pop-up so the name is hidden; on Results it covers the first goal row and Shards line. Owner: AI-8. Suggest placing the box away from other pop-ups.
+12. OPEN (low) Goal chips on the real Drop are cut again ("Collect 10 g...", "Reach a Co...") - same as problem 4, now seen in real play.
+13. CHECK (low, seen in text only) Results text reads "+1 Shards" for a single Shard. Not seen in a picture; check plural wording in WORDS.md.
+14. UNEXPLAINED A scripted element.click() on the Drop button opened Settings once; a real touch tap on the same button worked every time. I could not reproduce it with taps, so I am not calling it a game bug. If a mouse click (laptop) opens Settings instead of starting a Drop, that would be serious: worth a manual check on a laptop.
+Not yet done: Workshop buy, Crew buy and hire manager, Rig place/save/load Loadout, a Snap, many Drops, Collapse, Large text, Reduce motion, rotation.
