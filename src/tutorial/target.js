@@ -66,8 +66,29 @@ function same(a, b, tol) {
 // opts.stable: only report a target that is shown and has stopped moving (a button that slides in is not found until it lands).
 //   A target that never holds still is accepted after 1.5 s, so a pulsing button can never hide the guide for good.
 // opts.now: a clock, for tests.
+// Things inside a scrolling screen: if one sits outside the visible part, the guide scrolls it to the middle once.
+const SCROLL_TO = { 'rig-new-part': 1, 'rig-good-cell': 1, 'workshop-part': 1 };
+
+function bringIntoView(doc, el, rect, name, done) {
+  try {
+    if (!SCROLL_TO[name] || done.has(el)) return false;
+    const win = doc.defaultView;
+    const vh = win && win.innerHeight ? win.innerHeight : 0;
+    if (!vh) return false;
+    const low = rect.top + rect.height > vh - 150; // under the action bar or tab bar
+    const high = rect.top < 60;
+    if (!low && !high) return false;
+    done.add(el);
+    if (el.scrollIntoView) el.scrollIntoView({ block: 'center', inline: 'nearest' });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 export function makeFinder(doc, opts) {
   const o = opts || {};
+  const scrolled = new WeakSet();
   const now = typeof o.now === 'function' ? o.now : () => Date.now();
   const samples = new Map();
 
@@ -100,6 +121,7 @@ export function makeFinder(doc, opts) {
         }
         const pick = pickGoodCell(cells);
         const rect = pick ? readRect(pick.ref) : null;
+        if (rect && bringIntoView(doc, pick.ref, rect, name, scrolled)) return null;
         return rect && settled(name, pick.ref, rect) ? { el: pick.ref, rect } : null;
       }
       if (name === 'workshop-screen') {
@@ -110,6 +132,7 @@ export function makeFinder(doc, opts) {
       let el = doc.querySelector('[data-tut~="' + name + '"]');
       if (el && name === 'results-gold' && el.closest) el = el.closest('.res-gold') || el; // ring the whole row, not the counting number
       const rect = el ? readRect(el) : null;
+      if (rect && bringIntoView(doc, el, rect, name, scrolled)) return null;
       return rect && settled(name, el, rect) ? { el, rect } : null;
     } catch (e) {
       return null;

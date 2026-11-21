@@ -95,3 +95,20 @@ test('after the first drop, dropping again sends every later step to the closing
     assert.ok(again && again.goto === 'crew-intro', id + ' has a way out');
   }
 });
+
+test('finder scrolls a far-down tutorial target into view once, then reports it', () => {
+  let calls = 0;
+  const el = { getBoundingClientRect: () => ({ left: 10, top: 700, width: 80, height: 90 }), scrollIntoView: () => { calls++; el.getBoundingClientRect = () => ({ left: 10, top: 300, width: 80, height: 90 }); }, getAttribute: () => null };
+  const doc = { defaultView: { innerHeight: 640 }, querySelector: () => el, querySelectorAll: () => [] };
+  const find = makeFinder(doc, {});
+  assert.equal(find('rig-new-part'), null, 'first look scrolls and waits');
+  assert.equal(calls, 1);
+  const f = find('rig-new-part');
+  assert.ok(f && f.rect.top === 300);
+  assert.equal(calls, 1, 'scrolls only once');
+});
+
+test('Results step is patient (slow phones) but never endless', () => {
+  const s = STEPS.find((x) => x.id === 'results-gold');
+  assert.ok(s.findMs >= 30000 && s.maxMs <= 180000);
+});

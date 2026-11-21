@@ -36,7 +36,7 @@ export const STEPS = [
     on: [{ bus: 'run:ended', goto: 'results-gold' }], skipTo: 'results-gold' },
   // The Results screen has no tab bar, so one note shows the Gold and sends the player Home. It waits until the buttons have landed.
   { id: 'results-gold', targets: ['results-gold', 'results-home'], text: 'That is your Gold. Tap Home.', mode: 'action', side: 'top',
-    on: [{ appears: 'tab-workshop' }, AGAIN], skipTo: 'tab-workshop', findMs: 9000, maxMs: 40000, maxTo: 'tab-workshop' },
+    on: [{ appears: 'tab-workshop' }, AGAIN], skipTo: 'tab-workshop', findMs: 60000, maxMs: 120000, maxTo: 'tab-workshop' },
   { id: 'tab-workshop', targets: ['tab-workshop'], text: 'Open the Workshop.', mode: 'action', side: 'top',
     on: [{ appears: 'workshop-part' }, { appears: 'workshop-screen', goto: 'workshop-wait' }, AGAIN], skipTo: 'final', maxMs: 25000, maxTo: 'final' },
   // The Workshop is open but nothing can be bought yet (not enough Gold).
