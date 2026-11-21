@@ -51,3 +51,10 @@ test('Filter chip rows scroll sideways with a fade on the cut edge', () => {
     assert.match(r, /padding-inline-end:/, sel);
   }
 });
+
+test('Results: the action row is solid and above the scrolling body (no card peeking out behind Drop again)', () => {
+  const r = rule(css('results.css'), '.res-actions');
+  assert.ok(!/background:\s*linear-gradient\(transparent/.test(r), 'no see-through fade');
+  assert.match(r, /background:\s*var\(--ink-900\)/);
+  assert.match(r, /z-index:\s*2/);
+});

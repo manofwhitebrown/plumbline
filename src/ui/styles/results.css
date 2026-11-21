@@ -47,7 +47,8 @@
 .res-summary { max-width: 340px; overflow-wrap: anywhere; }
 
 .res-actions { flex: none; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-4) calc(var(--space-4) + var(--sab, env(safe-area-inset-bottom, 0px)));
-  background: linear-gradient(transparent, var(--ink-900) 40%); visibility: hidden; }
+  /* Solid background (was a see-through fade, so the next card peeked out behind Drop again at 360x640). Above the scrolling body. */
+  position: relative; z-index: 2; background: var(--ink-900); border-top: 1px solid var(--line); visibility: hidden; }
 .res-actions.in { visibility: visible; }
 .res-again { min-height: 64px; }
 .res-row { display: flex; gap: var(--space-2); }
@@ -94,7 +95,7 @@
 .res-best, .res-parts { width: 100%; max-width: 360px; padding: 10px 12px; border-radius: var(--radius-card); border: 1px solid var(--brass-line, var(--line)); background: linear-gradient(180deg, rgba(255, 232, 180, .06), transparent 40%), var(--ink-700); }
 .res-summary { width: 100%; padding: 10px 12px; border-radius: var(--radius-card); border: 1px solid var(--brass-line, var(--line)); }
 /* A little room under the last row so the fade above the buttons never hides text. */
-.res-body { padding-bottom: var(--space-6); }
+.res-body { padding-bottom: var(--space-4); }  /* the action row is its own solid block under the body, so only a small gap is needed */
 
 /* Short phones: tighter rows so more shows above the buttons. */
 @media (max-height: 700px) {
