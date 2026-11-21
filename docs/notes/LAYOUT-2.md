@@ -8,3 +8,4 @@ Browser: real headless Chromium (puppeteer-core), dev server, busy test save. Pi
 
 ## Note for Manager
 `tests/integration-flow-real.test.js` "a snap pays exactly once" is flaky: it fails about 4 runs in 12 when run alone, without any of my files involved (it does not import the UI). Not mine. See docs/requests/LAYOUT-2-to-Manager-red.md.
+- Problem 5 FIXED. Rewards heading "Day 1 reward is ready" and Crew names now wrap to two lines (class clamp2) instead of ending in "…". The Crew "Owned 12 · x2 output" line wraps too. SAW both at 320x568 (before: "Day 1 reward is re…", "Winch H…"; after: full text on two lines). Limit 22 kept.

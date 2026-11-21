@@ -32,3 +32,13 @@ test('Rig: the content scrolls in .rig-scroll and the screen itself does not scr
   assert.ok(i > 0 && j > i, 'the action bar is built after (outside) the scrolling part');
   assert.ok(src.indexOf('rig-helps') > i && src.indexOf('rig-helps') < j, 'the help buttons are inside the scrolling part');
 });
+
+test('Rewards heading and Crew names may wrap to two lines (no one-line "…" cut)', () => {
+  const clamp = rule(css('crew.css'), '.clamp2');
+  assert.match(clamp, /white-space:\s*normal/);
+  assert.match(clamp, /-webkit-line-clamp:\s*2/);
+  const crew = readFileSync(new URL('../src/ui/screens/crewCard.js', import.meta.url), 'utf8');
+  assert.match(crew, /class: 'title clamp2'/);
+  const daily = readFileSync(new URL('../src/ui/screens/rewardsDaily.js', import.meta.url), 'utf8');
+  assert.match(daily, /h\('h2', \{ class: 'title clamp2' \}\)/);
+});

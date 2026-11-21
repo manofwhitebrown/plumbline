@@ -21,6 +21,9 @@
 .crew-actions .crew-mgr-done { grid-column: 2; justify-content: center; min-height: 44px; }
 .crew-reason { min-height: 16px; }
 .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Up to two lines, then "…". Used for Crew names and the Rewards heading (they were cut after one line at 320x568). */
+.clamp2 { white-space: normal; overflow-wrap: anywhere; line-height: 1.15; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
+.crew-head > .grow, .crew-head > div:not(.crew-rate-box) { min-width: 0; }
 #app[data-reduce="1"] .crew-card.shake, #app[data-reduce="1"] .crew-card.pop { animation: none; }
 .crew-card.shake { animation: shake 260ms var(--ease); }
 .screen-crew [hidden] { display: none !important; }

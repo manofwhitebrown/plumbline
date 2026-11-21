@@ -93,8 +93,8 @@ export const crewIconHtml = (id) => CREW_ICONS[id] || iconHtml('crew');
 export function crewCard(c, handlers, scope) {
   const hd = handlers || {};
   const id = String(c && c.id);
-  const name = h('div', { class: 'title ellipsis' });
-  const owned = h('div', { class: 'sub ellipsis' });
+  const name = h('div', { class: 'title clamp2' });   // wraps to two lines (320 px), no more "Winch H…"
+  const owned = h('div', { class: 'sub clamp2' });
   const found = CREW_DATA.find((x) => x.id === id);
   const desc = h('div', { class: 'sub crew-desc', text: found ? found.desc : '' });
   const rate = h('div', { class: 'num crew-rate' });

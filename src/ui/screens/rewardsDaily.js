@@ -82,7 +82,7 @@ function slotEl(s) {
 export function buildDaily(ctx) {
   const { meta, toast, scope } = ctx;
   const grid = h('div', { class: 'rw-slots', role: 'list', 'aria-label': 'Daily reward days' });
-  const title = h('h2', { class: 'title ellipsis' });
+  const title = h('h2', { class: 'title clamp2' });   // up to two lines, no more "Day 1 reward is re…"
   const sub = h('p', { class: 'sub' });
   const btn = button({ label: 'Claim', kind: 'primary', big: true, onPress: claim, onDeny: (r) => { try { if (typeof toast === 'function') toast(r, 'warn'); } catch (e) { /* ignore */ } } }, scope);
   const el = h('section', { class: 'card rw-daily', 'aria-label': 'Daily reward' },
