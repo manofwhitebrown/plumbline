@@ -1,0 +1,20 @@
+/* "i" help tip. The tap area is 44 px; the round mark is 24 px. */
+.helptip { position: relative; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: var(--tap-min, 44px); height: var(--tap-min, 44px); min-width: 44px; min-height: 44px; padding: 0; margin: 0;
+  background: transparent; border: 0; color: var(--muted); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.helptip-i { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid currentColor; font: italic 700 14px/1 Georgia, 'Times New Roman', serif; }
+.helptip:active .helptip-i, .helptip[aria-expanded="true"] .helptip-i { color: var(--gold-soft, #ffd77a); }
+.helptip:focus-visible { outline: 2px solid var(--gold-soft, #ffd77a); outline-offset: -4px; border-radius: 12px; }
+.helptip-row { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.helptip-label { min-width: 0; overflow-wrap: anywhere; }
+.helptip-body { position: fixed; z-index: 90; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px;
+  width: max-content; max-width: calc(100vw - 24px); padding: 10px 12px; border-radius: 12px;
+  background: var(--ink-600, #1d2740); border: 1px solid var(--line, #2a3555); color: var(--text, #eef2ff);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .45); font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; word-break: normal;
+  max-height: calc(100% - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); overflow-y: auto;
+  animation: helptipIn 140ms ease-out; }
+.helptip-title { font-size: 14px; color: var(--gold-soft, #ffd77a); }
+.helptip-text { font-size: 14px; }
+@keyframes helptipIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.reduce-motion .helptip-body, [data-reduce="1"] .helptip-body { animation: none; }
