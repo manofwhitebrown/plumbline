@@ -10,3 +10,4 @@
 - Speed: AFTER table in docs/perf/PERF-2.md; added looks/reduce options to dev/perf-run.js and perf-lab.js; tests/perf-idle.test.js.
 
 STATUS: DONE (gaps: 6x AFTER run, memory run at 430x932, browser look at Looks in Drop and Home, real-phone speed).
+- Full check showed 1 flaky failure (integration-flow-real, 'a snap pays exactly once'), also seen without my changes; request note docs/requests/FINISH-3-to-Manager-red.md. My last push went out before I had read that result; I should have waited.
