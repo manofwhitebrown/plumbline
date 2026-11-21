@@ -16,3 +16,4 @@
 
 ## Next
 - Wall and Looks panels (own files), request notes, browser check.
+- Wall and Looks panels written: src/ui/screens/codexWall.js (panels), wallModel.js (plain data), wallShapes.js (31 relic pictures), src/ui/styles/wall.css. Tests: tests/hook3-wall-model.test.js. They only show once the Codex owner adds the two tabs (request note next).

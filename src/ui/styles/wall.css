@@ -1,0 +1,38 @@
+/* Relic Wall and Looks panels [HOOK-3]. Tokens only. Works at 320 px wide and with Large text. */
+.wl-panel { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.wl-head { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.wl-count { font-size: var(--fs-4); font-weight: 800; }
+.wl-bonus { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.wl-chip { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 32px; padding: 2px var(--space-3) 2px 2px; border-radius: var(--radius-pill); border: 1px solid var(--line); background: var(--ink-800); color: var(--muted); font-size: var(--fs-1); max-width: 100%; }
+.wl-chip-n { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; border-radius: 50%; background: var(--ink-600); font-weight: 800; }
+.wl-chip-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wl-chip.on { color: var(--ink-900); background: var(--gold); border-color: transparent; font-weight: 700; }
+.wl-chip.on .wl-chip-n { background: var(--ink-900); color: var(--gold); }
+.wl-next { margin: 0; overflow-wrap: anywhere; }
+.wl-biome { margin: var(--space-2) 0 0; font-size: var(--fs-2); font-weight: 700; color: var(--muted); }
+.wl-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+.wl-card { position: relative; width: 100%; min-height: 88px; padding: var(--space-2) var(--space-1); border-radius: var(--radius-btn); border: 1px solid var(--line); background: var(--ink-700); color: var(--text); display: flex; flex-direction: column; align-items: center; gap: var(--space-1); text-align: center; }
+.wl-card.hid { background: var(--ink-800); color: var(--muted); }
+.wl-card.fresh { border-color: var(--gold); }
+.wl-art { display: inline-flex; width: 40px; height: 40px; }
+.wl-name { font-size: var(--fs-1); line-height: 1.2; max-width: 100%; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wl-new, .lk-new { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; }
+.wl-big { display: inline-flex; width: 72px; height: 72px; }
+
+.lk-note { margin: 0; }
+.lk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.lk-row { position: relative; display: flex; align-items: center; gap: var(--space-3); min-height: 64px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-btn); border: 1px solid var(--line); background: var(--ink-700); min-width: 0; }
+.lk-row.hid { background: var(--ink-800); }
+.lk-row.fresh { border-color: var(--gold); }
+.lk-swatch { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line); }
+.lk-swatch.rope { width: 14px; border-radius: 4px; margin: 0 11px; }
+.lk-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lk-name { font-size: var(--fs-3); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lk-how { font-size: var(--fs-1); color: var(--muted); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.lk-act { flex: 0 0 auto; min-width: 76px; max-width: 108px; min-height: var(--tap-min); padding: 0 var(--space-3); border-radius: var(--radius-btn); border: 1px solid var(--line); background: var(--ink-600); color: var(--text); font-size: var(--fs-2); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lk-act.buy { background: var(--shard); color: var(--ink-900); border-color: transparent; }
+.lk-act.worn { background: transparent; color: var(--gold); border-color: var(--gold); }
+.lk-act.lock { color: var(--muted); background: var(--ink-800); }
+.lk-act[disabled] { opacity: .75; }
+.lk-act.buy[disabled] { opacity: .45; }
+.lk-new { top: 6px; right: auto; left: 6px; }
