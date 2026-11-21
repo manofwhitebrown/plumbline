@@ -8,7 +8,11 @@
 
 - Render hook `src/render/cosmeticsHook.js` + 3 guarded calls in `src/render/index.js` (well wash, rope tint, bucket frame tint) and 2 in `src/render/homeScene.js` (well glow, live rope/bucket). Tints only, gradients cached, no per-frame allocation (test). Bucket tint skips the tile plate; rope tint fades out as Strain rises; the well wash is skipped on low quality. Tests: tests/hook3-render.test.js (real canvas pixels).
 
-## Next
-- Render hook (src/render/cosmeticsHook.js) + Drop and Home calls, then Relic Wall and Looks tabs in the Codex, cheats, words, bonus into getMods.
 
-STATUS: NOT DONE (in progress)
+- Cheats: src/cheats/catalog-looks.js (Show every relic on the Wall, Unlock every Look) + docs/CHEATS.md. Tests: tests/hook3-cheats.test.js.
+- Words: docs/WORDS.md section "Relic Wall and Looks".
+- Real Drop check: tests/hook3-drop-relic.test.js runs the real engine, session and finish code; a relic found (seed 1 finds Root Charm) reaches the Wall. Tests pass (full check 992 pass).
+- Found while checking: the earlier Wall and Looks tab screens and tests/hook3-meta.test.js were never pushed to main, so they were not in the repo.
+
+## Next
+- Wall and Looks panels (own files), request notes, browser check.

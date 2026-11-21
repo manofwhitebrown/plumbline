@@ -36,3 +36,14 @@ beat, lane, tick, entity, null, undefined, NaN, Infinity, seed, slice, bus, payl
 - Couldn't save. Your progress is safe in this tab — try again.
 
 (More definitions and lines will be added as the tutorial is built.)
+
+## Relic Wall and Looks
+Words: Relic Wall (also just "the Wall"), Look, Looks, Wear, Worn, Locked, New.
+
+- **Relic Wall**: the page that shows every relic you have found. Hidden ones show "???" and a short hint. Never say "relic book", "slice" or "record".
+- **Look**: a colour style for the Bucket, the Rope or the Well. A Look changes only how things look. Say "Look", never "skin" or "cosmetic".
+- **Wear**: put a Look on. A Look you wear says "Worn". Never say "equip".
+- **Wall bonus**: a small bonus for finding many relics (10, 20 and 36 found). Say "+1% Gold" or "+1% better gems". Never say "buff".
+- Hints for hidden relics: "Hides in the Clay Biome" (and the other five Biomes).
+- Ways to get a Look: "Find 6 relics", "Earn an achievement", "Buy with Shards", "Free".
+- Counts read "12 of 36 found".

@@ -62,6 +62,8 @@ These go into the Drop through `mods.cheat.play`. They mark the save as **Cheats
 - **Make Collapse available now**.
 - **Unlock every Codex entry** and **Unlock all achievements**.
 - **Set best Depth** to 100 / 500 / 1000 / 2500 m.
+- **Show every relic on the Wall**: all 36 appear on the Relic Wall so you can look at them. They do not count for the Wall bonus or for Looks.
+- **Unlock every Look**: you can wear any bucket, rope or well Look. Looks are only colours, so nothing else changes.
 
 ## Tools
 
