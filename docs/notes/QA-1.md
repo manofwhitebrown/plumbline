@@ -5,4 +5,6 @@
 - Fixed (file owner: MOTION-1, src/ui/motion/index.js, 2 lines): the achievement pop-up always said "New achievement" and the Codex pop-up "New entry", because the lookup used api.achievements / api.codex which do not exist (real ones are api.meta.achievements / api.meta.codex). I saw it fixed: pop-up now shows "Gear Head".
 - Next: other sizes (360x640, 430x932, 1440x900), full playthrough (Workshop buy, Rig place/save/load, real Drop, Haul Up, Snap, Collapse), Large text, then the Top 15 report in docs/qa/QA-1.md.
 
-STATUS: NOT DONE (in progress)
+- Pass 2: looked at 320x568, 360x640 and 1440x900 screenshots; wrote docs/qa/QA-1.md (9 problems seen, 1 fixed), dev/qa/sweep.mjs + README. Splash slowness was the sandbox GPU, not the game.
+- Still to do: full playthrough, Snap, Collapse, Large text, 430x932 screenshots, finish Top 15, fix small items 4-7.
+STATUS: NOT DONE (partial report; playthrough and Top 15 not finished)
