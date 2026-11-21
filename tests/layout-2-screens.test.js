@@ -42,3 +42,12 @@ test('Rewards heading and Crew names may wrap to two lines (no one-line "…" cu
   const daily = readFileSync(new URL('../src/ui/screens/rewardsDaily.js', import.meta.url), 'utf8');
   assert.match(daily, /h\('h2', \{ class: 'title clamp2' \}\)/);
 });
+
+test('Filter chip rows scroll sideways with a fade on the cut edge', () => {
+  for (const sel of ['.chips', '.ws-chips']) {
+    const r = rule(css('screens.css'), '.chips, .ws-chips') || rule(css('screens.css'), sel);
+    assert.match(r, /overflow-x:\s*auto/, sel);
+    assert.match(r, /mask-image:\s*linear-gradient/, sel);
+    assert.match(r, /padding-inline-end:/, sel);
+  }
+});

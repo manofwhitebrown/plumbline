@@ -77,3 +77,13 @@
 /* The Loadout that matches the Rig on the grid glows so you know which one is selected */
 .loadouts .chip.on { background: var(--gold); color: var(--ink-900); box-shadow: 0 0 0 2px #ffe3a1, 0 0 14px rgba(246, 196, 83, .75); font-weight: 800; }
 .loadouts .chip:not(.on) { opacity: .8; }
+
+/* Filter chip rows (Workshop part families, Rig tray families): a clear sideways scroll row.
+   Was: the row ran off the right edge with nothing to show there is more (320 and 360 wide).
+   Now: soft fade on the cut edge (so the last chip shows half-faded) and extra end padding so the last chip scrolls fully clear of the fade. */
+.chips, .ws-chips {
+  overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; padding-inline-end: 32px;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+          mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+.chips::-webkit-scrollbar, .ws-chips::-webkit-scrollbar { display: none; }
